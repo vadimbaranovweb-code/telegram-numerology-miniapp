@@ -1,0 +1,5 @@
+# Bot uses Python stdlib only — no third-party runtime dependencies.
+# Python 3.9+ required.
+#
+# Dev/test dependencies (install via: pip install -r requirements-dev.txt):
+#   pytest

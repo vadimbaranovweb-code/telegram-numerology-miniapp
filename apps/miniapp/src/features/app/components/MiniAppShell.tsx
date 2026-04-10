@@ -1,0 +1,165 @@
+"use client";
+
+import { ReadyHomeScreen } from "@/features/app/components/ReadyHomeScreen";
+import { HeroSection } from "@/features/onboarding/components/HeroSection";
+import { NextStepsCard } from "@/features/onboarding/components/NextStepsCard";
+import { OnboardingForm } from "@/features/onboarding/components/OnboardingForm";
+import { BootstrapScreen } from "@/features/profile/components/BootstrapScreen";
+import { TelegramContextCard } from "@/features/telegram/components/TelegramContextCard";
+import { useTelegramAuth } from "@/features/telegram/hooks/useTelegramAuth";
+import { useTelegramBootstrap } from "@/features/telegram/hooks/useTelegramBootstrap";
+import { useTelegramWebApp } from "@/features/telegram/hooks/useTelegramWebApp";
+
+import { useMiniAppBootstrap } from "../hooks/useMiniAppBootstrap";
+
+export function MiniAppShell() {
+  const telegramContext = useTelegramWebApp();
+  const telegramAuth = useTelegramAuth(telegramContext);
+  const { bootstrapState: telegramBootstrap, refreshBootstrap } =
+    useTelegramBootstrap(telegramAuth);
+  const {
+    birthDate,
+    fullName,
+    dailyOptIn,
+    profile,
+    result,
+    homeHeadline,
+    homeSupportingText,
+    homeNextStep,
+    dailyInsight,
+    isDailyLoading,
+    todayState,
+    isCompatibilityExpanded,
+    relationshipContext,
+    targetBirthDate,
+    targetDisplayName,
+    compatibilityPreview,
+    compatibilityError,
+    isCompatibilitySubmitting,
+    isPaywallOpen,
+    isPurchaseSuccessOpen,
+    bootstrapStatus,
+    isPremium,
+    premiumStatus,
+    appStateSource,
+    restorationMode,
+    resumePoint,
+    availableSections,
+    sectionOrder,
+    homeFocus,
+    entrySection,
+    sectionBadges,
+    sectionDescriptions,
+    sectionStates,
+    sectionActions,
+    primaryAction,
+    error,
+    isSubmitting,
+    isFormValid,
+    readingPreview,
+    setBirthDate,
+    setFullName,
+    setDailyOptIn,
+    setRelationshipContext,
+    setTargetBirthDate,
+    setTargetDisplayName,
+    openCompatibilityTeaser,
+    openPaywall,
+    closePaywall,
+    completePurchase,
+    openPurchaseSuccessPreview,
+    handleSubmit,
+    handleCompatibilitySubmit,
+    handleResetProfile,
+  } = useMiniAppBootstrap(
+    telegramContext,
+    telegramAuth,
+    telegramBootstrap,
+    refreshBootstrap,
+  );
+
+  return (
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#f3efe6_0%,#efe7db_42%,#e6dccf_100%)] px-4 py-6 text-stone-900">
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-md flex-col gap-5">
+        {bootstrapStatus === "bootstrapping" ? (
+          <BootstrapScreen />
+        ) : (
+          <>
+            <HeroSection />
+            <TelegramContextCard
+              context={telegramContext}
+              authState={telegramAuth}
+              bootstrapState={telegramBootstrap}
+            />
+
+            {bootstrapStatus === "onboarding" ? (
+              <OnboardingForm
+                birthDate={birthDate}
+                fullName={fullName}
+                dailyOptIn={dailyOptIn}
+                isSubmitting={isSubmitting}
+                isFormValid={isFormValid}
+                error={error}
+                onBirthDateChange={setBirthDate}
+                onFullNameChange={setFullName}
+                onDailyOptInChange={setDailyOptIn}
+                onSubmit={handleSubmit}
+              />
+            ) : null}
+
+            {bootstrapStatus === "ready" && profile && result && readingPreview ? (
+              <ReadyHomeScreen
+                profile={profile}
+                result={result}
+                readingPreview={readingPreview}
+                homeHeadline={homeHeadline}
+                homeSupportingText={homeSupportingText}
+                homeNextStep={homeNextStep}
+                appStateSource={appStateSource}
+                restorationMode={restorationMode}
+                resumePoint={resumePoint}
+                availableSections={availableSections}
+                sectionOrder={sectionOrder}
+                homeFocus={homeFocus}
+                entrySection={entrySection}
+                sectionBadges={sectionBadges}
+                sectionDescriptions={sectionDescriptions}
+                sectionStates={sectionStates}
+                sectionActions={sectionActions}
+                primaryAction={primaryAction}
+                todayState={todayState}
+                dailyInsight={dailyInsight}
+                isDailyLoading={isDailyLoading}
+                isCompatibilityExpanded={isCompatibilityExpanded}
+                relationshipContext={relationshipContext}
+                targetBirthDate={targetBirthDate}
+                targetDisplayName={targetDisplayName}
+                compatibilityPreview={compatibilityPreview}
+                compatibilityError={compatibilityError}
+                isCompatibilitySubmitting={isCompatibilitySubmitting}
+                isPaywallOpen={isPaywallOpen}
+                isPurchaseSuccessOpen={isPurchaseSuccessOpen}
+                isPremium={isPremium}
+                premiumStatus={premiumStatus}
+                onExpandCompatibility={openCompatibilityTeaser}
+                onOpenPaywall={openPaywall}
+                onClosePaywall={closePaywall}
+                onCompletePurchase={completePurchase}
+                onOpenPurchaseSuccessPreview={openPurchaseSuccessPreview}
+                onRelationshipContextChange={setRelationshipContext}
+                onTargetBirthDateChange={setTargetBirthDate}
+                onTargetDisplayNameChange={setTargetDisplayName}
+                onCompatibilitySubmit={handleCompatibilitySubmit}
+                onResetProfile={handleResetProfile}
+              />
+            ) : (
+              <section className="grid gap-3">
+                <NextStepsCard />
+              </section>
+            )}
+          </>
+        )}
+      </div>
+    </main>
+  );
+}
