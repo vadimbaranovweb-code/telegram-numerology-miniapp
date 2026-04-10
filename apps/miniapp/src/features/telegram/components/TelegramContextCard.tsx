@@ -1,3 +1,7 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
 import { TelegramWebAppContext } from "@/features/telegram/types";
 import { TelegramAuthState } from "@/features/telegram/hooks/useTelegramAuth";
 import { TelegramBootstrapState } from "@/features/telegram/hooks/useTelegramBootstrap";
@@ -13,6 +17,20 @@ export function TelegramContextCard({
   authState,
   bootstrapState,
 }: TelegramContextCardProps) {
+  const [isDebugMode, setIsDebugMode] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setIsDebugMode(window.location.search.includes("debug=1"));
+  }, []);
+
+  function copySessionToken() {
+    if (!authState.sessionToken) return;
+    void navigator.clipboard.writeText(authState.sessionToken).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
   const userLabel = context.user?.username
     ? `@${context.user.username}`
     : context.user?.first_name ?? "Unknown";
@@ -102,7 +120,7 @@ export function TelegramContextCard({
         <p className="text-sm leading-6 text-stone-500">{summaryLine}</p>
       </div>
 
-      {process.env.NODE_ENV !== "production" ? (
+      {(process.env.NODE_ENV !== "production" || isDebugMode) ? (
         <details className="mt-4 rounded-2xl border border-stone-200 bg-stone-50/80 px-4 py-3 text-sm text-stone-600">
           <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
             Telegram debug
@@ -116,9 +134,20 @@ export function TelegramContextCard({
                 <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
                   {row.label}
                 </p>
-                <p className="mt-1 font-medium text-stone-900">{row.value}</p>
+                <p className="mt-1 break-all font-medium text-stone-900">{row.value}</p>
               </div>
             ))}
+            {isDebugMode && authState.sessionToken ? (
+              <button
+                onClick={copySessionToken}
+                className="rounded-2xl border border-stone-200 bg-white px-4 py-3 text-left"
+              >
+                <p className="text-xs uppercase tracking-[0.18em] text-stone-500">Admin</p>
+                <p className="mt-1 font-medium text-stone-900">
+                  {copied ? "Copied!" : "Copy session token"}
+                </p>
+              </button>
+            ) : null}
           </div>
         </details>
       ) : null}
