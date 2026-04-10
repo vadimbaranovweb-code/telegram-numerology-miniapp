@@ -8,6 +8,13 @@ type PremiumPaywallCardProps = {
   onBack: () => void;
 };
 
+const BENEFITS = [
+  "Full compatibility analysis with deeper cards",
+  "Where tension will show up between you",
+  "What makes this bond last long-term",
+  "Saved to your profile for later",
+];
+
 export function PremiumPaywallCard({
   preview,
   isPremium,
@@ -15,78 +22,128 @@ export function PremiumPaywallCard({
   onContinue,
   onBack,
 }: PremiumPaywallCardProps) {
-  const eyebrow = isPremium ? "Premium active" : "Premium unlock";
-  const title = isPremium
-    ? "This compatibility unlock is already active."
-    : "Unlock the full compatibility reading.";
-  const body = isPremium
-    ? "Your session already has premium access, so you can go straight back to the compatibility preview."
-    : "Take the next step after the preview and unlock the deeper compatibility reading.";
-  const ctaLabel = isPremium ? "Back to compatibility" : "Continue to unlock";
-
-  return (
-    <article className="rounded-[28px] border border-stone-900 bg-stone-950 p-6 text-stone-50 shadow-[0_18px_45px_rgba(34,24,14,0.28)]">
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-400">
-        {eyebrow}
-      </p>
-      <div className="mt-3 space-y-2">
-        <h3 className="text-3xl font-semibold tracking-tight">{title}</h3>
-        <p className="text-sm leading-6 text-stone-300">
-          {body}
+  if (isPremium) {
+    return (
+      <article
+        className="rounded-[28px] p-6"
+        style={{
+          background: "var(--bg-surface)",
+          border: "1px solid rgba(52,211,153,0.3)",
+          boxShadow: "0 18px 45px rgba(0,0,0,0.5)",
+        }}
+      >
+        <p
+          className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+          style={{ color: "var(--accent-green)" }}
+        >
+          Premium active
         </p>
-      </div>
-
-      <div className="mt-5 rounded-[24px] border border-stone-800 bg-stone-900/70 p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-          {isPremium ? "Current status" : "Included now"}
+        <h3
+          className="mt-3 text-2xl font-bold tracking-tight"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Your unlock is already active.
+        </h3>
+        <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+          Status: {premiumStatus ?? "premium"}
         </p>
-        {isPremium ? (
-          <div className="mt-3 space-y-2 text-sm leading-6 text-stone-200">
-            <p>Premium is already unlocked for this session.</p>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-300">
-              Status: {premiumStatus ?? "premium"}
-            </p>
-          </div>
-        ) : (
-          <ul className="mt-3 space-y-2 text-sm leading-6 text-stone-200">
-            <li>Full compatibility reading with deeper cards</li>
-            <li>More detail on emotional friction and long-term fit</li>
-            <li>A clearer next step after the preview</li>
-          </ul>
-        )}
-      </div>
-
-      {!isPremium ? (
-        <div className="mt-4 rounded-[24px] border border-amber-300/30 bg-amber-300/10 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">
-            Price
-          </p>
-          <p className="mt-2 text-3xl font-semibold text-stone-50">
-            {preview.paywall.price_local} {preview.paywall.currency}
-          </p>
-        </div>
-      ) : null}
-
-      <div className="mt-5 grid gap-3">
         <button
           type="button"
           onClick={onContinue}
-          className={
-            isPremium
-              ? "w-full rounded-2xl bg-emerald-300 px-4 py-3 text-sm font-semibold text-stone-950 transition hover:bg-emerald-200"
-              : "w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-200"
-          }
+          className="mt-5 w-full rounded-2xl py-3.5 text-sm font-semibold transition"
+          style={{ background: "var(--accent-green)", color: "#0A0A14" }}
         >
-          {ctaLabel}
+          Back to compatibility
         </button>
-        <button
-          type="button"
-          onClick={onBack}
-          className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-semibold text-stone-100 transition hover:border-stone-500"
-        >
-          Back to preview
-        </button>
+      </article>
+    );
+  }
+
+  return (
+    <article
+      className="rounded-[28px] p-6"
+      style={{
+        background: "var(--bg-surface)",
+        border: "1px solid var(--border-glow)",
+        boxShadow: "0 18px 45px rgba(0,0,0,0.5), 0 0 60px rgba(123,94,248,0.08)",
+      }}
+    >
+      {/* Glow */}
+      <div
+        className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-8 rounded-full blur-3xl"
+        style={{ width: 200, height: 120, background: "rgba(123,94,248,0.15)" }}
+      />
+
+      <p
+        className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+        style={{ color: "var(--accent-soft)" }}
+      >
+        Premium unlock
+      </p>
+
+      <h3
+        className="mt-3 text-[26px] font-bold tracking-tight"
+        style={{ color: "var(--text-primary)" }}
+      >
+        Unlock the full picture.
+      </h3>
+
+      {/* Benefits */}
+      <ul className="mt-5 space-y-3">
+        {BENEFITS.map((b) => (
+          <li key={b} className="flex items-start gap-3">
+            <span style={{ color: "var(--accent-primary)", marginTop: 1 }}>✦</span>
+            <span className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+              {b}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {/* Price block */}
+      <div
+        className="mt-5 rounded-2xl px-5 py-4"
+        style={{
+          background: "var(--bg-elevated)",
+          border: "1px solid rgba(123,94,248,0.2)",
+        }}
+      >
+        <div className="flex items-baseline gap-2">
+          <span className="text-[32px] font-bold" style={{ color: "var(--text-primary)" }}>
+            ⭐ {preview.paywall.price_local ?? 350}
+          </span>
+          <span className="text-sm" style={{ color: "var(--text-muted)" }}>Stars</span>
+        </div>
+        <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+          One-time unlock · less than a coffee
+        </p>
       </div>
+
+      {/* CTA */}
+      <button
+        type="button"
+        onClick={onContinue}
+        className="mt-4 w-full rounded-2xl py-3.5 text-sm font-semibold text-white transition active:scale-[0.98]"
+        style={{ background: "var(--grad-cta)" }}
+      >
+        Unlock Full Reading
+      </button>
+
+      <button
+        type="button"
+        onClick={onBack}
+        className="mt-3 w-full rounded-2xl py-3 text-sm transition"
+        style={{
+          border: "1px solid var(--border-subtle)",
+          color: "var(--text-secondary)",
+        }}
+      >
+        Back to preview
+      </button>
+
+      <p className="mt-3 text-center text-xs" style={{ color: "var(--text-muted)" }}>
+        Paid via Telegram Stars · Instant access
+      </p>
     </article>
   );
 }

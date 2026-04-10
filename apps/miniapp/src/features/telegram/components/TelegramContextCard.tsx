@@ -102,49 +102,89 @@ export function TelegramContextCard({
   ].filter(Boolean) as Array<{ label: string; value: string }>;
 
   return (
-    <article className="rounded-[24px] border border-white/80 bg-white/85 p-5 shadow-[0_10px_30px_rgba(89,63,31,0.08)]">
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">
+    <article
+      className="rounded-[24px] p-5"
+      style={{
+        background: "var(--bg-surface)",
+        border: "1px solid var(--border-subtle)",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+      }}
+    >
+      <p
+        className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+        style={{ color: "var(--text-muted)" }}
+      >
         Telegram bootstrap
       </p>
       <div className="mt-3 space-y-2">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+        <h2
+          className="text-xl font-bold tracking-tight"
+          style={{ color: "var(--text-primary)" }}
+        >
           {context.isAvailable
             ? "Mini App context detected."
             : "Running in browser mode."}
         </h2>
-        <p className="text-sm leading-6 text-stone-600">
+        <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
           {context.isAvailable
             ? "Telegram is available, so the app can restore the user's progress and open the right next step."
             : "Telegram WebApp was not found, so the app keeps the local MVP flow available outside Telegram."}
         </p>
-        <p className="text-sm leading-6 text-stone-500">{summaryLine}</p>
+        <p className="text-sm leading-6" style={{ color: "var(--text-muted)" }}>
+          {summaryLine}
+        </p>
       </div>
 
       {(process.env.NODE_ENV !== "production" || isDebugMode) ? (
-        <details className="mt-4 rounded-2xl border border-stone-200 bg-stone-50/80 px-4 py-3 text-sm text-stone-600">
-          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+        <details
+          className="mt-4 rounded-2xl px-4 py-3 text-sm"
+          style={{
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--border-subtle)",
+            color: "var(--text-secondary)",
+          }}
+        >
+          <summary
+            className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.18em]"
+            style={{ color: "var(--text-muted)" }}
+          >
             Telegram debug
           </summary>
           <div className="mt-3 grid gap-3 text-sm">
             {debugRows.map((row) => (
               <div
                 key={row.label}
-                className="rounded-2xl border border-stone-200 bg-white px-4 py-3"
+                className="rounded-2xl px-4 py-3"
+                style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}
               >
-                <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                <p
+                  className="text-[10px] uppercase tracking-[0.18em]"
+                  style={{ color: "var(--text-muted)" }}
+                >
                   {row.label}
                 </p>
-                <p className="mt-1 break-all font-medium text-stone-900">{row.value}</p>
+                <p className="mt-1 break-all font-medium" style={{ color: "var(--text-primary)" }}>
+                  {row.value}
+                </p>
               </div>
             ))}
             {isDebugMode && authState.sessionToken ? (
               <button
                 onClick={copySessionToken}
-                className="rounded-2xl border border-stone-200 bg-white px-4 py-3 text-left"
+                className="rounded-2xl px-4 py-3 text-left transition"
+                style={{
+                  background: "var(--bg-surface)",
+                  border: "1px solid var(--accent-primary)",
+                }}
               >
-                <p className="text-xs uppercase tracking-[0.18em] text-stone-500">Admin</p>
-                <p className="mt-1 font-medium text-stone-900">
-                  {copied ? "Copied!" : "Copy session token"}
+                <p
+                  className="text-[10px] uppercase tracking-[0.18em]"
+                  style={{ color: "var(--accent-soft)" }}
+                >
+                  Admin
+                </p>
+                <p className="mt-1 font-medium" style={{ color: "var(--text-primary)" }}>
+                  {copied ? "Copied! ✓" : "Copy session token"}
                 </p>
               </button>
             ) : null}
@@ -153,13 +193,27 @@ export function TelegramContextCard({
       ) : null}
 
       {authState.errorMessage ? (
-        <p className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <p
+          className="mt-4 rounded-2xl px-4 py-3 text-sm"
+          style={{
+            background: "rgba(244,63,94,0.1)",
+            border: "1px solid rgba(244,63,94,0.2)",
+            color: "#FDA4AF",
+          }}
+        >
           {authState.errorMessage}
         </p>
       ) : null}
 
       {bootstrapState.errorMessage ? (
-        <p className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <p
+          className="mt-4 rounded-2xl px-4 py-3 text-sm"
+          style={{
+            background: "rgba(244,63,94,0.1)",
+            border: "1px solid rgba(244,63,94,0.2)",
+            color: "#FDA4AF",
+          }}
+        >
           {bootstrapState.errorMessage}
         </p>
       ) : null}

@@ -344,36 +344,58 @@ function SectionMetadataHeader({
 
   return (
     <div
-      className={`mb-2 rounded-2xl px-4 py-3 shadow-[0_8px_24px_rgba(89,63,31,0.06)] ${toneClassName}`}
+      className="mb-2 rounded-2xl px-4 py-3"
+      style={{
+        background: "var(--bg-surface)",
+        border: "1px solid var(--border-subtle)",
+      }}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500">
+        <p
+          className="text-[11px] font-semibold uppercase tracking-[0.16em]"
+          style={{ color: "var(--text-muted)" }}
+        >
           {formatSectionLabel(section)}
         </p>
         {badge ? (
-          <span className="rounded-full bg-stone-900 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-50">
+          <span
+            className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white"
+            style={{ background: "var(--accent-primary)" }}
+          >
             {badge}
           </span>
         ) : null}
         {state ? (
-          <span className="rounded-full border border-stone-300 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
+          <span
+            className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{
+              border: "1px solid var(--border-subtle)",
+              color: "var(--text-muted)",
+            }}
+          >
             {state.replaceAll("_", " ")}
           </span>
         ) : null}
       </div>
       {description ? (
-        <p className="mt-2 text-sm leading-6 text-stone-600">{description}</p>
+        <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+          {description}
+        </p>
       ) : null}
       {action ? (
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-400">
+          <p
+            className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+            style={{ color: "var(--text-muted)" }}
+          >
             Next: {formatPrimaryActionLabel(action)}
           </p>
           {actionLabel ? (
             <button
               type="button"
               onClick={onAction}
-              className="text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-700 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-950"
+              className="text-[11px] font-semibold uppercase tracking-[0.14em] transition"
+              style={{ color: "var(--accent-soft)" }}
             >
               {actionLabel}
             </button>
@@ -481,20 +503,36 @@ function HomeSectionIntro({
   ];
 
   return (
-    <article className="rounded-[24px] border border-white/80 bg-white/85 p-5 shadow-[0_10px_30px_rgba(89,63,31,0.08)]">
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">
+    <article
+      className="rounded-[24px] p-5"
+      style={{
+        background: "var(--bg-surface)",
+        border: "1px solid var(--border-subtle)",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+      }}
+    >
+      <p
+        className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+        style={{ color: "var(--text-muted)" }}
+      >
         Overview
       </p>
       <div className="mt-3 space-y-2">
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+        <h2
+          className="text-2xl font-bold tracking-tight"
+          style={{ color: "var(--text-primary)" }}
+        >
           {headline ?? "Your reading is ready to explore."}
         </h2>
-        <p className="text-sm leading-6 text-stone-600">
+        <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
           {supportingText ??
             "You can revisit your core numbers, check what is ready now, and continue into compatibility whenever you want."}
         </p>
         {resolvedNextStep ? (
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+          <p
+            className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+            style={{ color: "var(--text-muted)" }}
+          >
             Up next: {resolvedNextStep}
           </p>
         ) : null}
@@ -502,7 +540,8 @@ function HomeSectionIntro({
           <button
             type="button"
             onClick={onPrimaryAction}
-            className="mt-2 inline-flex min-h-11 items-center justify-center rounded-2xl bg-stone-950 px-4 py-3 text-sm font-semibold text-stone-50 transition hover:bg-stone-800"
+            className="mt-2 inline-flex min-h-11 items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold text-white transition active:scale-[0.98]"
+            style={{ background: "var(--grad-cta)" }}
           >
             {primaryActionLabel}
           </button>
@@ -517,47 +556,38 @@ function HomeSectionIntro({
               type="button"
               onClick={() => onSectionAction(sectionActionMap[section] ?? null)}
               disabled={!sectionActionMap[section]}
-              className={`rounded-2xl px-3 py-2 text-left transition ${getOverviewMetadataTone(
-                sectionStates[section] ?? null,
-              )} ${
-                section === homeFocus
-                  ? "ring-2 ring-stone-300/80"
-                  : ""
-              } ${
-                sectionActionMap[section]
-                  ? "cursor-pointer hover:translate-y-[-1px] hover:shadow-[0_10px_24px_rgba(89,63,31,0.08)]"
-                  : "cursor-default"
-              }`}
+              className="rounded-2xl px-3 py-2 text-left transition"
+              style={{
+                background: section === homeFocus
+                  ? "rgba(123,94,248,0.12)"
+                  : "var(--bg-elevated)",
+                border: section === homeFocus
+                  ? "1px solid var(--accent-primary)"
+                  : "1px solid var(--border-subtle)",
+                cursor: sectionActionMap[section] ? "pointer" : "default",
+              }}
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-600">
+              <p
+                className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+                style={{ color: section === homeFocus ? "var(--accent-soft)" : "var(--text-secondary)" }}
+              >
                 {formatSectionLabel(section)}: {sectionBadges[section]}
               </p>
-              {section === entrySection && section === homeFocus ? (
-                <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
-                  Start here
+              {(section === entrySection || section === homeFocus) && (
+                <p
+                  className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {section === entrySection && section === homeFocus
+                    ? "Start here"
+                    : section === entrySection
+                    ? "Starting point"
+                    : "In focus"}
                 </p>
-              ) : section === entrySection ? (
-                <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
-                  Starting point
-                </p>
-              ) : section === homeFocus ? (
-                <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
-                  In focus
-                </p>
-              ) : null}
-              {sectionStates[section] ? (
-                <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-400">
-                  Status: {sectionStates[section].replaceAll("_", " ")}
-                </p>
-              ) : null}
+              )}
               {sectionDescriptions[section] ? (
-                <p className="mt-1 text-xs leading-5 text-stone-500">
+                <p className="mt-1 text-xs leading-5" style={{ color: "var(--text-muted)" }}>
                   {sectionDescriptions[section]}
-                </p>
-              ) : null}
-              {sectionActions[section] ? (
-                <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-400">
-                  Next: {formatPrimaryActionLabel(sectionActions[section])}
                 </p>
               ) : null}
             </button>
@@ -566,13 +596,22 @@ function HomeSectionIntro({
       ) : null}
 
       {process.env.NODE_ENV !== "production" && debugLines.length > 0 ? (
-        <details className="mt-4 rounded-2xl border border-stone-200 bg-stone-50/80 px-4 py-3 text-sm text-stone-600">
-          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+        <details
+          className="mt-4 rounded-2xl px-4 py-3 text-sm"
+          style={{
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--border-subtle)",
+          }}
+        >
+          <summary
+            className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.18em]"
+            style={{ color: "var(--text-muted)" }}
+          >
             Home state details
           </summary>
           <div className="mt-3 space-y-2">
             {debugLines.map((line) => (
-              <p key={line} className="text-xs leading-5 text-stone-500">
+              <p key={line} className="text-xs leading-5" style={{ color: "var(--text-muted)" }}>
                 {line}
               </p>
             ))}

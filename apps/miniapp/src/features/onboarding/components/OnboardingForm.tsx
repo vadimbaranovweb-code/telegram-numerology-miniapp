@@ -1,4 +1,5 @@
 import { FormEvent } from "react";
+import { DrumDatePicker } from "./DrumDatePicker";
 
 type OnboardingFormProps = {
   birthDate: string;
@@ -26,59 +27,141 @@ export function OnboardingForm({
   onSubmit,
 }: OnboardingFormProps) {
   return (
-    <section className="rounded-[28px] border border-stone-200/80 bg-stone-950 p-5 text-stone-50 shadow-[0_12px_40px_rgba(34,24,14,0.24)]">
-      <form className="space-y-4" onSubmit={onSubmit}>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-200" htmlFor="birthDate">
-            Birth date
+    <section
+      className="rounded-[28px] p-5"
+      style={{
+        background: "var(--bg-surface)",
+        border: "1px solid var(--border-subtle)",
+        boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
+      }}
+    >
+      <form className="space-y-5" onSubmit={onSubmit}>
+        {/* Birth date */}
+        <div className="space-y-3">
+          <label
+            className="block text-[11px] font-semibold uppercase tracking-[0.22em]"
+            style={{ color: "var(--text-muted)" }}
+          >
+            When were you born?
           </label>
-          <input
-            id="birthDate"
-            type="date"
-            value={birthDate}
-            onChange={(event) => onBirthDateChange(event.target.value)}
-            className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-50 outline-none transition focus:border-amber-400"
-            required
-          />
+          <DrumDatePicker value={birthDate} onChange={onBirthDateChange} />
         </div>
 
+        {/* Name */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-200" htmlFor="fullName">
-            Name
+          <label
+            className="block text-[11px] font-semibold uppercase tracking-[0.22em]"
+            htmlFor="fullName"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Your name
+            <span
+              className="ml-2 normal-case tracking-normal text-xs font-normal"
+              style={{ color: "var(--text-muted)" }}
+            >
+              (optional)
+            </span>
           </label>
           <input
             id="fullName"
             type="text"
-            placeholder="Optional, for deeper profile signals"
+            placeholder="First name for deeper profile signals"
             value={fullName}
-            onChange={(event) => onFullNameChange(event.target.value)}
-            className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-50 outline-none transition placeholder:text-stone-500 focus:border-amber-400"
+            onChange={(e) => onFullNameChange(e.target.value)}
+            className="w-full rounded-2xl px-4 py-3 text-[15px] outline-none transition"
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--border-subtle)",
+              color: "var(--text-primary)",
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = "var(--accent-primary)";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = "var(--border-subtle)";
+            }}
           />
         </div>
 
-        <label className="flex items-start gap-3 rounded-2xl border border-stone-800 bg-stone-900/70 px-4 py-3 text-sm text-stone-200">
-          <input
-            type="checkbox"
-            checked={dailyOptIn}
-            onChange={(event) => onDailyOptInChange(event.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-stone-600 bg-stone-950 text-amber-300"
-          />
-          <span className="leading-6">
-            Get daily insights ready once your reading is unlocked.
+        {/* Daily opt-in */}
+        <label
+          className="flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-3"
+          style={{
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--border-subtle)",
+          }}
+        >
+          <div className="relative mt-0.5 flex-shrink-0">
+            <input
+              type="checkbox"
+              checked={dailyOptIn}
+              onChange={(e) => onDailyOptInChange(e.target.checked)}
+              className="sr-only"
+            />
+            <div
+              className="h-5 w-5 rounded-md flex items-center justify-center transition"
+              style={{
+                background: dailyOptIn ? "var(--accent-primary)" : "transparent",
+                border: dailyOptIn
+                  ? "1px solid var(--accent-primary)"
+                  : "1px solid var(--text-muted)",
+              }}
+            >
+              {dailyOptIn && (
+                <svg
+                  className="h-3 w-3 text-white"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="2,6 5,9 10,3" />
+                </svg>
+              )}
+            </div>
+          </div>
+          <span className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+            Get daily insights once your reading is ready.
           </span>
         </label>
 
+        {/* Privacy note */}
+        <p className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
+          <span>🔒</span>
+          <span>Your data stays private. We never share it.</span>
+        </p>
+
+        {/* Submit */}
         <button
           type="submit"
           disabled={!isFormValid || isSubmitting}
-          className="w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-2xl px-4 py-3.5 text-sm font-semibold text-white transition"
+          style={{
+            background: isFormValid && !isSubmitting
+              ? "var(--grad-cta)"
+              : "var(--bg-elevated)",
+            color: isFormValid && !isSubmitting
+              ? "white"
+              : "var(--text-muted)",
+            cursor: !isFormValid || isSubmitting ? "not-allowed" : "pointer",
+            opacity: !isFormValid || isSubmitting ? 0.6 : 1,
+          }}
         >
-          {isSubmitting ? "Calculating..." : "See my numbers"}
+          {isSubmitting ? "Calculating your numbers..." : "See my numbers →"}
         </button>
       </form>
 
       {error ? (
-        <p className="mt-4 rounded-2xl border border-rose-400/30 bg-rose-950/50 px-4 py-3 text-sm text-rose-100">
+        <p
+          className="mt-4 rounded-2xl px-4 py-3 text-sm"
+          style={{
+            background: "rgba(244,63,94,0.1)",
+            border: "1px solid rgba(244,63,94,0.2)",
+            color: "#FDA4AF",
+          }}
+        >
           {error}
         </p>
       ) : null}

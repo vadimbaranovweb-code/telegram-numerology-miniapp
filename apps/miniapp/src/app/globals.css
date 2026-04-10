@@ -1,8 +1,37 @@
 @import "tailwindcss";
 
 :root {
-  --background: #e8ded1;
-  --foreground: #22180e;
+  /* Base backgrounds */
+  --bg-base:     #0A0A14;
+  --bg-surface:  #111128;
+  --bg-elevated: #1A1A35;
+  --bg-overlay:  rgba(255, 255, 255, 0.04);
+
+  /* Accents */
+  --accent-primary: #7B5EF8;
+  --accent-soft:    #C084FC;
+  --accent-gold:    #F59E0B;
+  --accent-rose:    #F472B6;
+  --accent-blue:    #60A5FA;
+  --accent-green:   #34D399;
+
+  /* Text */
+  --text-primary:   #F1F0F7;
+  --text-secondary: #9B96C4;
+  --text-muted:     #5C587A;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-glow:   rgba(123, 94, 248, 0.3);
+
+  /* Gradients */
+  --grad-cta:  linear-gradient(135deg, #7B5EF8, #C084FC);
+  --grad-card: linear-gradient(180deg, #1A1A35 0%, #111128 100%);
+  --grad-hero: radial-gradient(ellipse at top, #1E1040 0%, #0A0A14 60%);
+
+  /* Compat with existing code */
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
 }
 
 @theme inline {
@@ -17,22 +46,22 @@
 }
 
 html {
-  background: var(--background);
+  background: var(--bg-base);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--background);
-  color: var(--foreground);
-  font-family:
-    "SF Pro Display",
-    "Inter",
-    "Segoe UI",
-    sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: "SF Pro Display", "Inter", "Segoe UI", sans-serif;
 }
 
 a {
   color: inherit;
   text-decoration: none;
 }
+
+/* Drum picker scrollbar hidden */
+.drum-col::-webkit-scrollbar { display: none; }
+.drum-col { -ms-overflow-style: none; scrollbar-width: none; }

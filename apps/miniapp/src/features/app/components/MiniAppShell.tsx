@@ -11,6 +11,7 @@ import { useTelegramBootstrap } from "@/features/telegram/hooks/useTelegramBoots
 import { useTelegramWebApp } from "@/features/telegram/hooks/useTelegramWebApp";
 
 import { useMiniAppBootstrap } from "../hooks/useMiniAppBootstrap";
+import { StarField } from "./StarField";
 
 export function MiniAppShell() {
   const telegramContext = useTelegramWebApp();
@@ -79,8 +80,15 @@ export function MiniAppShell() {
   );
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#f3efe6_0%,#efe7db_42%,#e6dccf_100%)] px-4 py-6 text-stone-900">
-      <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-md flex-col gap-5">
+    <main
+      className="relative min-h-screen px-4 py-6"
+      style={{
+        background: "var(--grad-hero)",
+        color: "var(--text-primary)",
+      }}
+    >
+      <StarField />
+      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-md flex-col gap-5">
         {bootstrapStatus === "bootstrapping" ? (
           <BootstrapScreen />
         ) : (
