@@ -55,8 +55,8 @@ export function useTelegramWebApp() {
     }
 
     const webApp = window.Telegram?.WebApp;
-    webApp.ready?.();
-    webApp.expand?.();
+    webApp?.ready?.();
+    webApp?.expand?.();
     trackEvent("telegram_context_loaded", {
       platform: context.platform,
       version: context.version,

@@ -170,7 +170,7 @@ export function ReadyHomeScreen({
     handleResolvedAction(primaryHomeAction);
   }
 
-  const sectionContent = {
+  const sectionContent: Record<string, React.ReactNode> = {
     overview: (
       <HomeSectionIntro
         headline={homeHeadline}
