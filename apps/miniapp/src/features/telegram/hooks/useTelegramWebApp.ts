@@ -44,10 +44,13 @@ const EMPTY_CONTEXT: TelegramWebAppContext = {
 };
 
 export function useTelegramWebApp() {
-  const [context] = useState<TelegramWebAppContext>(() => readTelegramContext());
+  const [context, setContext] = useState<TelegramWebAppContext>(EMPTY_CONTEXT);
 
   useEffect(() => {
-    if (!context.isAvailable) {
+    const ctx = readTelegramContext();
+    setContext(ctx);
+
+    if (!ctx.isAvailable) {
       trackEvent("telegram_context_missing", {
         bootstrap_mode: "browser_fallback",
       });
@@ -58,12 +61,12 @@ export function useTelegramWebApp() {
     webApp?.ready?.();
     webApp?.expand?.();
     trackEvent("telegram_context_loaded", {
-      platform: context.platform,
-      version: context.version,
-      has_init_data: Boolean(context.initData),
-      telegram_user_id: context.user?.id ?? null,
+      platform: ctx.platform,
+      version: ctx.version,
+      has_init_data: Boolean(ctx.initData),
+      telegram_user_id: ctx.user?.id ?? null,
     });
-  }, [context]);
+  }, []);
 
   return context;
 }
