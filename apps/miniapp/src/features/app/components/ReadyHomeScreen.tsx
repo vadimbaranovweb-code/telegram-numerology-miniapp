@@ -160,8 +160,8 @@ export function ReadyHomeScreen({
 
   return (
     <>
-      {/* Scrollable content with bottom padding for tab bar */}
-      <div className="grid gap-3 pb-24">
+      {/* Scrollable content — extra padding when reading CTA is shown */}
+      <div className={`grid gap-3 ${activeTab === "home" && homeScreen === "reading" ? "pb-36" : "pb-24"}`}>
 
         {/* ── HOME TAB ── */}
         {activeTab === "home" && homeScreen === "hub" && (
@@ -180,6 +180,7 @@ export function ReadyHomeScreen({
             <ReadingStory
               preview={readingPreview}
               lifePathNumber={result.life_path_number}
+              blurFromIndex={3}
               sectionBadge={sectionBadges.reading ?? null}
               sectionState={sectionStates.reading ?? null}
               sectionDescription={sectionDescriptions.reading ?? null}
@@ -240,6 +241,26 @@ export function ReadyHomeScreen({
           />
         )}
       </div>
+
+      {/* Fixed CTA on reading screen */}
+      {activeTab === "home" && homeScreen === "reading" && (
+        <div
+          className="fixed left-0 right-0 z-40 mx-auto max-w-md px-4"
+          style={{ bottom: "calc(60px + env(safe-area-inset-bottom, 0px))" }}
+        >
+          <button
+            type="button"
+            onClick={openCompat}
+            className="w-full rounded-2xl py-4 text-sm font-semibold text-white transition active:scale-[0.98]"
+            style={{
+              background: "var(--grad-cta)",
+              boxShadow: "0 8px 28px rgba(123,94,248,0.4)",
+            }}
+          >
+            Получить полный расклад →
+          </button>
+        </div>
+      )}
 
       <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} />
 

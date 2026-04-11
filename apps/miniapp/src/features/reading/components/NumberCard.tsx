@@ -17,10 +17,12 @@ export function NumberCard({
   label,
   value,
   isRu = false,
+  onInfo,
 }: {
   label: string;
   value: number | null;
   isRu?: boolean;
+  onInfo?: () => void;
 }) {
   const archetype = value != null ? ARCHETYPES[value] : null;
   const keyword = archetype
@@ -33,18 +35,37 @@ export function NumberCard({
 
   return (
     <div
-      className="rounded-2xl p-4 flex flex-col gap-1"
+      className="rounded-2xl p-4 flex flex-col gap-1 relative"
       style={{
         background: "var(--bg-elevated)",
         border: "1px solid var(--border-subtle)",
       }}
     >
-      <p
-        className="text-[10px] font-semibold uppercase tracking-[0.2em]"
-        style={{ color: "var(--text-muted)" }}
-      >
-        {label}
-      </p>
+      <div className="flex items-start justify-between gap-1">
+        <p
+          className="text-[10px] font-semibold uppercase tracking-[0.2em] leading-4"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {label}
+        </p>
+        {onInfo && (
+          <button
+            type="button"
+            onClick={onInfo}
+            className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full transition active:scale-90"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid var(--border-subtle)",
+              color: "var(--text-muted)",
+              fontSize: 10,
+              fontWeight: 700,
+            }}
+            aria-label="Что это"
+          >
+            i
+          </button>
+        )}
+      </div>
       <p
         className="text-[40px] font-bold leading-none tracking-tight"
         style={{ color: "var(--text-primary)" }}
