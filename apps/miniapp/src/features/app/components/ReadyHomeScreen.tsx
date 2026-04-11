@@ -131,6 +131,7 @@ export function ReadyHomeScreen({
   const [homeScreen, setHomeScreen] = useState<HomeScreen>(() =>
     resolveInitialHomeScreen(entrySection),
   );
+  const [readingCtaVisible, setReadingCtaVisible] = useState(true);
 
   function handleTabChange(tab: TabId) {
     setActiveTab(tab);
@@ -194,10 +195,10 @@ export function ReadyHomeScreen({
 
   return (
     <>
-      {/* Scrollable content — extra padding when reading CTA is shown */}
+      {/* Scrollable content */}
       <div className={`grid gap-3 ${activeTab === "home" && homeScreen === "reading" ? "pb-36" : "pb-24"}`}>
 
-        {/* ── HOME TAB ── */}
+        {/* ── HOME TAB: Hub ── */}
         {activeTab === "home" && homeScreen === "hub" && (
           <HomeHub
             profile={profile}
@@ -208,53 +209,42 @@ export function ReadyHomeScreen({
           />
         )}
 
+        {/* ── HOME TAB: Reading ── */}
         {activeTab === "home" && homeScreen === "reading" && (
           <>
-            <ScreenBackButton label="Главная" onBack={goBackToHub} />
+            {/* Close button top-right */}
+            <div className="flex justify-end py-1">
+              <button
+                type="button"
+                onClick={goBackToHub}
+                className="flex h-8 w-8 items-center justify-center rounded-full transition active:opacity-60"
+                style={{
+                  background: "var(--bg-elevated)",
+                  border: "1px solid var(--border-subtle)",
+                  color: "var(--text-muted)",
+                }}
+                aria-label="Закрыть"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
             <ReadingStory
               preview={readingPreview}
               lifePathNumber={result.life_path_number}
-              blurFromIndex={3}
+              blurFromIndex={2}
               sectionBadge={sectionBadges.reading ?? null}
               sectionState={sectionStates.reading ?? null}
               sectionDescription={sectionDescriptions.reading ?? null}
               sectionAction={sectionActions.reading ?? null}
+              onUnlock={onCompletePurchase}
+              onUnlockBlockVisible={(visible) => setReadingCtaVisible(!visible)}
             />
             <ReadingNumbersGrid
               result={result}
               displayName={profile.display_name ?? undefined}
             />
-          </>
-        )}
-
-        {activeTab === "home" && homeScreen === "compat" && (
-          <>
-            <ScreenBackButton label="Главная" onBack={goBackToHub} />
-            {isCompatibilitySubmitting ? (
-              <GenerationLoadingScreen />
-            ) : (
-              <CompatibilityTeaserCard
-                isExpanded={isCompatibilityExpanded}
-                sectionBadge={sectionBadges.compatibility ?? null}
-                sectionState={sectionStates.compatibility ?? null}
-                sectionDescription={sectionDescriptions.compatibility ?? null}
-                sectionAction={sectionActions.compatibility ?? null}
-                stage={compatStage}
-                relationshipContext={relationshipContext}
-                targetBirthDate={targetBirthDate}
-                targetDisplayName={targetDisplayName}
-                preview={compatibilityPreview}
-                premiumStatus={premiumStatus}
-                isSubmitting={isCompatibilitySubmitting}
-                error={compatibilityError}
-                onExpand={onExpandCompatibility}
-                onOpenPaywall={onCompletePurchase}
-                onRelationshipContextChange={onRelationshipContextChange}
-                onTargetBirthDateChange={onTargetBirthDateChange}
-                onTargetDisplayNameChange={onTargetDisplayNameChange}
-                onSubmit={onCompatibilitySubmit}
-              />
-            )}
           </>
         )}
 
@@ -276,15 +266,19 @@ export function ReadyHomeScreen({
         )}
       </div>
 
-      {/* Fixed CTA on reading screen */}
+      {/* Fixed CTA on reading screen — hides when unlock block is in view */}
       {activeTab === "home" && homeScreen === "reading" && (
         <div
-          className="fixed left-0 right-0 z-40 mx-auto max-w-md px-4"
-          style={{ bottom: "calc(60px + env(safe-area-inset-bottom, 0px))" }}
+          className="fixed left-0 right-0 z-40 mx-auto max-w-md px-4 transition-opacity duration-300"
+          style={{
+            bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)",
+            opacity: readingCtaVisible ? 1 : 0,
+            pointerEvents: readingCtaVisible ? "auto" : "none",
+          }}
         >
           <button
             type="button"
-            onClick={openCompat}
+            onClick={onCompletePurchase}
             className="w-full rounded-2xl py-4 text-sm font-semibold text-white transition active:scale-[0.98]"
             style={{
               background: "var(--grad-cta)",
@@ -296,7 +290,10 @@ export function ReadyHomeScreen({
         </div>
       )}
 
-      <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} />
+      {/* Tab bar — only on hub and non-home tabs */}
+      {!(activeTab === "home" && homeScreen !== "hub") && (
+        <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} />
+      )}
 
       {/* Purchase success bottom sheet */}
       {isPurchaseSuccessOpen && compatibilityPreview ? (

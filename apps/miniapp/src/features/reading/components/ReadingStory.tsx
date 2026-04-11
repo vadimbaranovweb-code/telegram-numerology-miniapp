@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { t } from "@/i18n";
 import { BottomSheet } from "@/features/app/components/BottomSheet";
 import { ReadingCard, ReadingPreview } from "../types";
@@ -56,6 +56,13 @@ const CARD_INFO: Record<string, { title: string; what: string; how: string }> = 
   },
 };
 
+const READING_BENEFITS = [
+  "Все карты расклада полностью открыты",
+  "Сильные стороны, слепые пятна и текущая энергия",
+  "Полный анализ совместимости с партнёром",
+  "Сохранено в профиле навсегда",
+];
+
 function getAccent(label: string): string {
   for (const [key, color] of Object.entries(CARD_ACCENTS)) {
     if (label.toLowerCase().includes(key.toLowerCase())) return color;
@@ -85,11 +92,13 @@ function getCardInfo(label: string): { title: string; what: string; how: string 
 export function ReadingStory({
   preview,
   lifePathNumber,
-  blurFromIndex = 999,
+  blurFromIndex = 2,
   sectionBadge = null,
   sectionState = null,
   sectionDescription = null,
   sectionAction = null,
+  onUnlock,
+  onUnlockBlockVisible,
 }: {
   preview: ReadingPreview;
   lifePathNumber?: number;
@@ -98,9 +107,34 @@ export function ReadingStory({
   sectionState?: string | null;
   sectionDescription?: string | null;
   sectionAction?: string | null;
+  onUnlock?: () => void;
+  onUnlockBlockVisible?: (visible: boolean) => void;
 }) {
   const [activeInfoCard, setActiveInfoCard] = useState<ReadingCard | null>(null);
+  const [isUnlocking, setIsUnlocking] = useState(false);
   const activeInfo = activeInfoCard ? getCardInfo(activeInfoCard.label) : null;
+  const unlockRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!unlockRef.current || !onUnlockBlockVisible) return;
+    const el = unlockRef.current;
+    const obs = new IntersectionObserver(
+      ([entry]) => onUnlockBlockVisible(entry.isIntersecting),
+      { threshold: 0.2 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [onUnlockBlockVisible]);
+
+  async function handleUnlock() {
+    if (!onUnlock) return;
+    setIsUnlocking(true);
+    try {
+      await onUnlock();
+    } finally {
+      setIsUnlocking(false);
+    }
+  }
 
   return (
     <>
@@ -164,6 +198,66 @@ export function ReadingStory({
             />
           ))}
         </div>
+
+        {/* Unlock / price block */}
+        {onUnlock && (
+          <div
+            ref={unlockRef}
+            className="mt-4 rounded-[20px] p-5"
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--border-glow)",
+              boxShadow: "0 0 40px rgba(123,94,248,0.08)",
+            }}
+          >
+            <p
+              className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+              style={{ color: "var(--accent-soft)" }}
+            >
+              {t.paywall.label}
+            </p>
+            <h4
+              className="mt-2 text-[18px] font-bold tracking-tight"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Расклад + совместимость
+            </h4>
+            <p className="mt-1 text-sm leading-5" style={{ color: "var(--text-secondary)" }}>
+              Одна покупка открывает всё сразу.
+            </p>
+            <ul className="mt-3 space-y-2">
+              {READING_BENEFITS.map((b) => (
+                <li key={b} className="flex items-start gap-2.5">
+                  <span style={{ color: "var(--accent-primary)", flexShrink: 0, marginTop: 1 }}>✦</span>
+                  <span className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>{b}</span>
+                </li>
+              ))}
+            </ul>
+            <div
+              className="mt-4 flex items-baseline gap-2 rounded-2xl px-4 py-3"
+              style={{ background: "var(--bg-surface)", border: "1px solid rgba(123,94,248,0.2)" }}
+            >
+              <span className="text-[26px] font-bold" style={{ color: "var(--text-primary)" }}>
+                ⭐ 350
+              </span>
+              <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+                {t.paywall.stars} · {t.paywall.one_time}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleUnlock}
+              disabled={isUnlocking}
+              className="mt-4 w-full rounded-2xl py-4 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-60"
+              style={{ background: "var(--grad-cta)" }}
+            >
+              {isUnlocking ? "Открываем оплату..." : t.paywall.cta}
+            </button>
+            <p className="mt-3 text-center text-xs" style={{ color: "var(--text-muted)" }}>
+              {t.paywall.footer}
+            </p>
+          </div>
+        )}
       </article>
 
       {/* Info bottom sheet */}

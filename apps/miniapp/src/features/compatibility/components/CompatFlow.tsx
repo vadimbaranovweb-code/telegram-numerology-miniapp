@@ -220,6 +220,13 @@ export function CompatFlow({
   const cards = preview?.preview.cards ?? [];
   const VISIBLE_COUNT = 2;
 
+  const COMPAT_ZONES = [
+    { label: "Энергетика", icon: "⚡" },
+    { label: "Коммуникация", icon: "◈" },
+    { label: "Эмоции", icon: "♥" },
+    { label: "Цели", icon: "✦" },
+  ];
+
   return (
     <CompatFlowShell onClose={onClose} showBack backLabel="Главная">
       {/* Header */}
@@ -241,8 +248,44 @@ export function CompatFlow({
         </p>
       </div>
 
+      {/* Zones block — blurred if not premium */}
+      <div
+        className="relative mt-4 rounded-2xl overflow-hidden p-4"
+        style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}
+      >
+        {!isPremium && (
+          <div
+            className="absolute inset-0 z-10 rounded-2xl flex items-center justify-center"
+            style={{
+              backdropFilter: "blur(5px)",
+              WebkitBackdropFilter: "blur(5px)",
+              background: "linear-gradient(to bottom, rgba(17,17,40,0.1), rgba(17,17,40,0.75))",
+            }}
+          >
+            <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
+              ✦ Заблокировано
+            </span>
+          </div>
+        )}
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-muted)" }}>
+          Зоны совместимости
+        </p>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {COMPAT_ZONES.map((zone) => (
+            <div
+              key={zone.label}
+              className="rounded-xl px-3 py-2.5 flex items-center gap-2"
+              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}
+            >
+              <span className="text-sm" style={{ color: "var(--accent-soft)" }}>{zone.icon}</span>
+              <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>{zone.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Cards */}
-      <div className="mt-5 space-y-3">
+      <div className="mt-3 space-y-3">
         {cards.map((card, index) => {
           const isBlurred = index >= VISIBLE_COUNT && !isPremium;
           return (
@@ -296,6 +339,38 @@ export function CompatFlow({
         })}
       </div>
 
+      {/* Tension block — always blurred preview */}
+      {!isPremium && preview && (
+        <div
+          className="relative mt-3 rounded-2xl overflow-hidden"
+          style={{ background: "var(--bg-surface)", border: "1px solid rgba(123,94,248,0.2)" }}
+        >
+          <div
+            className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl"
+            style={{
+              backdropFilter: "blur(6px)",
+              WebkitBackdropFilter: "blur(6px)",
+              background: "linear-gradient(to bottom, rgba(17,17,40,0.25), rgba(17,17,40,0.85))",
+            }}
+          >
+            <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
+              ✦ Заблокировано
+            </span>
+          </div>
+          <div className="p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-muted)" }}>
+              Точки напряжения
+            </p>
+            <h4 className="mt-2 text-base font-bold leading-tight" style={{ color: "var(--text-primary)" }}>
+              Где могут возникать конфликты
+            </h4>
+            <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)", filter: "blur(3px)" }}>
+              Глубокий анализ зон напряжения и как их преодолевать вместе.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Unlock section (if not premium) */}
       {!isPremium && preview && (
         <div
@@ -316,8 +391,11 @@ export function CompatFlow({
             className="mt-2 text-[18px] font-bold tracking-tight"
             style={{ color: "var(--text-primary)" }}
           >
-            {t.paywall.title}
+            Расклад + совместимость
           </h4>
+          <p className="mt-1 text-sm leading-5" style={{ color: "var(--text-secondary)" }}>
+            Одна покупка открывает всё сразу.
+          </p>
           <ul className="mt-3 space-y-2">
             {t.paywall.benefits.map((b) => (
               <li key={b} className="flex items-start gap-2.5">
