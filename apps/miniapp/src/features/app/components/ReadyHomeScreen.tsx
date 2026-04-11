@@ -25,6 +25,7 @@ import { ReadingPreview } from "@/features/reading/types";
 import { PremiumPaywallCard } from "@/features/premium/components/PremiumPaywallCard";
 import { PurchaseSuccessCard } from "@/features/premium/components/PurchaseSuccessCard";
 import { BottomTabBar, TabId } from "./BottomTabBar";
+import { BottomSheet } from "./BottomSheet";
 import { FormEvent } from "react";
 
 type ReadyHomeScreenProps = {
@@ -170,36 +171,6 @@ export function ReadyHomeScreen({
 
   const compatStage = resolveCompatibilityUiStage({ preview: compatibilityPreview, isPremium });
 
-  // Full-screen overlays take priority over tab content
-  if (isPaywallOpen && compatibilityPreview) {
-    return (
-      <>
-        <PremiumPaywallCard
-          preview={compatibilityPreview}
-          isPremium={isPremium}
-          premiumStatus={premiumStatus}
-          onContinue={onCompletePurchase}
-          onBack={onClosePaywall}
-        />
-        <BottomTabBar activeTab="compat" onTabChange={handleTabChange} />
-      </>
-    );
-  }
-
-  if (isPurchaseSuccessOpen && compatibilityPreview) {
-    return (
-      <>
-        <PurchaseSuccessCard
-          preview={compatibilityPreview}
-          isPremium={isPremium}
-          premiumStatus={premiumStatus}
-          onOpenCompatibility={onOpenPurchaseSuccessPreview}
-        />
-        <BottomTabBar activeTab="compat" onTabChange={handleTabChange} />
-      </>
-    );
-  }
-
   return (
     <>
       {/* Scrollable tab content with bottom padding for tab bar */}
@@ -294,6 +265,31 @@ export function ReadyHomeScreen({
       </div>
 
       <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} />
+
+      {/* Paywall bottom sheet */}
+      {isPaywallOpen && compatibilityPreview ? (
+        <BottomSheet onClose={onClosePaywall}>
+          <PremiumPaywallCard
+            preview={compatibilityPreview}
+            isPremium={isPremium}
+            premiumStatus={premiumStatus}
+            onContinue={onCompletePurchase}
+            onBack={onClosePaywall}
+          />
+        </BottomSheet>
+      ) : null}
+
+      {/* Purchase success bottom sheet */}
+      {isPurchaseSuccessOpen && compatibilityPreview ? (
+        <BottomSheet onClose={onOpenPurchaseSuccessPreview}>
+          <PurchaseSuccessCard
+            preview={compatibilityPreview}
+            isPremium={isPremium}
+            premiumStatus={premiumStatus}
+            onOpenCompatibility={onOpenPurchaseSuccessPreview}
+          />
+        </BottomSheet>
+      ) : null}
     </>
   );
 }

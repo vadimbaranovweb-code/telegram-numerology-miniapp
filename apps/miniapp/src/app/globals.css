@@ -85,3 +85,13 @@ a {
   85%  { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(-6px); }
 }
+
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
