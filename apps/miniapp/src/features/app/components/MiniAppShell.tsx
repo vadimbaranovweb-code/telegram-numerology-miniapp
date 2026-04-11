@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ReadyHomeScreen } from "@/features/app/components/ReadyHomeScreen";
 import { HeroSection } from "@/features/onboarding/components/HeroSection";
 import { NextStepsCard } from "@/features/onboarding/components/NextStepsCard";
@@ -15,6 +16,7 @@ import { GenerationLoadingScreen } from "./GenerationLoadingScreen";
 import { StarField } from "./StarField";
 
 export function MiniAppShell() {
+  const [onboardingStep, setOnboardingStep] = useState<1 | 2>(1);
   const telegramContext = useTelegramWebApp();
   const telegramAuth = useTelegramAuth(telegramContext);
   const { bootstrapState: telegramBootstrap, refreshBootstrap } =
@@ -96,7 +98,7 @@ export function MiniAppShell() {
           <BootstrapScreen />
         ) : (
           <>
-            <HeroSection />
+            <HeroSection compact={bootstrapStatus === "onboarding" && onboardingStep === 2} />
             <TelegramContextCard
               context={telegramContext}
               authState={telegramAuth}
@@ -119,6 +121,7 @@ export function MiniAppShell() {
                   onFullNameChange={setFullName}
                   onDailyOptInChange={setDailyOptIn}
                   onSubmit={handleSubmit}
+                  onStepChange={(s) => setOnboardingStep(s as 1 | 2)}
                 />
               )
             ) : null}

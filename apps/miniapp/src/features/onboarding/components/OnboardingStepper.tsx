@@ -16,6 +16,7 @@ type OnboardingStepperProps = {
   onFullNameChange: (value: string) => void;
   onDailyOptInChange: (value: boolean) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onStepChange?: (step: Step) => void;
 };
 
 type Step = 1 | 2;
@@ -32,6 +33,7 @@ export function OnboardingStepper({
   onFullNameChange,
   onDailyOptInChange,
   onSubmit,
+  onStepChange,
 }: OnboardingStepperProps) {
   const [step, setStep] = useState<Step>(1);
   const [animDir, setAnimDir] = useState<"forward" | "back">("forward");
@@ -39,11 +41,13 @@ export function OnboardingStepper({
   function goNext() {
     setAnimDir("forward");
     setStep(2);
+    onStepChange?.(2);
   }
 
   function goBack() {
     setAnimDir("back");
     setStep(1);
+    onStepChange?.(1);
   }
 
   const animStyle = {
@@ -192,29 +196,21 @@ export function OnboardingStepper({
               </svg>
             </button>
             <p
-              className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+              className="text-[15px] font-bold tracking-tight"
+              style={{ color: "var(--text-primary)" }}
+              suppressHydrationWarning
+            >
+              {t.onboarding.step_date_title}
+            </p>
+            <p
+              className="ml-auto text-[11px] font-semibold uppercase tracking-[0.22em]"
               style={{ color: "var(--text-muted)" }}
             >
               2 / 2
             </p>
           </div>
 
-          <h2
-            className="mt-3 text-[22px] font-bold tracking-tight"
-            style={{ color: "var(--text-primary)" }}
-            suppressHydrationWarning
-          >
-            {t.onboarding.step_date_title}
-          </h2>
-          <p
-            className="mt-1 text-sm leading-6"
-            style={{ color: "var(--text-secondary)" }}
-            suppressHydrationWarning
-          >
-            {t.onboarding.step_date_subtitle}
-          </p>
-
-          <form className="mt-5 space-y-4" onSubmit={onSubmit}>
+          <form className="mt-4 space-y-4" onSubmit={onSubmit}>
             <DrumDatePicker value={birthDate} onChange={onBirthDateChange} />
 
             {/* Daily opt-in */}

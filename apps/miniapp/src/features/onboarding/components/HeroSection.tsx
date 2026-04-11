@@ -1,6 +1,25 @@
 import { t } from "@/i18n";
 
-export function HeroSection() {
+export function HeroSection({ compact = false }: { compact?: boolean }) {
+  if (compact) {
+    return (
+      <div className="flex justify-center pt-3 pb-1">
+        <div
+          className="flex h-10 w-10 items-center justify-center rounded-full"
+          style={{
+            background: "radial-gradient(circle at 40% 35%, rgba(192,132,252,0.22), rgba(123,94,248,0.08))",
+            border: "1px solid rgba(123,94,248,0.35)",
+            boxShadow: "0 0 16px rgba(123,94,248,0.2)",
+          }}
+        >
+          <span className="text-[20px] select-none leading-none" style={{ color: "#C084FC" }}>
+            ✦
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <section className="relative flex flex-col items-center pt-10 pb-2 text-center">
       {/* Background glow */}
