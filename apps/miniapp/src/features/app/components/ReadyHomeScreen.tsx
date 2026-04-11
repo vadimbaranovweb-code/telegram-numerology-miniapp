@@ -10,6 +10,7 @@ import type {
 } from "@/features/app/hooks/useMiniAppBootstrap";
 import { CompatibilityTeaserCard } from "@/features/compatibility/components/CompatibilityTeaserCard";
 import type { CompatibilityUiStage } from "@/features/compatibility/components/CompatibilityTeaserCard";
+import { CompatFlow } from "@/features/compatibility/components/CompatFlow";
 import {
   CompatibilityPreviewResponse,
   RelationshipContext,
@@ -29,7 +30,7 @@ import { BottomSheet } from "./BottomSheet";
 import { GenerationLoadingScreen } from "./GenerationLoadingScreen";
 import { FormEvent } from "react";
 
-type HomeScreen = "hub" | "reading" | "compat";
+type HomeScreen = "hub" | "reading" | "compat" | "compat_flow";
 
 type ReadyHomeScreenProps = {
   profile: TemporaryProfile;
@@ -88,9 +89,8 @@ type ReadyHomeScreenProps = {
 };
 
 function resolveInitialHomeScreen(entrySection: EntrySection): HomeScreen {
-  if (entrySection === "compatibility") return "compat";
-  if (entrySection === "first_reading") return "reading";
-  return "hub";
+  if (entrySection === "compatibility") return "compat_flow";
+  return "reading";
 }
 
 export function ReadyHomeScreen({
@@ -147,8 +147,7 @@ export function ReadyHomeScreen({
 
   function openCompat() {
     setActiveTab("home");
-    setHomeScreen("compat");
-    if (!isCompatibilityExpanded) onExpandCompatibility();
+    setHomeScreen("compat_flow");
   }
 
   function goBackToHub() {
@@ -156,6 +155,42 @@ export function ReadyHomeScreen({
   }
 
   const compatStage = resolveCompatibilityUiStage({ preview: compatibilityPreview, isPremium });
+
+  // Full-screen compat flow — no tab bar, no scroll wrapper
+  if (activeTab === "home" && homeScreen === "compat_flow") {
+    return (
+      <>
+        <div className="px-4 pb-10">
+          <CompatFlow
+            relationshipContext={relationshipContext}
+            targetBirthDate={targetBirthDate}
+            targetDisplayName={targetDisplayName}
+            preview={compatibilityPreview}
+            isPremium={isPremium}
+            isSubmitting={isCompatibilitySubmitting}
+            error={compatibilityError}
+            onRelationshipContextChange={onRelationshipContextChange}
+            onTargetBirthDateChange={onTargetBirthDateChange}
+            onTargetDisplayNameChange={onTargetDisplayNameChange}
+            onSubmit={onCompatibilitySubmit}
+            onUnlock={onCompletePurchase}
+            onClose={goBackToHub}
+          />
+        </div>
+        {/* Purchase success bottom sheet */}
+        {isPurchaseSuccessOpen && compatibilityPreview ? (
+          <BottomSheet onClose={onOpenPurchaseSuccessPreview}>
+            <PurchaseSuccessCard
+              preview={compatibilityPreview}
+              isPremium={isPremium}
+              premiumStatus={premiumStatus}
+              onOpenCompatibility={onOpenPurchaseSuccessPreview}
+            />
+          </BottomSheet>
+        ) : null}
+      </>
+    );
+  }
 
   return (
     <>

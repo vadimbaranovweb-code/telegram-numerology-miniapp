@@ -103,7 +103,7 @@ export function LifePathCard({ value, isRu = false }: LifePathCardProps) {
             className="text-[10px] font-semibold uppercase tracking-[0.2em]"
             style={{ color: "var(--text-muted)" }}
           >
-            Life Path
+            Жизненный путь
           </p>
           {name ? (
             <p

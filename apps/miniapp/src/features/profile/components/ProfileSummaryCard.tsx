@@ -14,10 +14,9 @@ export function ProfileSummaryCard({
   sectionBadge = null,
   sectionState = null,
   sectionDescription = null,
-  sectionAction = null,
   onReset,
 }: ProfileSummaryCardProps) {
-  const resolvedName = profile.display_name?.trim() || "Your profile";
+  const resolvedName = profile.display_name?.trim() || "Профиль";
 
   return (
     <article
@@ -35,7 +34,7 @@ export function ProfileSummaryCard({
               className="text-[11px] font-semibold uppercase tracking-[0.22em]"
               style={{ color: "var(--text-muted)" }}
             >
-              Profile
+              Профиль
             </p>
             {sectionBadge ? (
               <span
@@ -76,7 +75,7 @@ export function ProfileSummaryCard({
             color: "var(--text-secondary)",
           }}
         >
-          Reset
+          Сброс
         </button>
       </div>
 
@@ -92,7 +91,7 @@ export function ProfileSummaryCard({
             className="text-[11px] uppercase tracking-[0.18em]"
             style={{ color: "var(--text-muted)" }}
           >
-            Birth date
+            Дата рождения
           </dt>
           <dd
             className="mt-1 text-base font-semibold"
@@ -112,7 +111,7 @@ export function ProfileSummaryCard({
             className="text-[11px] uppercase tracking-[0.18em]"
             style={{ color: "var(--text-muted)" }}
           >
-            Daily signal
+            Ежедневные инсайты
           </dt>
           <dd
             className="mt-1 text-base font-semibold"
@@ -120,32 +119,15 @@ export function ProfileSummaryCard({
               color: profile.daily_opt_in ? "var(--accent-green)" : "var(--text-secondary)",
             }}
           >
-            {profile.daily_opt_in ? "Enabled" : "Not enabled"}
+            {profile.daily_opt_in ? "Включены" : "Не включены"}
           </dd>
         </div>
       </dl>
 
       <p className="mt-4 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
         {sectionDescription ??
-          "Your saved details shape the reading, daily rhythm, and compatibility flow across the app."}
+          "Твои данные формируют расклад, ежедневный ритм и анализ совместимости."}
       </p>
-      {sectionAction ? (
-        <p
-          className="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em]"
-          style={{ color: "var(--text-muted)" }}
-        >
-          Up next: {formatSectionActionLabel(sectionAction)}
-        </p>
-      ) : null}
     </article>
   );
-}
-
-function formatSectionActionLabel(action: string) {
-  switch (action) {
-    case "review_profile":
-      return "Open your profile";
-    default:
-      return action.replaceAll("_", " ");
-  }
 }
