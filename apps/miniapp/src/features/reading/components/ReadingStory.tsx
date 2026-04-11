@@ -58,10 +58,12 @@ export function ReadingStory({
       />
 
       {/* ── OPEN BLOCK 2: Personality Radar ── */}
-      <PersonalityRadarCard
-        scores={result.personality_scores}
-        aiInsights={ai}
-      />
+      {result.personality_scores && (
+        <PersonalityRadarCard
+          scores={result.personality_scores}
+          aiInsights={ai}
+        />
+      )}
 
       {/* ── OPEN BLOCK 3: Year Cycle ── */}
       <YearCycleCard
@@ -78,13 +80,19 @@ export function ReadingStory({
       />
 
       {/* ── BLURRED: Pythagorean Matrix ── */}
-      <PythagoreanMatrixCard matrix={result.pythagorean_matrix} />
+      {result.pythagorean_matrix && Object.keys(result.pythagorean_matrix).length > 0 && (
+        <PythagoreanMatrixCard matrix={result.pythagorean_matrix} />
+      )}
 
       {/* ── BLURRED: Pinnacles ── */}
-      <PinnaclesCard pinnacles={result.pinnacles} aiInsights={ai} />
+      {result.pinnacles && result.pinnacles.length > 0 && (
+        <PinnaclesCard pinnacles={result.pinnacles} aiInsights={ai} />
+      )}
 
       {/* ── BLURRED: Karmic Lessons ── */}
-      <KarmicLessonsCard karmicLessons={result.karmic_lessons} aiInsights={ai} />
+      {result.karmic_lessons && (
+        <KarmicLessonsCard karmicLessons={result.karmic_lessons} aiInsights={ai} />
+      )}
 
       {/* ── PAYWALL BLOCK ── */}
       {onUnlock && (

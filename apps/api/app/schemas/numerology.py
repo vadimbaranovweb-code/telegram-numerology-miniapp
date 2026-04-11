@@ -62,8 +62,8 @@ class NumerologyCalculationResponse(BaseModel):
     calculation_system: str
     calculation_version: str
     reading_preview: ReadingPreview
-    personality_scores: PersonalityScores
-    pinnacles: list[PinnacleInfo]
-    karmic_lessons: list[int]
-    pythagorean_matrix: dict[int, int]
+    personality_scores: Optional[PersonalityScores] = None
+    pinnacles: list[PinnacleInfo] = Field(default_factory=list)
+    karmic_lessons: list[int] = Field(default_factory=list)
+    pythagorean_matrix: dict[int, int] = Field(default_factory=dict)
     ai_insights: Optional[AiInsights] = None

@@ -32,7 +32,12 @@ def build_first_reading(
         )
 
     if session_state.first_reading is not None and not force_regenerate:
-        return FirstReadingResponse(**session_state.first_reading.model_dump())
+        cached = session_state.first_reading.model_dump()
+        # Force regenerate if cached reading lacks new enriched fields (schema migration)
+        if cached.get("personality_scores") is None:
+            force_regenerate = True
+        else:
+            return FirstReadingResponse(**cached)
 
     app_profile = session_state.app_profile
     birth_date = date.fromisoformat(app_profile.birth_date)

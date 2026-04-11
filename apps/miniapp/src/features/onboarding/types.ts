@@ -38,9 +38,9 @@ export type NumerologyResponse = {
   calculation_system: string;
   calculation_version: string;
   reading_preview: ReadingPreview;
-  personality_scores: PersonalityScores;
+  personality_scores: PersonalityScores | null;
   pinnacles: PinnacleInfo[];
   karmic_lessons: number[];
-  pythagorean_matrix: Record<string, number>;
+  pythagorean_matrix: Record<string, number> | null;
   ai_insights: AiInsights | null;
 };
