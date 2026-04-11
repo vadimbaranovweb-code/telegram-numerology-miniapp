@@ -5,6 +5,10 @@ import { t } from "@/i18n";
 import { DrumDatePicker } from "@/features/onboarding/components/DrumDatePicker";
 import { GenerationLoadingScreen } from "@/features/app/components/GenerationLoadingScreen";
 import { CompatibilityPreviewResponse, RelationshipContext } from "../types";
+import { CompatibilityRingCard } from "./CompatibilityRingCard";
+import { CompatibilityZonesCard } from "./CompatibilityZonesCard";
+import { DestinyTogetherCard } from "./DestinyTogetherCard";
+import { DeepConnectionCard } from "./DeepConnectionCard";
 
 type CompatFlowStep = "type" | "date" | "result";
 
@@ -217,20 +221,10 @@ export function CompatFlow({
   }
 
   // ── Result ──────────────────────────────────────────────────────
-  const cards = preview?.preview.cards ?? [];
-  const VISIBLE_COUNT = 2;
-
-  const COMPAT_ZONES = [
-    { label: "Энергетика", icon: "⚡" },
-    { label: "Коммуникация", icon: "◈" },
-    { label: "Эмоции", icon: "♥" },
-    { label: "Цели", icon: "✦" },
-  ];
-
   return (
     <CompatFlowShell onClose={onClose} showBack backLabel="Главная">
       {/* Header */}
-      <div className="px-1 pt-2">
+      <div className="px-1 pt-2 mb-4">
         <p
           className="text-[11px] font-semibold uppercase tracking-[0.22em]"
           style={{ color: "var(--accent-soft)" }}
@@ -248,126 +242,56 @@ export function CompatFlow({
         </p>
       </div>
 
-      {/* Zones block — blurred if not premium */}
-      <div
-        className="relative mt-4 rounded-2xl overflow-hidden p-4"
-        style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}
-      >
-        {!isPremium && (
-          <div
-            className="absolute inset-0 z-10 rounded-2xl flex items-center justify-center"
-            style={{
-              backdropFilter: "blur(5px)",
-              WebkitBackdropFilter: "blur(5px)",
-              background: "linear-gradient(to bottom, rgba(17,17,40,0.1), rgba(17,17,40,0.75))",
-            }}
-          >
-            <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
-              ✦ Заблокировано
-            </span>
-          </div>
-        )}
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-muted)" }}>
-          Зоны совместимости
-        </p>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          {COMPAT_ZONES.map((zone) => (
-            <div
-              key={zone.label}
-              className="rounded-xl px-3 py-2.5 flex items-center gap-2"
-              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}
-            >
-              <span className="text-sm" style={{ color: "var(--accent-soft)" }}>{zone.icon}</span>
-              <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>{zone.label}</span>
-            </div>
-          ))}
+      {/* Block 1 — Ring + score (always visible) */}
+      {preview && (
+        <CompatibilityRingCard
+          score={preview.compatibility_score}
+          sourceLifePath={preview.source_life_path}
+          targetLifePath={preview.target_life_path}
+          targetName={targetDisplayName}
+          aiInsights={preview.ai_insights}
+        />
+      )}
+
+      {/* Block 2 — Zones (always visible) */}
+      {preview?.zone_scores && (
+        <div className="mt-3">
+          <CompatibilityZonesCard
+            zones={preview.zone_scores}
+            context={relationshipContext}
+          />
         </div>
-      </div>
+      )}
 
-      {/* Cards */}
-      <div className="mt-3 space-y-3">
-        {cards.map((card, index) => {
-          const isBlurred = index >= VISIBLE_COUNT && !isPremium;
-          return (
-            <div
-              key={`${card.type}-${index}`}
-              className="relative rounded-2xl overflow-hidden"
-              style={{
-                background: "var(--bg-surface)",
-                border: `1px solid ${isBlurred ? "rgba(123,94,248,0.2)" : "var(--border-subtle)"}`,
-              }}
-            >
-              {isBlurred && (
-                <div
-                  className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl"
-                  style={{
-                    backdropFilter: "blur(6px)",
-                    WebkitBackdropFilter: "blur(6px)",
-                    background: "linear-gradient(to bottom, rgba(17,17,40,0.25), rgba(17,17,40,0.85))",
-                  }}
-                >
-                  <span
-                    className="text-xs font-semibold uppercase tracking-[0.18em]"
-                    style={{ color: "var(--accent-soft)" }}
-                  >
-                    ✦ Заблокировано
-                  </span>
-                </div>
-              )}
-              <div className="p-4">
-                <p
-                  className="text-[10px] font-semibold uppercase tracking-[0.18em]"
-                  style={{ color: isBlurred ? "var(--accent-soft)" : "var(--text-muted)" }}
-                >
-                  {card.type.replaceAll("_", " ")}
-                </p>
-                <h4
-                  className="mt-2 text-base font-bold leading-tight"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  {card.headline}
-                </h4>
-                <p
-                  className="mt-2 text-sm leading-6"
-                  style={{ color: "var(--text-secondary)", filter: isBlurred ? "blur(3px)" : "none" }}
-                >
-                  {card.body}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* Block 3 — Tension points (blurred) */}
+      {preview && (
+        <div className="mt-3">
+          <TensionCard
+            tensionBody={preview.ai_insights?.tension_body ?? null}
+            onUnlock={handleUnlock}
+          />
+        </div>
+      )}
 
-      {/* Tension block — always blurred preview */}
-      {!isPremium && preview && (
-        <div
-          className="relative mt-3 rounded-2xl overflow-hidden"
-          style={{ background: "var(--bg-surface)", border: "1px solid rgba(123,94,248,0.2)" }}
-        >
-          <div
-            className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl"
-            style={{
-              backdropFilter: "blur(6px)",
-              WebkitBackdropFilter: "blur(6px)",
-              background: "linear-gradient(to bottom, rgba(17,17,40,0.25), rgba(17,17,40,0.85))",
-            }}
-          >
-            <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
-              ✦ Заблокировано
-            </span>
-          </div>
-          <div className="p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-muted)" }}>
-              Точки напряжения
-            </p>
-            <h4 className="mt-2 text-base font-bold leading-tight" style={{ color: "var(--text-primary)" }}>
-              Где могут возникать конфликты
-            </h4>
-            <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)", filter: "blur(3px)" }}>
-              Глубокий анализ зон напряжения и как их преодолевать вместе.
-            </p>
-          </div>
+      {/* Block 4 — Destiny Together (blurred) */}
+      {preview && (
+        <div className="mt-3">
+          <DestinyTogetherCard
+            sourceLifePath={preview.source_life_path}
+            targetLifePath={preview.target_life_path}
+            aiInsights={preview.ai_insights}
+            onUnlock={handleUnlock}
+          />
+        </div>
+      )}
+
+      {/* Block 5 — Deep Connection (blurred) */}
+      {preview && (
+        <div className="mt-3">
+          <DeepConnectionCard
+            aiInsights={preview.ai_insights}
+            onUnlock={handleUnlock}
+          />
         </div>
       )}
 
@@ -433,6 +357,37 @@ export function CompatFlow({
       {/* Spacer for bottom */}
       <div className="h-8" />
     </CompatFlowShell>
+  );
+}
+
+// ── Tension Card (blurred) ─────────────────────────────────────────
+function TensionCard({ tensionBody, onUnlock }: { tensionBody: string | null; onUnlock: () => void }) {
+  return (
+    <div
+      className="rounded-[24px]"
+      style={{ background: "var(--bg-surface)", border: "1px solid rgba(123,94,248,0.2)", boxShadow: "0 12px 40px rgba(0,0,0,0.3)" }}
+    >
+      <div className="flex items-center justify-between px-5 pt-5 pb-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--text-muted)" }}>
+          Точки напряжения
+        </p>
+      </div>
+      <div className="relative px-5 pb-5 overflow-hidden rounded-b-[24px]">
+        <div
+          className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
+          style={{ backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", background: "linear-gradient(to bottom, rgba(17,17,40,0.1), rgba(17,17,40,0.7))" }}
+          onClick={onUnlock}
+        >
+          <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>✦ Нажми чтобы разблокировать</span>
+        </div>
+        <div className="rounded-2xl p-3" style={{ background: "rgba(244,114,182,0.08)", border: "1px solid rgba(244,114,182,0.2)" }}>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#F472B6" }}>⚡ Зоны конфликтов</p>
+          <p className="mt-1.5 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+            {tensionBody ?? "Где могут возникать конфликты и как их преодолевать вместе."}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 

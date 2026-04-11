@@ -19,10 +19,34 @@ export type CompatibilityPaywallPreview = {
   currency: string;
 };
 
+export type CompatibilityZoneScores = {
+  romance: number;
+  communication: number;
+  values: number;
+  dynamics: number;
+  longevity: number;
+};
+
+export type CompatibilityAiInsights = {
+  chemistry_headline: string;
+  chemistry_body: string;
+  destiny_headline: string;
+  destiny_body: string;
+  tension_body: string;
+  deep_connection_body: string;
+  best_periods_body: string;
+  advice: string;
+};
+
 export type CompatibilityPreviewResponse = {
   compatibility_request_id: string;
   preview: CompatibilityPreviewPayload;
   paywall: CompatibilityPaywallPreview;
+  source_life_path: number;
+  target_life_path: number;
+  compatibility_score: number;
+  zone_scores: CompatibilityZoneScores | null;
+  ai_insights: CompatibilityAiInsights | null;
 };
 
 export type TelegramInvoicePrice = {
