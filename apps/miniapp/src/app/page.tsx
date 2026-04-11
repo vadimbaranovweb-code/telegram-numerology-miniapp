@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { MiniAppShell } from "@/features/app/components/MiniAppShell";
 
 export default function Home() {
-  redirect("/wedding");
+  return <MiniAppShell />;
 }
