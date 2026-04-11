@@ -19,10 +19,14 @@ export type Lang = "ru" | "en";
 
 export const lang: Lang = (() => {
   if (typeof window === "undefined") return "en";
+  // 1. Telegram language code (most reliable — set by the user in Telegram)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const code: string =
+  const tgCode: string =
     (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user?.language_code ?? "";
-  return CIS_CODES.has(code.split("-")[0]) ? "ru" : "en";
+  if (tgCode) return CIS_CODES.has(tgCode.split("-")[0]) ? "ru" : "en";
+  // 2. Browser locale fallback (used in local dev / non-Telegram browsers)
+  const navCode = (navigator.language ?? "").split("-")[0].toLowerCase();
+  return CIS_CODES.has(navCode) ? "ru" : "en";
 })();
 
 /** Translation dictionary — use directly: `t.hero.title` */

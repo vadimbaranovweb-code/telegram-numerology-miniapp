@@ -101,6 +101,28 @@ export function TelegramContextCard({
       : null,
   ].filter(Boolean) as Array<{ label: string; value: string }>;
 
+  // In production (non-debug), only show if there's an error
+  if (!isDebugMode && process.env.NODE_ENV === "production") {
+    const hasError = !!(authState.errorMessage || bootstrapState.errorMessage);
+    if (!hasError) return null;
+    return (
+      <div className="space-y-2">
+        {authState.errorMessage ? (
+          <p className="rounded-2xl px-4 py-3 text-sm"
+            style={{ background: "rgba(244,63,94,0.1)", border: "1px solid rgba(244,63,94,0.2)", color: "#FDA4AF" }}>
+            {authState.errorMessage}
+          </p>
+        ) : null}
+        {bootstrapState.errorMessage ? (
+          <p className="rounded-2xl px-4 py-3 text-sm"
+            style={{ background: "rgba(244,63,94,0.1)", border: "1px solid rgba(244,63,94,0.2)", color: "#FDA4AF" }}>
+            {bootstrapState.errorMessage}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <article
       className="rounded-[24px] p-5"
@@ -126,11 +148,6 @@ export function TelegramContextCard({
             : "Running in browser mode."}
         </h2>
         <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-          {context.isAvailable
-            ? "Telegram is available, so the app can restore the user's progress and open the right next step."
-            : "Telegram WebApp was not found, so the app keeps the local MVP flow available outside Telegram."}
-        </p>
-        <p className="text-sm leading-6" style={{ color: "var(--text-muted)" }}>
           {summaryLine}
         </p>
       </div>
