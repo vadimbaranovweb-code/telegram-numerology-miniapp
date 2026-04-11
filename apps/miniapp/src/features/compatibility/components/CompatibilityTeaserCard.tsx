@@ -1,5 +1,8 @@
+"use client";
+
 import { FormEvent } from "react";
 
+import { DrumDatePicker } from "@/features/onboarding/components/DrumDatePicker";
 import {
   CompatibilityPreviewResponse,
   RelationshipContext,
@@ -33,7 +36,11 @@ type CompatibilityTeaserCardProps = {
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };
 
-const CONTEXT_OPTIONS: RelationshipContext[] = ["romantic", "friend", "work"];
+const CONTEXT_OPTIONS: { value: RelationshipContext; label: string; icon: string }[] = [
+  { value: "romantic", label: "Romantic", icon: "♥" },
+  { value: "friend", label: "Friend", icon: "✦" },
+  { value: "work", label: "Work", icon: "◈" },
+];
 
 export function CompatibilityTeaserCard({
   isExpanded,
@@ -69,115 +76,174 @@ export function CompatibilityTeaserCard({
 
   return (
     <article
-      className={
-        isHighlighted
-          ? "rounded-[24px] border border-stone-300 bg-white p-5 shadow-[0_14px_36px_rgba(89,63,31,0.12)] ring-2 ring-stone-200/80"
-          : "rounded-[24px] border border-stone-200 bg-white p-5 shadow-[0_10px_30px_rgba(89,63,31,0.08)]"
-      }
+      className="rounded-[28px] p-6"
+      style={{
+        background: "var(--bg-surface)",
+        border: isHighlighted
+          ? "1px solid var(--border-glow)"
+          : "1px solid var(--border-subtle)",
+        boxShadow: isHighlighted
+          ? "0 18px 45px rgba(0,0,0,0.5), 0 0 60px rgba(123,94,248,0.08)"
+          : "0 10px 30px rgba(0,0,0,0.4)",
+      }}
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">
-        Compatibility
-      </p>
-      {isHighlighted ? (
-        <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
-          In focus
+      {/* Badge row */}
+      <div className="flex flex-wrap items-center gap-2">
+        <p
+          className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+          style={{ color: "var(--accent-soft)" }}
+        >
+          Compatibility
         </p>
-      ) : null}
-      {sectionBadge || sectionState ? (
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          {sectionBadge ? (
-            <span className="rounded-full bg-stone-900 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-50">
-              {sectionBadge}
-            </span>
-          ) : null}
-          {sectionState ? (
-            <span className="rounded-full border border-stone-300 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
-              {sectionState.replaceAll("_", " ")}
-            </span>
-          ) : null}
-        </div>
-      ) : null}
-      <CompatibilityStageHeader
-        stage={stage}
-        sectionDescription={sectionDescription}
-      />
+        {isHighlighted ? (
+          <span
+            className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{
+              background: "rgba(123,94,248,0.15)",
+              color: "var(--accent-primary)",
+            }}
+          >
+            In focus
+          </span>
+        ) : null}
+        {sectionBadge ? (
+          <span
+            className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{
+              background: "var(--bg-elevated)",
+              color: "var(--text-secondary)",
+            }}
+          >
+            {sectionBadge}
+          </span>
+        ) : null}
+        {sectionState ? (
+          <span
+            className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{
+              border: "1px solid var(--border-subtle)",
+              color: "var(--text-muted)",
+            }}
+          >
+            {sectionState.replaceAll("_", " ")}
+          </span>
+        ) : null}
+      </div>
 
+      <CompatibilityStageHeader stage={stage} sectionDescription={sectionDescription} />
+
+      {/* Expand button (collapsed input state) */}
       {!isExpanded && !hasPreviewStage ? (
         <button
           type="button"
           onClick={onExpand}
-          className="mt-5 w-full rounded-2xl bg-stone-950 px-4 py-3 text-sm font-semibold text-stone-50 transition hover:bg-stone-800"
+          className="mt-5 w-full rounded-2xl py-3.5 text-sm font-semibold transition active:scale-[0.98]"
+          style={{ background: "var(--grad-cta)", color: "#fff" }}
         >
           {expandButtonLabel}
         </button>
       ) : null}
 
+      {/* Input form (expanded) */}
       {isExpanded ? (
-        <form className="mt-5 space-y-4" onSubmit={onSubmit}>
+        <form className="mt-5 space-y-5" onSubmit={onSubmit}>
+          {/* Relationship context pills */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700" htmlFor="relationshipContext">
-              Context
-            </label>
-            <select
-              id="relationshipContext"
-              value={relationshipContext}
-              onChange={(event) =>
-                onRelationshipContextChange(event.target.value as RelationshipContext)
-              }
-              className="w-full rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-amber-500"
+            <label
+              className="text-xs font-semibold uppercase tracking-[0.18em]"
+              style={{ color: "var(--text-muted)" }}
             >
-              {CONTEXT_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+              Relationship type
+            </label>
+            <div className="flex gap-2">
+              {CONTEXT_OPTIONS.map((opt) => {
+                const isActive = relationshipContext === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => onRelationshipContextChange(opt.value)}
+                    className="flex flex-1 flex-col items-center gap-1 rounded-2xl py-3 text-xs font-semibold transition"
+                    style={{
+                      background: isActive
+                        ? "rgba(123,94,248,0.18)"
+                        : "var(--bg-elevated)",
+                      border: isActive
+                        ? "1px solid var(--border-glow)"
+                        : "1px solid var(--border-subtle)",
+                      color: isActive ? "var(--accent-soft)" : "var(--text-secondary)",
+                    }}
+                  >
+                    <span style={{ fontSize: 18 }}>{opt.icon}</span>
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
+          {/* Birth date drum picker */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700" htmlFor="targetBirthDate">
+            <label
+              className="text-xs font-semibold uppercase tracking-[0.18em]"
+              style={{ color: "var(--text-muted)" }}
+            >
               Their birth date
             </label>
-            <input
-              id="targetBirthDate"
-              type="date"
+            <DrumDatePicker
               value={targetBirthDate}
-              onChange={(event) => onTargetBirthDateChange(event.target.value)}
-              className="w-full rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-amber-500"
-              required
+              onChange={onTargetBirthDateChange}
             />
           </div>
 
+          {/* Name input */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700" htmlFor="targetDisplayName">
+            <label
+              className="text-xs font-semibold uppercase tracking-[0.18em]"
+              style={{ color: "var(--text-muted)" }}
+            >
               Their name
             </label>
             <input
-              id="targetDisplayName"
               type="text"
               placeholder="Optional"
               value={targetDisplayName}
-              onChange={(event) => onTargetDisplayNameChange(event.target.value)}
-              className="w-full rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-amber-500"
+              onChange={(e) => onTargetDisplayNameChange(e.target.value)}
+              className="w-full rounded-2xl px-4 py-3 text-sm outline-none transition"
+              style={{
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border-subtle)",
+                color: "var(--text-primary)",
+              }}
             />
           </div>
 
           <button
             type="submit"
             disabled={!targetBirthDate || isSubmitting}
-            className="w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-2xl py-3.5 text-sm font-semibold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ background: "var(--grad-cta)", color: "#fff" }}
           >
             {isSubmitting ? "Generating..." : submitButtonLabel}
           </button>
         </form>
       ) : null}
 
+      {/* Error */}
       {error ? (
-        <p className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <p
+          className="mt-4 rounded-2xl px-4 py-3 text-sm"
+          style={{
+            background: "rgba(244,114,182,0.08)",
+            border: "1px solid rgba(244,114,182,0.25)",
+            color: "var(--accent-rose)",
+          }}
+        >
           {error}
         </p>
       ) : null}
 
+      {/* Preview */}
       {preview ? (
         <CompatibilityPreviewCard
           stage={stage}
@@ -200,11 +266,45 @@ function CompatibilityStageHeader({
   const content = resolveCompatibilityStageHeader(stage, sectionDescription);
 
   return (
-    <div className="mt-3 space-y-2">
-      <h3 className="text-2xl font-semibold tracking-tight text-stone-950">
+    <div className="mt-4 space-y-2">
+      {/* Orbits illustration for input stage */}
+      {stage === "input" ? <OrbitsIllustration /> : null}
+      <h3
+        className="text-[22px] font-bold tracking-tight"
+        style={{ color: "var(--text-primary)" }}
+      >
         {content.title}
       </h3>
-      <p className="text-sm leading-6 text-stone-600">{content.description}</p>
+      <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+        {content.description}
+      </p>
+    </div>
+  );
+}
+
+function OrbitsIllustration() {
+  return (
+    <div className="flex justify-center py-3">
+      <svg
+        width="96"
+        height="48"
+        viewBox="0 0 96 48"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Left orb */}
+        <circle cx="30" cy="24" r="22" stroke="rgba(123,94,248,0.5)" strokeWidth="1.5" />
+        <circle cx="30" cy="24" r="14" stroke="rgba(123,94,248,0.25)" strokeWidth="1" />
+        <circle cx="30" cy="24" r="5" fill="rgba(123,94,248,0.7)" />
+        {/* Right orb */}
+        <circle cx="66" cy="24" r="22" stroke="rgba(192,132,252,0.5)" strokeWidth="1.5" />
+        <circle cx="66" cy="24" r="14" stroke="rgba(192,132,252,0.25)" strokeWidth="1" />
+        <circle cx="66" cy="24" r="5" fill="rgba(192,132,252,0.7)" />
+        {/* Connection line */}
+        <line x1="35" y1="24" x2="61" y2="24" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="3 3" />
+        {/* Center glow */}
+        <circle cx="48" cy="24" r="3" fill="rgba(255,255,255,0.3)" />
+      </svg>
     </div>
   );
 }
@@ -226,15 +326,28 @@ function CompatibilityPreviewCard({
     : null;
 
   return (
-    <div className="mt-5 space-y-3">
-      <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+    <div className="mt-6 space-y-3">
+      {/* Preview header card */}
+      <div
+        className="rounded-2xl p-4"
+        style={{
+          background: "var(--bg-elevated)",
+          border: "1px solid var(--border-subtle)",
+        }}
+      >
+        <p
+          className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+          style={{ color: isPremiumStage ? "var(--accent-green)" : "var(--accent-soft)" }}
+        >
           {isPremiumStage ? "Saved compatibility" : "Preview"}
         </p>
-        <h4 className="mt-2 text-xl font-semibold tracking-tight text-stone-950">
+        <h4
+          className="mt-2 text-lg font-bold tracking-tight"
+          style={{ color: "var(--text-primary)" }}
+        >
           {preview.preview.title}
         </h4>
-        <p className="mt-2 text-sm leading-6 text-stone-600">
+        <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
           {isPremiumStage
             ? "Your saved compatibility preview is still the active return point, and premium access is now available for the next layer of this flow."
             : preview.preview.summary}
@@ -244,14 +357,26 @@ function CompatibilityPreviewCard({
       <CompatibilityPreviewBody stage={stage} preview={preview} />
 
       {premiumContinuation ? (
-        <div className="rounded-2xl border border-emerald-200 bg-[linear-gradient(135deg,#eef9f1_0%,#e0f4e6_100%)] p-4 text-stone-950">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+        <div
+          className="rounded-2xl p-4"
+          style={{
+            background: "rgba(52,211,153,0.05)",
+            border: "1px solid rgba(52,211,153,0.2)",
+          }}
+        >
+          <p
+            className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+            style={{ color: "var(--accent-green)" }}
+          >
             Premium continuation
           </p>
-          <h5 className="mt-2 text-lg font-semibold tracking-tight">
+          <h5
+            className="mt-2 text-base font-bold tracking-tight"
+            style={{ color: "var(--text-primary)" }}
+          >
             The next compatibility layer is now open.
           </h5>
-          <p className="mt-2 text-sm leading-6 text-stone-700">
+          <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
             This temporary premium layer keeps the flow moving until the fuller
             compatibility result is implemented.
           </p>
@@ -260,15 +385,27 @@ function CompatibilityPreviewCard({
             {premiumContinuation.map((item) => (
               <div
                 key={item.title}
-                className="rounded-2xl border border-emerald-200/80 bg-white/80 p-4"
+                className="rounded-2xl p-4"
+                style={{
+                  background: "var(--bg-elevated)",
+                  border: "1px solid rgba(52,211,153,0.15)",
+                }}
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                <p
+                  className="text-[11px] font-semibold uppercase tracking-[0.16em]"
+                  style={{ color: "var(--accent-green)" }}
+                >
                   {item.eyebrow}
                 </p>
-                <h6 className="mt-2 text-base font-semibold text-stone-950">
+                <h6
+                  className="mt-2 text-base font-semibold"
+                  style={{ color: "var(--text-primary)" }}
+                >
                   {item.title}
                 </h6>
-                <p className="mt-2 text-sm leading-6 text-stone-700">{item.body}</p>
+                <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+                  {item.body}
+                </p>
               </div>
             ))}
           </div>
@@ -276,14 +413,26 @@ function CompatibilityPreviewCard({
       ) : null}
 
       {isPremiumStage ? (
-        <div className="rounded-2xl border border-emerald-200/80 bg-white/80 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+        <div
+          className="rounded-2xl p-4"
+          style={{
+            background: "rgba(52,211,153,0.05)",
+            border: "1px solid rgba(52,211,153,0.15)",
+          }}
+        >
+          <p
+            className="text-[11px] font-semibold uppercase tracking-[0.16em]"
+            style={{ color: "var(--accent-green)" }}
+          >
             Premium path
           </p>
-          <h5 className="mt-2 text-lg font-semibold tracking-tight text-stone-950">
+          <h5
+            className="mt-2 text-base font-bold"
+            style={{ color: "var(--text-primary)" }}
+          >
             This saved match now has an active premium continuation.
           </h5>
-          <p className="mt-2 text-sm leading-6 text-stone-700">
+          <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
             The current temporary flow keeps this preview, its context, and the
             unlocked layer together so the next compatibility iteration can build
             on one consistent return point.
@@ -315,61 +464,131 @@ function CompatibilityPreviewBody({
   const lockedDepthCard = preview.preview.cards.find(
     (card) => card.type === "locked_depth",
   );
+  const isLastCardLocked = !isPremiumStage;
 
   return (
     <div className="space-y-3">
       {isPremiumStage ? (
-        <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+        <div
+          className="rounded-2xl p-4"
+          style={{
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--border-subtle)",
+          }}
+        >
+          <p
+            className="text-[11px] font-semibold uppercase tracking-[0.16em]"
+            style={{ color: "var(--text-muted)" }}
+          >
             Visible layer
           </p>
-          <p className="mt-2 text-sm leading-6 text-stone-600">
+          <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
             These are the first compatibility signals that were visible before the
             premium unlock.
           </p>
         </div>
       ) : null}
 
-      {visibleCards.map((card, index) => (
-        <div
-          key={`${card.type}-${index}`}
-          className={
-            !isPremiumStage && index === preview.preview.cards.length - 1
-              ? "rounded-2xl border border-dashed border-stone-300 bg-stone-100/80 p-4 opacity-80"
-              : "rounded-2xl border border-stone-200 bg-stone-50 p-4"
-          }
-        >
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
-            {card.type.replace("_", " ")}
-          </p>
-          <h5 className="mt-2 text-lg font-semibold text-stone-950">
-            {card.headline}
-          </h5>
-          <p className="mt-2 text-sm leading-6 text-stone-600">{card.body}</p>
-        </div>
-      ))}
+      {visibleCards.map((card, index) => {
+        const isLastVisible = !isPremiumStage && index === visibleCards.length - 1;
+        return (
+          <div
+            key={`${card.type}-${index}`}
+            className="relative rounded-2xl p-4 overflow-hidden"
+            style={{
+              background: "var(--bg-elevated)",
+              border: `1px solid ${isLastVisible ? "rgba(123,94,248,0.2)" : "var(--border-subtle)"}`,
+            }}
+          >
+            {/* Blur-lock overlay on last card */}
+            {isLastVisible && isLastCardLocked ? (
+              <div
+                className="absolute inset-0 z-10 flex flex-col items-center justify-end rounded-2xl pb-4"
+                style={{
+                  background:
+                    "linear-gradient(to bottom, transparent 0%, rgba(17,17,40,0.7) 40%, rgba(17,17,40,0.95) 100%)",
+                  backdropFilter: "blur(2px)",
+                  WebkitBackdropFilter: "blur(2px)",
+                }}
+              >
+                <span
+                  className="text-xs font-semibold uppercase tracking-[0.18em]"
+                  style={{ color: "var(--accent-soft)" }}
+                >
+                  ✦ Unlock to reveal
+                </span>
+              </div>
+            ) : null}
+            <p
+              className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+              style={{ color: isLastVisible ? "var(--accent-soft)" : "var(--text-muted)" }}
+            >
+              {card.type.replace("_", " ")}
+            </p>
+            <h5
+              className="mt-2 text-base font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {card.headline}
+            </h5>
+            <p
+              className="mt-2 text-sm leading-6"
+              style={{
+                color: "var(--text-secondary)",
+                filter: isLastVisible ? "blur(3px)" : "none",
+              }}
+            >
+              {card.body}
+            </p>
+          </div>
+        );
+      })}
 
       {isPremiumStage && lockedDepthCard ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+        <div
+          className="rounded-2xl p-4"
+          style={{
+            background: "rgba(52,211,153,0.05)",
+            border: "1px solid rgba(52,211,153,0.2)",
+          }}
+        >
+          <p
+            className="text-[11px] font-semibold uppercase tracking-[0.16em]"
+            style={{ color: "var(--accent-green)" }}
+          >
             Unlocked layer
           </p>
-          <h5 className="mt-2 text-lg font-semibold text-stone-950">
+          <h5
+            className="mt-2 text-base font-bold"
+            style={{ color: "var(--text-primary)" }}
+          >
             Premium access is active for the deeper layer
           </h5>
-          <p className="mt-2 text-sm leading-6 text-stone-700">
+          <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
             This session has already unlocked premium, so the next iteration of
             this flow can open the deeper compatibility read without asking for
             unlock again.
           </p>
-          <div className="mt-3 rounded-2xl border border-emerald-200/80 bg-white/70 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+          <div
+            className="mt-3 rounded-2xl p-4"
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid rgba(52,211,153,0.15)",
+            }}
+          >
+            <p
+              className="text-[11px] font-semibold uppercase tracking-[0.16em]"
+              style={{ color: "var(--accent-green)" }}
+            >
               Coming next
             </p>
-            <h6 className="mt-2 text-base font-semibold text-stone-950">
+            <h6
+              className="mt-2 text-base font-semibold"
+              style={{ color: "var(--text-primary)" }}
+            >
               {lockedDepthCard.headline}
             </h6>
-            <p className="mt-2 text-sm leading-6 text-stone-700">
+            <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
               {lockedDepthCard.body}
             </p>
           </div>
@@ -392,19 +611,40 @@ function CompatibilityFooterCard({
 }) {
   if (stage === "preview_premium") {
     return (
-      <div className="rounded-2xl border border-emerald-900 bg-emerald-950 p-4 text-emerald-50">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
+      <div
+        className="rounded-2xl p-4"
+        style={{
+          background: "rgba(52,211,153,0.08)",
+          border: "1px solid rgba(52,211,153,0.3)",
+        }}
+      >
+        <p
+          className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+          style={{ color: "var(--accent-green)" }}
+        >
           Premium active
         </p>
-        <p className="mt-2 text-sm leading-6 text-emerald-100">
+        <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
           Your premium access is already active for this session, and this saved
           compatibility preview remains the current continuation point.
         </p>
-        <div className="mt-4 rounded-2xl border border-emerald-700/70 bg-emerald-900/60 p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-200">
+        <div
+          className="mt-4 rounded-2xl p-4"
+          style={{
+            background: "var(--bg-elevated)",
+            border: "1px solid rgba(52,211,153,0.15)",
+          }}
+        >
+          <p
+            className="text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{ color: "var(--text-muted)" }}
+          >
             Status
           </p>
-          <p className="mt-1 text-sm font-medium text-emerald-50">
+          <p
+            className="mt-1 text-sm font-semibold"
+            style={{ color: "var(--accent-green)" }}
+          >
             {premiumStatus ?? "premium"}
           </p>
         </div>
@@ -413,18 +653,31 @@ function CompatibilityFooterCard({
   }
 
   return (
-    <div className="rounded-2xl border border-stone-900 bg-stone-950 p-4 text-stone-50">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-300">
+    <div
+      className="rounded-2xl p-5"
+      style={{
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border-glow)",
+      }}
+    >
+      <p
+        className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+        style={{ color: "var(--accent-soft)" }}
+      >
         Full reading
       </p>
-      <p className="mt-2 text-sm leading-6 text-stone-200">
+      <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
         Unlock the full compatibility reading with deeper cards for{" "}
-        {preview.paywall.price_local} {preview.paywall.currency}.
+        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+          ⭐ {preview.paywall.price_local} Stars
+        </span>
+        .
       </p>
       <button
         type="button"
         onClick={onOpenPaywall}
-        className="mt-4 w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-200"
+        className="mt-4 w-full rounded-2xl py-3.5 text-sm font-semibold transition active:scale-[0.98]"
+        style={{ background: "var(--grad-cta)", color: "#fff" }}
       >
         Unlock full compatibility
       </button>
@@ -490,9 +743,9 @@ function resolveCompatibilityStageHeader(
   }
 
   return {
-    title: "See how your dynamic feels with another person.",
+    title: "See how your energy connects.",
     description:
       sectionDescription ??
-      "Start with a quick preview to see the first compatibility signals before you unlock the full reading.",
+      "Enter their birth date for a quick preview of the first compatibility signals.",
   };
 }

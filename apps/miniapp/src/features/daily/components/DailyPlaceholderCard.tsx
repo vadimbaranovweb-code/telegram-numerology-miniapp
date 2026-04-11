@@ -55,42 +55,87 @@ export function DailyPlaceholderCard({
 
   return (
     <article
-      className={
-        isHighlighted
-          ? "rounded-[24px] border border-amber-400 bg-[linear-gradient(135deg,#fff4d8_0%,#f7ecd4_100%)] p-5 shadow-[0_14px_36px_rgba(120,83,29,0.16)] ring-2 ring-amber-200/80"
-          : "rounded-[24px] border border-amber-200/80 bg-[linear-gradient(135deg,#fff4d8_0%,#f7ecd4_100%)] p-5 shadow-[0_10px_30px_rgba(120,83,29,0.10)]"
-      }
+      className="rounded-[28px] p-6"
+      style={{
+        background: "var(--bg-surface)",
+        border: isHighlighted
+          ? "1px solid rgba(96,165,250,0.4)"
+          : "1px solid rgba(96,165,250,0.15)",
+        boxShadow: isHighlighted
+          ? "0 14px 36px rgba(0,0,0,0.4), 0 0 40px rgba(96,165,250,0.06)"
+          : "0 10px 30px rgba(0,0,0,0.35)",
+      }}
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-800">
-        Today
-      </p>
-      {isHighlighted ? (
-        <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
-          In focus
+      {/* Header row */}
+      <div className="flex flex-wrap items-center gap-2">
+        <p
+          className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+          style={{ color: "var(--accent-blue)" }}
+        >
+          Today
         </p>
-      ) : null}
-      {sectionBadge || sectionState ? (
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          {sectionBadge ? (
-            <span className="rounded-full bg-amber-900 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-50">
-              {sectionBadge}
-            </span>
-          ) : null}
-          {sectionState ? (
-            <span className="rounded-full border border-amber-400/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-800">
-              {sectionState.replaceAll("_", " ")}
-            </span>
-          ) : null}
-        </div>
-      ) : null}
-      <div className="mt-3 space-y-2">
-        <h3 className="text-xl font-semibold tracking-tight text-stone-950">
+        {isHighlighted ? (
+          <span
+            className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{
+              background: "rgba(96,165,250,0.12)",
+              color: "var(--accent-blue)",
+            }}
+          >
+            In focus
+          </span>
+        ) : null}
+        {sectionBadge ? (
+          <span
+            className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{
+              background: "var(--bg-elevated)",
+              color: "var(--text-secondary)",
+            }}
+          >
+            {sectionBadge}
+          </span>
+        ) : null}
+        {sectionState ? (
+          <span
+            className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{
+              border: "1px solid var(--border-subtle)",
+              color: "var(--text-muted)",
+            }}
+          >
+            {sectionState.replaceAll("_", " ")}
+          </span>
+        ) : null}
+      </div>
+
+      {/* Content */}
+      <div className="mt-4 space-y-2">
+        <h3
+          className="text-xl font-bold tracking-tight"
+          style={{ color: "var(--text-primary)" }}
+        >
           {title}
         </h3>
-        <p className="text-sm leading-6 text-stone-700">{body}</p>
+        <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+          {body}
+        </p>
       </div>
-      <div className="mt-4 rounded-2xl border border-amber-300/70 bg-white/60 px-4 py-3 text-sm text-stone-700">
-        {footer}
+
+      {/* Footer hint */}
+      <div
+        className="mt-5 rounded-2xl px-4 py-3 text-sm"
+        style={{
+          background: "var(--bg-elevated)",
+          border: "1px solid rgba(96,165,250,0.12)",
+          color: "var(--text-muted)",
+        }}
+      >
+        {isLoading ? (
+          <span style={{ color: "var(--accent-blue)" }}>{footer}</span>
+        ) : (
+          footer
+        )}
       </div>
     </article>
   );
