@@ -110,9 +110,8 @@ export const RU: Translations = {
     action_open: "Пересмотреть расклад",
   },
   nav: {
-    home: "Расклад",
-    today: "Сегодня",
-    compat: "Связь",
+    home: "Главная",
+    explore: "Обзор",
     profile: "Профиль",
   },
 };

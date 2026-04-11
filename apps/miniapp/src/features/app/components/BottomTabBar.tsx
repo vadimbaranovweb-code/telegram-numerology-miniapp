@@ -2,7 +2,7 @@
 
 import { t } from "@/i18n";
 
-export type TabId = "home" | "today" | "compat" | "profile";
+export type TabId = "home" | "explore" | "profile";
 
 type BottomTabBarProps = {
   activeTab: TabId;
@@ -15,27 +15,18 @@ const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
     label: t.nav.home,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2l2.4 7.2H22l-6.2 4.5 2.4 7.3L12 17.1l-6.2 4 2.4-7.3L2 9.2h7.6L12 2z" />
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
+        <path d="M9 21V12h6v9" />
       </svg>
     ),
   },
   {
-    id: "today",
-    label: t.nav.today,
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-      </svg>
-    ),
-  },
-  {
-    id: "compat",
-    label: t.nav.compat,
+    id: "explore",
+    label: t.nav.explore,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="9" cy="12" r="5" />
-        <circle cx="15" cy="12" r="5" />
+        <circle cx="12" cy="12" r="9" />
+        <path d="M16.24 7.76l-4.24 2.12-2.12 4.24 4.24-2.12 2.12-4.24z" />
       </svg>
     ),
   },

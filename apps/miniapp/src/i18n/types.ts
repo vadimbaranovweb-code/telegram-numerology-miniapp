@@ -99,8 +99,7 @@ export type Translations = {
   };
   nav: {
     home: string;
-    today: string;
-    compat: string;
+    explore: string;
     profile: string;
   };
 };

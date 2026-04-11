@@ -110,9 +110,8 @@ export const EN: Translations = {
     action_open: "Revisit your reading",
   },
   nav: {
-    home: "Reading",
-    today: "Today",
-    compat: "Connect",
+    home: "Home",
+    explore: "Explore",
     profile: "Profile",
   },
 };

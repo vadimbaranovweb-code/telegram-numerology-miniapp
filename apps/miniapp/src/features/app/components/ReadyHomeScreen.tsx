@@ -24,11 +24,13 @@ import { ReadingStory } from "@/features/reading/components/ReadingStory";
 import { ReadingPreview } from "@/features/reading/types";
 import { PremiumPaywallCard } from "@/features/premium/components/PremiumPaywallCard";
 import { PurchaseSuccessCard } from "@/features/premium/components/PurchaseSuccessCard";
+import { PersonalYearCard } from "@/features/reading/components/PersonalYearCard";
 import { BottomTabBar, TabId } from "./BottomTabBar";
 import { BottomSheet } from "./BottomSheet";
 import { GenerationLoadingScreen } from "./GenerationLoadingScreen";
-import { PersonalYearCard } from "@/features/reading/components/PersonalYearCard";
 import { FormEvent } from "react";
+
+type HomeScreen = "hub" | "reading" | "compat";
 
 type ReadyHomeScreenProps = {
   profile: TemporaryProfile;
@@ -86,46 +88,21 @@ type ReadyHomeScreenProps = {
   onResetProfile: () => void | Promise<void>;
 };
 
-/** Maps tab id → the section keys it contains */
-const TAB_SECTIONS: Record<TabId, string[]> = {
-  home: ["overview", "reading"],
-  today: ["today"],
-  compat: ["compatibility"],
-  profile: ["profile"],
-};
-
-/** Maps section key → tab */
-const SECTION_TAB: Record<string, TabId> = {
-  overview: "home",
-  reading: "home",
-  today: "today",
-  compatibility: "compat",
-  profile: "profile",
-};
-
-function resolveInitialTab(entrySection: EntrySection): TabId {
-  return SECTION_TAB[entrySection] ?? "home";
+function resolveInitialHomeScreen(entrySection: EntrySection): HomeScreen {
+  if (entrySection === "compatibility") return "compat";
+  if (entrySection === "first_reading") return "reading";
+  return "hub";
 }
 
 export function ReadyHomeScreen({
   profile,
   result,
   readingPreview,
-  homeHeadline,
-  homeSupportingText,
-  homeNextStep,
-  appStateSource,
-  restorationMode,
-  resumePoint,
-  availableSections,
-  sectionOrder,
-  homeFocus,
   entrySection,
   sectionBadges,
   sectionDescriptions,
   sectionStates,
   sectionActions,
-  primaryAction,
   todayState,
   dailyInsight,
   isDailyLoading,
@@ -151,118 +128,107 @@ export function ReadyHomeScreen({
   onCompatibilitySubmit,
   onResetProfile,
 }: ReadyHomeScreenProps) {
-  const [activeTab, setActiveTab] = useState<TabId>(() =>
-    resolveInitialTab(entrySection),
+  const [activeTab, setActiveTab] = useState<TabId>("home");
+  const [homeScreen, setHomeScreen] = useState<HomeScreen>(() =>
+    resolveInitialHomeScreen(entrySection),
   );
 
-  // When paywall/success is open, force compat tab so context is correct
   function handleTabChange(tab: TabId) {
     setActiveTab(tab);
-    if (tab === "compat" && !isCompatibilityExpanded) {
-      onExpandCompatibility();
+    if (tab === "home") {
+      // returning to home tab → show hub (not sub-screen)
+      setHomeScreen("hub");
     }
   }
 
-  // Sections visible in the current tab
-  const orderedSections = sectionOrder.filter((s) =>
-    availableSections.includes(s),
-  );
-  const visibleSections = orderedSections.filter(
-    (s) => TAB_SECTIONS[activeTab]?.includes(s),
-  );
+  function openReading() {
+    setActiveTab("home");
+    setHomeScreen("reading");
+  }
+
+  function openCompat() {
+    setActiveTab("home");
+    setHomeScreen("compat");
+    if (!isCompatibilityExpanded) onExpandCompatibility();
+  }
+
+  function goBackToHub() {
+    setHomeScreen("hub");
+  }
 
   const compatStage = resolveCompatibilityUiStage({ preview: compatibilityPreview, isPremium });
 
   return (
     <>
-      {/* Scrollable tab content with bottom padding for tab bar */}
+      {/* Scrollable content with bottom padding for tab bar */}
       <div className="grid gap-3 pb-24">
-        {activeTab === "home" && (
-          <>
-            <HomeSectionIntro
-              headline={homeHeadline}
-              supportingText={homeSupportingText}
-              nextStep={homeNextStep}
-              appStateSource={appStateSource}
-              restorationMode={restorationMode}
-              resumePoint={resumePoint}
-              availableSections={availableSections}
-              sectionOrder={sectionOrder}
-              homeFocus={homeFocus}
-              entrySection={entrySection}
-              sectionBadges={sectionBadges}
-              sectionDescriptions={sectionDescriptions}
-              sectionStates={sectionStates}
-              sectionActions={sectionActions}
-              onTabChange={handleTabChange}
-            />
-            <PersonalYearCard
-              personalYear={result.personal_year_number}
-              personalMonth={result.personal_month_number}
-            />
 
-            {visibleSections.includes("reading") && (
-              <>
-                <ReadingStory
-                  preview={readingPreview}
-                  lifePathNumber={result.life_path_number}
-                  sectionBadge={sectionBadges.reading ?? null}
-                  sectionState={sectionStates.reading ?? null}
-                  sectionDescription={sectionDescriptions.reading ?? null}
-                  sectionAction={sectionActions.reading ?? null}
-                />
-                <ReadingNumbersGrid
-                  result={result}
-                  displayName={profile.display_name ?? undefined}
-                />
-              </>
+        {/* ── HOME TAB ── */}
+        {activeTab === "home" && homeScreen === "hub" && (
+          <HomeHub
+            profile={profile}
+            result={result}
+            hasCompatibilityPreview={!!compatibilityPreview}
+            onOpenReading={openReading}
+            onOpenCompat={openCompat}
+          />
+        )}
+
+        {activeTab === "home" && homeScreen === "reading" && (
+          <>
+            <ScreenBackButton label="Главная" onBack={goBackToHub} />
+            <ReadingStory
+              preview={readingPreview}
+              lifePathNumber={result.life_path_number}
+              sectionBadge={sectionBadges.reading ?? null}
+              sectionState={sectionStates.reading ?? null}
+              sectionDescription={sectionDescriptions.reading ?? null}
+              sectionAction={sectionActions.reading ?? null}
+            />
+            <ReadingNumbersGrid
+              result={result}
+              displayName={profile.display_name ?? undefined}
+            />
+          </>
+        )}
+
+        {activeTab === "home" && homeScreen === "compat" && (
+          <>
+            <ScreenBackButton label="Главная" onBack={goBackToHub} />
+            {isCompatibilitySubmitting ? (
+              <GenerationLoadingScreen />
+            ) : (
+              <CompatibilityTeaserCard
+                isExpanded={isCompatibilityExpanded}
+                sectionBadge={sectionBadges.compatibility ?? null}
+                sectionState={sectionStates.compatibility ?? null}
+                sectionDescription={sectionDescriptions.compatibility ?? null}
+                sectionAction={sectionActions.compatibility ?? null}
+                stage={compatStage}
+                relationshipContext={relationshipContext}
+                targetBirthDate={targetBirthDate}
+                targetDisplayName={targetDisplayName}
+                preview={compatibilityPreview}
+                premiumStatus={premiumStatus}
+                isSubmitting={isCompatibilitySubmitting}
+                error={compatibilityError}
+                onExpand={onExpandCompatibility}
+                onOpenPaywall={onOpenPaywall}
+                onRelationshipContextChange={onRelationshipContextChange}
+                onTargetBirthDateChange={onTargetBirthDateChange}
+                onTargetDisplayNameChange={onTargetDisplayNameChange}
+                onSubmit={onCompatibilitySubmit}
+              />
             )}
           </>
         )}
 
-        {activeTab === "today" && (
-          <DailyPlaceholderCard
-            dailyOptIn={profile.daily_opt_in}
-            todayState={todayState}
-            isHighlighted={homeFocus === "today"}
-            sectionBadge={sectionBadges.today ?? null}
-            sectionState={sectionStates.today ?? null}
-            sectionDescription={sectionDescriptions.today ?? null}
-            sectionAction={sectionActions.today ?? null}
-            dailyInsight={dailyInsight}
-            isLoading={isDailyLoading}
-          />
+        {/* ── EXPLORE TAB ── */}
+        {activeTab === "explore" && (
+          <ExploreScreen />
         )}
 
-        {activeTab === "compat" && isCompatibilitySubmitting && (
-          <GenerationLoadingScreen />
-        )}
-
-        {activeTab === "compat" && !isCompatibilitySubmitting && (
-          <CompatibilityTeaserCard
-            isExpanded={isCompatibilityExpanded}
-            isHighlighted={homeFocus === "compatibility"}
-            sectionBadge={sectionBadges.compatibility ?? null}
-            sectionState={sectionStates.compatibility ?? null}
-            sectionDescription={sectionDescriptions.compatibility ?? null}
-            sectionAction={sectionActions.compatibility ?? null}
-            stage={compatStage}
-            relationshipContext={relationshipContext}
-            targetBirthDate={targetBirthDate}
-            targetDisplayName={targetDisplayName}
-            preview={compatibilityPreview}
-            premiumStatus={premiumStatus}
-            isSubmitting={isCompatibilitySubmitting}
-            error={compatibilityError}
-            onExpand={onExpandCompatibility}
-            onOpenPaywall={onOpenPaywall}
-            onRelationshipContextChange={onRelationshipContextChange}
-            onTargetBirthDateChange={onTargetBirthDateChange}
-            onTargetDisplayNameChange={onTargetDisplayNameChange}
-            onSubmit={onCompatibilitySubmit}
-          />
-        )}
-
+        {/* ── PROFILE TAB ── */}
         {activeTab === "profile" && (
           <ProfileSummaryCard
             profile={profile}
@@ -305,6 +271,8 @@ export function ReadyHomeScreen({
   );
 }
 
+// ─── Sub-components ────────────────────────────────────────────────
+
 function resolveCompatibilityUiStage({
   preview,
   isPremium,
@@ -317,67 +285,191 @@ function resolveCompatibilityUiStage({
   return "preview_locked";
 }
 
-function HomeSectionIntro({
-  headline,
-  supportingText,
-  nextStep,
-  appStateSource,
-  restorationMode,
-  resumePoint,
-  availableSections,
-  sectionOrder,
-  homeFocus,
-  entrySection,
-  sectionBadges,
-  sectionDescriptions,
-  sectionStates,
-  sectionActions,
-  onTabChange,
-}: {
-  headline: string | null;
-  supportingText: string | null;
-  nextStep: string | null;
-  appStateSource: AppStateSource;
-  restorationMode:
-    | "empty"
-    | "restored_profile"
-    | "restored_reading"
-    | "restored_home"
-    | null;
-  resumePoint:
-    | "onboarding"
-    | "first_reading"
-    | "today"
-    | "compatibility_preview"
-    | "home"
-    | null;
-  availableSections: string[];
-  sectionOrder: string[];
-  homeFocus: HomeFocus;
-  entrySection: EntrySection;
-  sectionBadges: Record<string, string>;
-  sectionDescriptions: Record<string, string>;
-  sectionStates: Record<string, string>;
-  sectionActions: Record<string, string>;
-  onTabChange: (tab: TabId) => void;
-}) {
-  const debugLines = [
-    appStateSource ? `Source: ${appStateSource.replaceAll("_", " ")}` : null,
-    restorationMode
-      ? `Restore mode: ${restorationMode.replaceAll("_", " ")}`
-      : null,
-    `Entry: ${entrySection.replaceAll("_", " ")}`,
-    `Focus: ${homeFocus}${resumePoint ? ` from ${resumePoint.replaceAll("_", " ")}` : ""}`,
-    availableSections.length > 0
-      ? `Sections: ${availableSections.join(" → ")}`
-      : null,
-    sectionOrder.length > 0 ? `Flow: ${sectionOrder.join(" → ")}` : null,
-  ].filter(Boolean) as string[];
-
-  // Section badges that belong to other tabs (shown as quick-nav pills)
-  const otherTabBadges = Object.entries(sectionBadges).filter(
-    ([section]) => !TAB_SECTIONS.home.includes(section),
+/** Back button shown at top of reading/compat sub-screens */
+function ScreenBackButton({ label, onBack }: { label: string; onBack: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onBack}
+      className="flex items-center gap-2 py-1 transition active:opacity-60"
+      style={{ color: "var(--text-muted)", background: "none", border: "none" }}
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+      <span className="text-sm font-medium">{label}</span>
+    </button>
   );
+}
+
+/** Home hub with banner cards */
+function HomeHub({
+  profile,
+  result,
+  hasCompatibilityPreview,
+  onOpenReading,
+  onOpenCompat,
+}: {
+  profile: TemporaryProfile;
+  result: NumerologyResponse;
+  hasCompatibilityPreview: boolean;
+  onOpenReading: () => void;
+  onOpenCompat: () => void;
+}) {
+  const name = profile.display_name ? `, ${profile.display_name.split(" ")[0]}` : "";
+
+  return (
+    <>
+      {/* Greeting */}
+      <div className="px-1 pt-1">
+        <h1
+          className="text-[22px] font-bold tracking-tight"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Привет{name} 👋
+        </h1>
+        <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+          Что хочешь исследовать сегодня?
+        </p>
+      </div>
+
+      {/* Personal year card */}
+      <PersonalYearCard
+        personalYear={result.personal_year_number}
+        personalMonth={result.personal_month_number}
+      />
+
+      {/* Banner cards */}
+      <HomeBanner
+        icon="✦"
+        accentColor="#7B5EF8"
+        title="Нумерология"
+        subtitle={`Жизненный путь · ${result.life_path_number}`}
+        badge="Готово"
+        onClick={onOpenReading}
+      />
+      <HomeBanner
+        icon="♥"
+        accentColor="#F472B6"
+        title="Совместимость"
+        subtitle={hasCompatibilityPreview ? "Превью готово" : "Проверь энергии с партнёром"}
+        badge={hasCompatibilityPreview ? "Превью" : undefined}
+        onClick={onOpenCompat}
+      />
+      <HomeBanner
+        icon="★"
+        accentColor="#60A5FA"
+        title="Гороскоп"
+        subtitle="Персональный астрологический расклад"
+        badge="Скоро"
+        disabled
+        onClick={() => {}}
+      />
+    </>
+  );
+}
+
+function HomeBanner({
+  icon,
+  accentColor,
+  title,
+  subtitle,
+  badge,
+  disabled = false,
+  onClick,
+}: {
+  icon: string;
+  accentColor: string;
+  title: string;
+  subtitle: string;
+  badge?: string;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="w-full rounded-[24px] p-5 text-left transition active:scale-[0.98]"
+      style={{
+        background: "var(--bg-surface)",
+        border: `1px solid ${disabled ? "var(--border-subtle)" : "var(--border-subtle)"}`,
+        boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+        opacity: disabled ? 0.55 : 1,
+        cursor: disabled ? "default" : "pointer",
+      }}
+    >
+      <div className="flex items-center gap-4">
+        {/* Icon orb */}
+        <div
+          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-xl"
+          style={{
+            background: `${accentColor}18`,
+            border: `1px solid ${accentColor}30`,
+            color: accentColor,
+          }}
+        >
+          {icon}
+        </div>
+
+        {/* Text */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p
+              className="text-[15px] font-semibold leading-tight"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {title}
+            </p>
+            {badge && (
+              <span
+                className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em]"
+                style={{
+                  background: disabled ? "var(--bg-elevated)" : `${accentColor}20`,
+                  color: disabled ? "var(--text-muted)" : accentColor,
+                }}
+              >
+                {badge}
+              </span>
+            )}
+          </div>
+          <p
+            className="mt-0.5 text-xs leading-5 truncate"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {subtitle}
+          </p>
+        </div>
+
+        {/* Arrow */}
+        {!disabled && (
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ color: "var(--text-muted)", flexShrink: 0 }}
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        )}
+      </div>
+    </button>
+  );
+}
+
+/** Explore tab placeholder */
+function ExploreScreen() {
+  const articles = [
+    { icon: "✦", title: "Что такое число жизненного пути?", tag: "Основы" },
+    { icon: "◈", title: "Мастер-числа 11, 22, 33 — в чём особенность?", tag: "Нумерология" },
+    { icon: "♥", title: "Совместимость по числам: мифы и реальность", tag: "Совместимость" },
+  ];
 
   return (
     <article
@@ -392,122 +484,52 @@ function HomeSectionIntro({
         className="text-[11px] font-semibold uppercase tracking-[0.22em]"
         style={{ color: "var(--text-muted)" }}
       >
-        Overview
+        Статьи · скоро
       </p>
-      <div className="mt-3 space-y-2">
-        <h2
-          className="text-2xl font-bold tracking-tight"
-          style={{ color: "var(--text-primary)" }}
-        >
-          {headline ?? "Your reading is ready."}
-        </h2>
-        <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-          {supportingText ??
-            "Explore your core numbers below, or navigate with the tabs."}
-        </p>
-        {nextStep ? (
-          <p
-            className="text-[11px] font-semibold uppercase tracking-[0.18em]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Up next: {nextStep}
-          </p>
-        ) : null}
-      </div>
+      <h2
+        className="mt-3 text-[20px] font-bold tracking-tight"
+        style={{ color: "var(--text-primary)" }}
+      >
+        Обзор
+      </h2>
+      <p className="mt-1 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+        Здесь появятся статьи и материалы по нумерологии.
+      </p>
 
-      {/* Quick-nav pills to other tabs that have badges */}
-      {otherTabBadges.length > 0 ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {otherTabBadges.map(([section, badge]) => {
-            const targetTab = SECTION_TAB[section];
-            if (!targetTab) return null;
-            const isFocused = homeFocus === section;
-            return (
-              <button
-                key={section}
-                type="button"
-                onClick={() => onTabChange(targetTab)}
-                className="rounded-2xl px-3 py-2 text-left transition active:scale-[0.97]"
-                style={{
-                  background: isFocused
-                    ? "rgba(123,94,248,0.12)"
-                    : "var(--bg-elevated)",
-                  border: isFocused
-                    ? "1px solid var(--accent-primary)"
-                    : "1px solid var(--border-subtle)",
-                }}
+      <ul className="mt-5 space-y-3">
+        {articles.map((a) => (
+          <li
+            key={a.title}
+            className="flex items-start gap-3 rounded-2xl px-4 py-3"
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--border-subtle)",
+              opacity: 0.55,
+            }}
+          >
+            <span
+              className="mt-0.5 text-base flex-shrink-0"
+              style={{ color: "var(--accent-soft)" }}
+            >
+              {a.icon}
+            </span>
+            <div>
+              <p
+                className="text-[10px] font-semibold uppercase tracking-[0.14em]"
+                style={{ color: "var(--text-muted)" }}
               >
-                <p
-                  className="text-[11px] font-semibold uppercase tracking-[0.14em]"
-                  style={{
-                    color: isFocused
-                      ? "var(--accent-soft)"
-                      : "var(--text-secondary)",
-                  }}
-                >
-                  {formatSectionLabel(section)}: {badge}
-                </p>
-                {isFocused ? (
-                  <p
-                    className="mt-0.5 text-[10px] uppercase tracking-[0.12em]"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    In focus
-                  </p>
-                ) : null}
-                {sectionDescriptions[section] ? (
-                  <p className="mt-1 text-xs leading-5" style={{ color: "var(--text-muted)" }}>
-                    {sectionDescriptions[section]}
-                  </p>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
-
-      {process.env.NODE_ENV !== "production" && debugLines.length > 0 ? (
-        <details
-          className="mt-4 rounded-2xl px-4 py-3 text-sm"
-          style={{
-            background: "var(--bg-elevated)",
-            border: "1px solid var(--border-subtle)",
-          }}
-        >
-          <summary
-            className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.18em]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Home state
-          </summary>
-          <div className="mt-3 space-y-1">
-            {debugLines.map((line) => (
-              <p key={line} className="text-xs leading-5" style={{ color: "var(--text-muted)" }}>
-                {line}
+                {a.tag}
               </p>
-            ))}
-          </div>
-        </details>
-      ) : null}
+              <p
+                className="mt-0.5 text-sm font-medium leading-5"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {a.title}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
     </article>
   );
-}
-
-function formatSectionLabel(section: string) {
-  switch (section) {
-    case "overview":
-      return "Overview";
-    case "profile":
-      return "Profile";
-    case "reading":
-      return "Reading";
-    case "today":
-      return "Today";
-    case "compatibility":
-      return "Compatibility";
-    default:
-      return section
-        .replaceAll("_", " ")
-        .replace(/\b\w/g, (letter) => letter.toUpperCase());
-  }
 }
