@@ -22,7 +22,6 @@ import { ProfileSummaryCard } from "@/features/profile/components/ProfileSummary
 import { ReadingNumbersGrid } from "@/features/reading/components/ReadingNumbersGrid";
 import { ReadingStory } from "@/features/reading/components/ReadingStory";
 import { ReadingPreview } from "@/features/reading/types";
-import { PremiumPaywallCard } from "@/features/premium/components/PremiumPaywallCard";
 import { PurchaseSuccessCard } from "@/features/premium/components/PurchaseSuccessCard";
 import { PersonalYearCard } from "@/features/reading/components/PersonalYearCard";
 import { BottomTabBar, TabId } from "./BottomTabBar";
@@ -214,7 +213,7 @@ export function ReadyHomeScreen({
                 isSubmitting={isCompatibilitySubmitting}
                 error={compatibilityError}
                 onExpand={onExpandCompatibility}
-                onOpenPaywall={onOpenPaywall}
+                onOpenPaywall={onCompletePurchase}
                 onRelationshipContextChange={onRelationshipContextChange}
                 onTargetBirthDateChange={onTargetBirthDateChange}
                 onTargetDisplayNameChange={onTargetDisplayNameChange}
@@ -263,19 +262,6 @@ export function ReadyHomeScreen({
       )}
 
       <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} />
-
-      {/* Paywall bottom sheet */}
-      {isPaywallOpen && compatibilityPreview ? (
-        <BottomSheet onClose={onClosePaywall}>
-          <PremiumPaywallCard
-            preview={compatibilityPreview}
-            isPremium={isPremium}
-            premiumStatus={premiumStatus}
-            onContinue={onCompletePurchase}
-            onBack={onClosePaywall}
-          />
-        </BottomSheet>
-      ) : null}
 
       {/* Purchase success bottom sheet */}
       {isPurchaseSuccessOpen && compatibilityPreview ? (

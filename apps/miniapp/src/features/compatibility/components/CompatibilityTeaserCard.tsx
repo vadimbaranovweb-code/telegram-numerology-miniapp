@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { t } from "@/i18n";
 
 import { DrumDatePicker } from "@/features/onboarding/components/DrumDatePicker";
@@ -622,6 +622,8 @@ function CompatibilityFooterCard({
   premiumStatus: "free" | "premium" | null;
   onOpenPaywall: () => void;
 }) {
+  const [isUnlocking, setIsUnlocking] = useState(false);
+
   if (stage === "preview_premium") {
     return (
       <div
@@ -634,68 +636,97 @@ function CompatibilityFooterCard({
         <p
           className="text-[11px] font-semibold uppercase tracking-[0.18em]"
           style={{ color: "var(--accent-green)" }}
+          suppressHydrationWarning
         >
-          Premium active
+          {t.paywall.premium_label}
         </p>
-        <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-          Your premium access is already active for this session, and this saved
-          compatibility preview remains the current continuation point.
+        <p className="mt-2 text-sm font-semibold" style={{ color: "var(--accent-green)" }}>
+          {premiumStatus ?? "premium"}
         </p>
-        <div
-          className="mt-4 rounded-2xl p-4"
-          style={{
-            background: "var(--bg-elevated)",
-            border: "1px solid rgba(52,211,153,0.15)",
-          }}
-        >
-          <p
-            className="text-[10px] font-semibold uppercase tracking-[0.14em]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Status
-          </p>
-          <p
-            className="mt-1 text-sm font-semibold"
-            style={{ color: "var(--accent-green)" }}
-          >
-            {premiumStatus ?? "premium"}
-          </p>
-        </div>
+        <p className="mt-1 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+          Полный расклад совместимости открыт в этой сессии.
+        </p>
       </div>
     );
   }
 
+  async function handleUnlock() {
+    setIsUnlocking(true);
+    try {
+      await onOpenPaywall();
+    } finally {
+      setIsUnlocking(false);
+    }
+  }
+
   return (
     <div
-      className="rounded-2xl p-5"
+      className="rounded-[20px] p-5"
       style={{
-        background: "var(--bg-elevated)",
+        background: "var(--bg-surface)",
         border: "1px solid var(--border-glow)",
+        boxShadow: "0 0 40px rgba(123,94,248,0.08)",
       }}
     >
       <p
-        className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+        className="text-[11px] font-semibold uppercase tracking-[0.22em]"
         style={{ color: "var(--accent-soft)" }}
         suppressHydrationWarning
       >
-        {t.compatibility.full_reading}
+        {t.paywall.label}
       </p>
-      <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-        Unlock the full compatibility reading with deeper cards for{" "}
-        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-          ⭐ {preview.paywall.price_local} {t.paywall.stars}
-        </span>
-        .
-      </p>
-      <button
-        type="button"
-        onClick={onOpenPaywall}
-        className="mt-4 w-full rounded-2xl py-3.5 text-sm font-semibold transition active:scale-[0.98]"
-        style={{ background: "var(--grad-cta)", color: "#fff" }}
+      <h4
+        className="mt-2 text-[20px] font-bold tracking-tight"
+        style={{ color: "var(--text-primary)" }}
         suppressHydrationWarning
       >
-        {t.compatibility.unlock_cta}
+        {t.paywall.title}
+      </h4>
+
+      {/* Benefits */}
+      <ul className="mt-4 space-y-2">
+        {t.paywall.benefits.map((b) => (
+          <li key={b} className="flex items-start gap-2.5">
+            <span style={{ color: "var(--accent-primary)", marginTop: 1, flexShrink: 0 }}>✦</span>
+            <span className="text-sm leading-6" style={{ color: "var(--text-secondary)" }} suppressHydrationWarning>
+              {b}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {/* Price */}
+      <div
+        className="mt-4 flex items-baseline gap-2 rounded-2xl px-4 py-3"
+        style={{ background: "var(--bg-elevated)", border: "1px solid rgba(123,94,248,0.2)" }}
+      >
+        <span className="text-[28px] font-bold" style={{ color: "var(--text-primary)" }}>
+          ⭐ {preview.paywall.price_local ?? 350}
+        </span>
+        <span className="text-sm" style={{ color: "var(--text-muted)" }} suppressHydrationWarning>
+          {t.paywall.stars} · {t.paywall.one_time}
+        </span>
+      </div>
+
+      {/* CTA — opens Telegram Stars native modal directly */}
+      <button
+        type="button"
+        onClick={handleUnlock}
+        disabled={isUnlocking}
+        className="mt-4 w-full rounded-2xl py-3.5 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-60"
+        style={{ background: "var(--grad-cta)" }}
+        suppressHydrationWarning
+      >
+        {isUnlocking ? "Открываем оплату..." : t.compatibility.unlock_cta}
       </button>
+
+      <p
+        className="mt-3 text-center text-xs"
+        style={{ color: "var(--text-muted)" }}
+        suppressHydrationWarning
+      >
+        {t.paywall.footer}
+      </p>
     </div>
   );
 }
