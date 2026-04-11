@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import type {
   AppStateSource,
   EntrySection,
@@ -20,10 +22,10 @@ import { ProfileSummaryCard } from "@/features/profile/components/ProfileSummary
 import { ReadingNumbersGrid } from "@/features/reading/components/ReadingNumbersGrid";
 import { ReadingStory } from "@/features/reading/components/ReadingStory";
 import { ReadingPreview } from "@/features/reading/types";
-import type { ReactNode } from "react";
-import { FormEvent, useRef } from "react";
 import { PremiumPaywallCard } from "@/features/premium/components/PremiumPaywallCard";
 import { PurchaseSuccessCard } from "@/features/premium/components/PurchaseSuccessCard";
+import { BottomTabBar, TabId } from "./BottomTabBar";
+import { FormEvent } from "react";
 
 type ReadyHomeScreenProps = {
   profile: TemporaryProfile;
@@ -81,6 +83,27 @@ type ReadyHomeScreenProps = {
   onResetProfile: () => void | Promise<void>;
 };
 
+/** Maps tab id → the section keys it contains */
+const TAB_SECTIONS: Record<TabId, string[]> = {
+  home: ["overview", "reading"],
+  today: ["today"],
+  compat: ["compatibility"],
+  profile: ["profile"],
+};
+
+/** Maps section key → tab */
+const SECTION_TAB: Record<string, TabId> = {
+  overview: "home",
+  reading: "home",
+  today: "today",
+  compatibility: "compat",
+  profile: "profile",
+};
+
+function resolveInitialTab(entrySection: EntrySection): TabId {
+  return SECTION_TAB[entrySection] ?? "home";
+}
+
 export function ReadyHomeScreen({
   profile,
   result,
@@ -125,163 +148,32 @@ export function ReadyHomeScreen({
   onCompatibilitySubmit,
   onResetProfile,
 }: ReadyHomeScreenProps) {
-  const orderedSections = sectionOrder.filter((section) =>
-    availableSections.includes(section),
+  const [activeTab, setActiveTab] = useState<TabId>(() =>
+    resolveInitialTab(entrySection),
   );
-  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const primaryHomeAction = resolvePrimaryHomeAction({
-    primaryAction,
-    entrySection,
-    sectionOrder: orderedSections,
-    sectionActions,
-  });
-  const sectionActionMap = buildSectionActionMap({
-    sectionOrder: orderedSections,
-    sectionActions,
-  });
 
-  function scrollToSection(section: string) {
-    sectionRefs.current[section]?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }
-
-  function handleResolvedAction(action: { section: string; action: string } | null) {
-    if (!action) {
-      return;
-    }
-
-    if (
-      action.action === "open_compatibility" ||
-      action.action === "continue_compatibility"
-    ) {
+  // When paywall/success is open, force compat tab so context is correct
+  function handleTabChange(tab: TabId) {
+    setActiveTab(tab);
+    if (tab === "compat" && !isCompatibilityExpanded) {
       onExpandCompatibility();
-      window.setTimeout(() => {
-        scrollToSection(action.section);
-      }, 120);
-      return;
     }
-
-    scrollToSection(action.section);
   }
 
-  function handlePrimaryHomeAction() {
-    handleResolvedAction(primaryHomeAction);
-  }
+  // Sections visible in the current tab
+  const orderedSections = sectionOrder.filter((s) =>
+    availableSections.includes(s),
+  );
+  const visibleSections = orderedSections.filter(
+    (s) => TAB_SECTIONS[activeTab]?.includes(s),
+  );
 
-  const sectionContent: Record<string, React.ReactNode> = {
-    overview: (
-      <HomeSectionIntro
-        headline={homeHeadline}
-        supportingText={homeSupportingText}
-        nextStep={homeNextStep}
-        appStateSource={appStateSource}
-        restorationMode={restorationMode}
-        resumePoint={resumePoint}
-        availableSections={availableSections}
-        sectionOrder={sectionOrder}
-        homeFocus={homeFocus}
-        entrySection={entrySection}
-        sectionBadges={sectionBadges}
-        sectionDescriptions={sectionDescriptions}
-        sectionStates={sectionStates}
-        sectionActions={sectionActions}
-        primaryActionLabel={primaryHomeAction?.label ?? null}
-        onPrimaryAction={handlePrimaryHomeAction}
-        onSectionAction={handleResolvedAction}
-        sectionActionMap={sectionActionMap}
-      />
-    ),
-    profile: (
-      <ProfileSummaryCard
-        profile={profile}
-        sectionBadge={sectionBadges.profile ?? null}
-        sectionState={sectionStates.profile ?? null}
-        sectionDescription={sectionDescriptions.profile ?? null}
-        sectionAction={sectionActions.profile ?? null}
-        onReset={onResetProfile}
-      />
-    ),
-    reading: (
+  const compatStage = resolveCompatibilityUiStage({ preview: compatibilityPreview, isPremium });
+
+  // Full-screen overlays take priority over tab content
+  if (isPaywallOpen && compatibilityPreview) {
+    return (
       <>
-        <ReadingStory
-          preview={readingPreview}
-          lifePathNumber={result.life_path_number}
-          sectionBadge={sectionBadges.reading ?? null}
-          sectionState={sectionStates.reading ?? null}
-          sectionDescription={sectionDescriptions.reading ?? null}
-          sectionAction={sectionActions.reading ?? null}
-        />
-        <ReadingNumbersGrid result={result} displayName={profile.display_name ?? undefined} />
-      </>
-    ),
-    today: (
-      <DailyPlaceholderCard
-        dailyOptIn={profile.daily_opt_in}
-        todayState={todayState}
-        isHighlighted={homeFocus === "today"}
-        sectionBadge={sectionBadges.today ?? null}
-        sectionState={sectionStates.today ?? null}
-        sectionDescription={sectionDescriptions.today ?? null}
-        sectionAction={sectionActions.today ?? null}
-        dailyInsight={dailyInsight}
-        isLoading={isDailyLoading}
-      />
-    ),
-    compatibility: (
-      <CompatibilityTeaserCard
-        isExpanded={isCompatibilityExpanded}
-        isHighlighted={homeFocus === "compatibility"}
-        sectionBadge={sectionBadges.compatibility ?? null}
-        sectionState={sectionStates.compatibility ?? null}
-        sectionDescription={sectionDescriptions.compatibility ?? null}
-        sectionAction={sectionActions.compatibility ?? null}
-        stage={resolveCompatibilityUiStage({
-          preview: compatibilityPreview,
-          isPremium,
-        })}
-        relationshipContext={relationshipContext}
-        targetBirthDate={targetBirthDate}
-        targetDisplayName={targetDisplayName}
-        preview={compatibilityPreview}
-        premiumStatus={premiumStatus}
-        isSubmitting={isCompatibilitySubmitting}
-        error={compatibilityError}
-        onExpand={onExpandCompatibility}
-        onOpenPaywall={onOpenPaywall}
-        onRelationshipContextChange={onRelationshipContextChange}
-        onTargetBirthDateChange={onTargetBirthDateChange}
-        onTargetDisplayNameChange={onTargetDisplayNameChange}
-        onSubmit={onCompatibilitySubmit}
-      />
-    ),
-  } satisfies Record<string, ReactNode>;
-
-  return (
-    <section className="grid gap-3">
-      {orderedSections.map((section) => (
-        <div
-          key={section}
-          ref={(node) => {
-            sectionRefs.current[section] = node;
-          }}
-        >
-          {section !== "overview" ? (
-            <SectionMetadataHeader
-              section={section}
-              badge={sectionBadges[section] ?? null}
-              state={sectionStates[section] ?? null}
-              description={sectionDescriptions[section] ?? null}
-              action={sectionActions[section] ?? null}
-              actionLabel={sectionActionMap[section]?.label ?? null}
-              onAction={() => handleResolvedAction(sectionActionMap[section] ?? null)}
-            />
-          ) : null}
-          {sectionContent[section]}
-        </div>
-      ))}
-      {isPaywallOpen && compatibilityPreview ? (
         <PremiumPaywallCard
           preview={compatibilityPreview}
           isPremium={isPremium}
@@ -289,16 +181,120 @@ export function ReadyHomeScreen({
           onContinue={onCompletePurchase}
           onBack={onClosePaywall}
         />
-      ) : null}
-      {isPurchaseSuccessOpen && compatibilityPreview ? (
+        <BottomTabBar activeTab="compat" onTabChange={handleTabChange} />
+      </>
+    );
+  }
+
+  if (isPurchaseSuccessOpen && compatibilityPreview) {
+    return (
+      <>
         <PurchaseSuccessCard
           preview={compatibilityPreview}
           isPremium={isPremium}
           premiumStatus={premiumStatus}
           onOpenCompatibility={onOpenPurchaseSuccessPreview}
         />
-      ) : null}
-    </section>
+        <BottomTabBar activeTab="compat" onTabChange={handleTabChange} />
+      </>
+    );
+  }
+
+  return (
+    <>
+      {/* Scrollable tab content with bottom padding for tab bar */}
+      <div className="grid gap-3 pb-24">
+        {activeTab === "home" && (
+          <>
+            <HomeSectionIntro
+              headline={homeHeadline}
+              supportingText={homeSupportingText}
+              nextStep={homeNextStep}
+              appStateSource={appStateSource}
+              restorationMode={restorationMode}
+              resumePoint={resumePoint}
+              availableSections={availableSections}
+              sectionOrder={sectionOrder}
+              homeFocus={homeFocus}
+              entrySection={entrySection}
+              sectionBadges={sectionBadges}
+              sectionDescriptions={sectionDescriptions}
+              sectionStates={sectionStates}
+              sectionActions={sectionActions}
+              onTabChange={handleTabChange}
+            />
+            {visibleSections.includes("reading") && (
+              <>
+                <ReadingStory
+                  preview={readingPreview}
+                  lifePathNumber={result.life_path_number}
+                  sectionBadge={sectionBadges.reading ?? null}
+                  sectionState={sectionStates.reading ?? null}
+                  sectionDescription={sectionDescriptions.reading ?? null}
+                  sectionAction={sectionActions.reading ?? null}
+                />
+                <ReadingNumbersGrid
+                  result={result}
+                  displayName={profile.display_name ?? undefined}
+                />
+              </>
+            )}
+          </>
+        )}
+
+        {activeTab === "today" && (
+          <DailyPlaceholderCard
+            dailyOptIn={profile.daily_opt_in}
+            todayState={todayState}
+            isHighlighted={homeFocus === "today"}
+            sectionBadge={sectionBadges.today ?? null}
+            sectionState={sectionStates.today ?? null}
+            sectionDescription={sectionDescriptions.today ?? null}
+            sectionAction={sectionActions.today ?? null}
+            dailyInsight={dailyInsight}
+            isLoading={isDailyLoading}
+          />
+        )}
+
+        {activeTab === "compat" && (
+          <CompatibilityTeaserCard
+            isExpanded={isCompatibilityExpanded}
+            isHighlighted={homeFocus === "compatibility"}
+            sectionBadge={sectionBadges.compatibility ?? null}
+            sectionState={sectionStates.compatibility ?? null}
+            sectionDescription={sectionDescriptions.compatibility ?? null}
+            sectionAction={sectionActions.compatibility ?? null}
+            stage={compatStage}
+            relationshipContext={relationshipContext}
+            targetBirthDate={targetBirthDate}
+            targetDisplayName={targetDisplayName}
+            preview={compatibilityPreview}
+            premiumStatus={premiumStatus}
+            isSubmitting={isCompatibilitySubmitting}
+            error={compatibilityError}
+            onExpand={onExpandCompatibility}
+            onOpenPaywall={onOpenPaywall}
+            onRelationshipContextChange={onRelationshipContextChange}
+            onTargetBirthDateChange={onTargetBirthDateChange}
+            onTargetDisplayNameChange={onTargetDisplayNameChange}
+            onSubmit={onCompatibilitySubmit}
+          />
+        )}
+
+        {activeTab === "profile" && (
+          <ProfileSummaryCard
+            profile={profile}
+            sectionBadge={sectionBadges.profile ?? null}
+            sectionState={sectionStates.profile ?? null}
+            sectionDescription={sectionDescriptions.profile ?? null}
+            sectionAction={sectionActions.profile ?? null}
+            onReset={onResetProfile}
+          />
+        )}
+      </div>
+
+      <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} />
+    </>
   );
 }
 
@@ -309,128 +305,9 @@ function resolveCompatibilityUiStage({
   preview: CompatibilityPreviewResponse | null;
   isPremium: boolean;
 }): CompatibilityUiStage {
-  if (!preview) {
-    return "input";
-  }
-
-  if (isPremium) {
-    return "preview_premium";
-  }
-
+  if (!preview) return "input";
+  if (isPremium) return "preview_premium";
   return "preview_locked";
-}
-
-function SectionMetadataHeader({
-  section,
-  badge,
-  state,
-  description,
-  action,
-  actionLabel,
-  onAction,
-}: {
-  section: string;
-  badge: string | null;
-  state: string | null;
-  description: string | null;
-  action: string | null;
-  actionLabel: string | null;
-  onAction: () => void;
-}) {
-  if (!badge && !state && !description && !action) {
-    return null;
-  }
-
-  const toneClassName = getSectionMetadataTone(state);
-
-  return (
-    <div
-      className="mb-2 rounded-2xl px-4 py-3"
-      style={{
-        background: "var(--bg-surface)",
-        border: "1px solid var(--border-subtle)",
-      }}
-    >
-      <div className="flex flex-wrap items-center gap-2">
-        <p
-          className="text-[11px] font-semibold uppercase tracking-[0.16em]"
-          style={{ color: "var(--text-muted)" }}
-        >
-          {formatSectionLabel(section)}
-        </p>
-        {badge ? (
-          <span
-            className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white"
-            style={{ background: "var(--accent-primary)" }}
-          >
-            {badge}
-          </span>
-        ) : null}
-        {state ? (
-          <span
-            className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
-            style={{
-              border: "1px solid var(--border-subtle)",
-              color: "var(--text-muted)",
-            }}
-          >
-            {state.replaceAll("_", " ")}
-          </span>
-        ) : null}
-      </div>
-      {description ? (
-        <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-          {description}
-        </p>
-      ) : null}
-      {action ? (
-        <div className="mt-2 flex flex-wrap items-center gap-3">
-          <p
-            className="text-[11px] font-semibold uppercase tracking-[0.14em]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Next: {formatPrimaryActionLabel(action)}
-          </p>
-          {actionLabel ? (
-            <button
-              type="button"
-              onClick={onAction}
-              className="text-[11px] font-semibold uppercase tracking-[0.14em] transition"
-              style={{ color: "var(--accent-soft)" }}
-            >
-              {actionLabel}
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function getSectionMetadataTone(state: string | null) {
-  switch (state) {
-    case "previewed":
-      return "border border-amber-200/80 bg-amber-50/70";
-    case "ready":
-      return "border border-emerald-200/80 bg-emerald-50/60";
-    case "saved":
-      return "border border-stone-200/80 bg-white/70";
-    default:
-      return "border border-stone-200/80 bg-white/70";
-  }
-}
-
-function getOverviewMetadataTone(state: string | null) {
-  switch (state) {
-    case "previewed":
-      return "border border-amber-200/80 bg-amber-50";
-    case "ready":
-      return "border border-emerald-200/80 bg-emerald-50";
-    case "saved":
-      return "border border-stone-200 bg-stone-50";
-    default:
-      return "border border-stone-200 bg-stone-50";
-  }
 }
 
 function HomeSectionIntro({
@@ -448,10 +325,7 @@ function HomeSectionIntro({
   sectionDescriptions,
   sectionStates,
   sectionActions,
-  primaryActionLabel,
-  onPrimaryAction,
-  onSectionAction,
-  sectionActionMap,
+  onTabChange,
 }: {
   headline: string | null;
   supportingText: string | null;
@@ -478,10 +352,7 @@ function HomeSectionIntro({
   sectionDescriptions: Record<string, string>;
   sectionStates: Record<string, string>;
   sectionActions: Record<string, string>;
-  primaryActionLabel: string | null;
-  onPrimaryAction: () => void;
-  onSectionAction: (action: { section: string; action: string } | null) => void;
-  sectionActionMap: Record<string, { section: string; action: string; label: string }>;
+  onTabChange: (tab: TabId) => void;
 }) {
   const debugLines = [
     appStateSource ? `Source: ${appStateSource.replaceAll("_", " ")}` : null,
@@ -489,19 +360,17 @@ function HomeSectionIntro({
       ? `Restore mode: ${restorationMode.replaceAll("_", " ")}`
       : null,
     `Entry: ${entrySection.replaceAll("_", " ")}`,
-    `Focus area: ${homeFocus}${resumePoint ? ` from ${resumePoint.replaceAll("_", " ")}` : ""}`,
+    `Focus: ${homeFocus}${resumePoint ? ` from ${resumePoint.replaceAll("_", " ")}` : ""}`,
     availableSections.length > 0
-      ? `Sections: ${availableSections.join(" -> ")}`
+      ? `Sections: ${availableSections.join(" → ")}`
       : null,
-    sectionOrder.length > 0 ? `Flow order: ${sectionOrder.join(" -> ")}` : null,
+    sectionOrder.length > 0 ? `Flow: ${sectionOrder.join(" → ")}` : null,
   ].filter(Boolean) as string[];
-  const resolvedNextStep = nextStep
-    ? formatNextStepLabel(nextStep)
-    : primaryActionLabel;
-  const orderedSectionMetadata = [
-    ...sectionOrder.filter((section) => section in sectionBadges),
-    ...Object.keys(sectionBadges).filter((section) => !sectionOrder.includes(section)),
-  ];
+
+  // Section badges that belong to other tabs (shown as quick-nav pills)
+  const otherTabBadges = Object.entries(sectionBadges).filter(
+    ([section]) => !TAB_SECTIONS.home.includes(section),
+  );
 
   return (
     <article
@@ -523,76 +392,70 @@ function HomeSectionIntro({
           className="text-2xl font-bold tracking-tight"
           style={{ color: "var(--text-primary)" }}
         >
-          {headline ?? "Your reading is ready to explore."}
+          {headline ?? "Your reading is ready."}
         </h2>
         <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
           {supportingText ??
-            "You can revisit your core numbers, check what is ready now, and continue into compatibility whenever you want."}
+            "Explore your core numbers below, or navigate with the tabs."}
         </p>
-        {resolvedNextStep ? (
+        {nextStep ? (
           <p
             className="text-[11px] font-semibold uppercase tracking-[0.18em]"
             style={{ color: "var(--text-muted)" }}
           >
-            Up next: {resolvedNextStep}
+            Up next: {nextStep}
           </p>
-        ) : null}
-        {primaryActionLabel ? (
-          <button
-            type="button"
-            onClick={onPrimaryAction}
-            className="mt-2 inline-flex min-h-11 items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold text-white transition active:scale-[0.98]"
-            style={{ background: "var(--grad-cta)" }}
-          >
-            {primaryActionLabel}
-          </button>
         ) : null}
       </div>
 
-      {Object.keys(sectionBadges).length > 0 ? (
+      {/* Quick-nav pills to other tabs that have badges */}
+      {otherTabBadges.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2">
-          {orderedSectionMetadata.map((section) => (
-            <button
-              key={section}
-              type="button"
-              onClick={() => onSectionAction(sectionActionMap[section] ?? null)}
-              disabled={!sectionActionMap[section]}
-              className="rounded-2xl px-3 py-2 text-left transition"
-              style={{
-                background: section === homeFocus
-                  ? "rgba(123,94,248,0.12)"
-                  : "var(--bg-elevated)",
-                border: section === homeFocus
-                  ? "1px solid var(--accent-primary)"
-                  : "1px solid var(--border-subtle)",
-                cursor: sectionActionMap[section] ? "pointer" : "default",
-              }}
-            >
-              <p
-                className="text-[11px] font-semibold uppercase tracking-[0.14em]"
-                style={{ color: section === homeFocus ? "var(--accent-soft)" : "var(--text-secondary)" }}
+          {otherTabBadges.map(([section, badge]) => {
+            const targetTab = SECTION_TAB[section];
+            if (!targetTab) return null;
+            const isFocused = homeFocus === section;
+            return (
+              <button
+                key={section}
+                type="button"
+                onClick={() => onTabChange(targetTab)}
+                className="rounded-2xl px-3 py-2 text-left transition active:scale-[0.97]"
+                style={{
+                  background: isFocused
+                    ? "rgba(123,94,248,0.12)"
+                    : "var(--bg-elevated)",
+                  border: isFocused
+                    ? "1px solid var(--accent-primary)"
+                    : "1px solid var(--border-subtle)",
+                }}
               >
-                {formatSectionLabel(section)}: {sectionBadges[section]}
-              </p>
-              {(section === entrySection || section === homeFocus) && (
                 <p
-                  className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
-                  style={{ color: "var(--text-muted)" }}
+                  className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+                  style={{
+                    color: isFocused
+                      ? "var(--accent-soft)"
+                      : "var(--text-secondary)",
+                  }}
                 >
-                  {section === entrySection && section === homeFocus
-                    ? "Start here"
-                    : section === entrySection
-                    ? "Starting point"
-                    : "In focus"}
+                  {formatSectionLabel(section)}: {badge}
                 </p>
-              )}
-              {sectionDescriptions[section] ? (
-                <p className="mt-1 text-xs leading-5" style={{ color: "var(--text-muted)" }}>
-                  {sectionDescriptions[section]}
-                </p>
-              ) : null}
-            </button>
-          ))}
+                {isFocused ? (
+                  <p
+                    className="mt-0.5 text-[10px] uppercase tracking-[0.12em]"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    In focus
+                  </p>
+                ) : null}
+                {sectionDescriptions[section] ? (
+                  <p className="mt-1 text-xs leading-5" style={{ color: "var(--text-muted)" }}>
+                    {sectionDescriptions[section]}
+                  </p>
+                ) : null}
+              </button>
+            );
+          })}
         </div>
       ) : null}
 
@@ -608,9 +471,9 @@ function HomeSectionIntro({
             className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.18em]"
             style={{ color: "var(--text-muted)" }}
           >
-            Home state details
+            Home state
           </summary>
-          <div className="mt-3 space-y-2">
+          <div className="mt-3 space-y-1">
             {debugLines.map((line) => (
               <p key={line} className="text-xs leading-5" style={{ color: "var(--text-muted)" }}>
                 {line}
@@ -623,104 +486,6 @@ function HomeSectionIntro({
   );
 }
 
-function resolvePrimaryHomeAction({
-  primaryAction,
-  entrySection,
-  sectionOrder,
-  sectionActions,
-}: {
-  primaryAction: PrimaryHomeAction;
-  entrySection: EntrySection;
-  sectionOrder: string[];
-  sectionActions: Record<string, string>;
-}) {
-  const priorityActions = [
-    "continue_compatibility",
-    "open_compatibility",
-    "open_today",
-    "open_reading",
-    "review_profile",
-  ] as const;
-
-  const orderedCandidates = [entrySection, ...sectionOrder].filter(
-    (section, index, sections) => sections.indexOf(section) === index,
-  );
-
-  if (primaryAction) {
-    const matchingSection = orderedCandidates.find(
-      (section) => sectionActions[section] === primaryAction,
-    );
-
-    if (matchingSection) {
-      return {
-        section: matchingSection,
-        action: primaryAction,
-        label: formatPrimaryActionLabel(primaryAction),
-      };
-    }
-  }
-
-  for (const action of priorityActions) {
-    const matchingSection = orderedCandidates.find(
-      (section) => sectionActions[section] === action,
-    );
-
-    if (!matchingSection) {
-      continue;
-    }
-
-    return {
-      section: matchingSection,
-      action,
-      label: formatPrimaryActionLabel(action),
-    };
-  }
-
-  return null;
-}
-
-function buildSectionActionMap({
-  sectionOrder,
-  sectionActions,
-}: {
-  sectionOrder: string[];
-  sectionActions: Record<string, string>;
-}) {
-  return Object.fromEntries(
-    sectionOrder
-      .filter((section) => Boolean(sectionActions[section]))
-      .map((section) => [
-        section,
-        {
-          section,
-          action: sectionActions[section],
-          label: formatPrimaryActionLabel(sectionActions[section]),
-        },
-      ]),
-  );
-}
-
-function formatPrimaryActionLabel(action: string) {
-  switch (action) {
-    case "complete_onboarding":
-      return "Complete onboarding";
-    case "generate_first_reading":
-      return "Generate your first reading";
-    case "continue_compatibility":
-      return "Continue compatibility";
-    case "open_compatibility":
-      return "Explore compatibility";
-    case "open_today":
-      return "See today's insight";
-    case "open_reading":
-      return "Revisit your reading";
-    case "review_profile":
-      return "Open your profile";
-    default:
-      return action.replaceAll("_", " ");
-  }
-}
-
 function formatSectionLabel(section: string) {
   switch (section) {
     case "overview":
@@ -728,7 +493,7 @@ function formatSectionLabel(section: string) {
     case "profile":
       return "Profile";
     case "reading":
-      return "Your reading";
+      return "Reading";
     case "today":
       return "Today";
     case "compatibility":
@@ -737,16 +502,5 @@ function formatSectionLabel(section: string) {
       return section
         .replaceAll("_", " ")
         .replace(/\b\w/g, (letter) => letter.toUpperCase());
-  }
-}
-
-function formatNextStepLabel(nextStep: string) {
-  switch (nextStep) {
-    case "Continue compatibility":
-      return "Continue compatibility";
-    case "Open today's card":
-      return "See today's insight";
-    default:
-      return nextStep;
   }
 }

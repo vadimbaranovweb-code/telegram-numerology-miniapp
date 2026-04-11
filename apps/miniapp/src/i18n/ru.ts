@@ -103,4 +103,10 @@ export const RU: Translations = {
     label: "Первый расклад",
     action_open: "Пересмотреть расклад",
   },
+  nav: {
+    home: "Расклад",
+    today: "Сегодня",
+    compat: "Связь",
+    profile: "Профиль",
+  },
 };

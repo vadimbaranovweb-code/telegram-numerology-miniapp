@@ -82,10 +82,12 @@ export function MiniAppShell() {
 
   return (
     <main
-      className="relative min-h-screen px-4 py-6"
+      className="relative min-h-screen px-4"
       style={{
         background: "var(--grad-hero)",
         color: "var(--text-primary)",
+        paddingTop: "1.5rem",
+        paddingBottom: bootstrapStatus === "ready" ? "0" : "1.5rem",
       }}
     >
       <StarField />

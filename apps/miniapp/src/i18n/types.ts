@@ -91,4 +91,10 @@ export type Translations = {
     label: string;
     action_open: string;
   };
+  nav: {
+    home: string;
+    today: string;
+    compat: string;
+    profile: string;
+  };
 };

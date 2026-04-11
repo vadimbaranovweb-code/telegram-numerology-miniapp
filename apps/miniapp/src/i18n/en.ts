@@ -103,4 +103,10 @@ export const EN: Translations = {
     label: "First reading",
     action_open: "Revisit your reading",
   },
+  nav: {
+    home: "Reading",
+    today: "Today",
+    compat: "Connect",
+    profile: "Profile",
+  },
 };
