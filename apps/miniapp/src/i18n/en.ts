@@ -14,6 +14,12 @@ export const EN: Translations = {
     privacy: "Your data stays private. We never share it.",
     submit: "See my numbers →",
     submitting: "Calculating your numbers...",
+    step_name_title: "What's your name?",
+    step_name_subtitle: "Optional — helps personalize your reading.",
+    step_name_use: "Use",
+    step_name_next: "Continue →",
+    step_date_title: "When were you born?",
+    step_date_subtitle: "Your birth date is the key to your numbers.",
   },
   loading: {
     messages: [

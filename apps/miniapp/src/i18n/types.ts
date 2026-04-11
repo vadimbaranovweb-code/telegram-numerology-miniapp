@@ -12,6 +12,12 @@ export type Translations = {
     privacy: string;
     submit: string;
     submitting: string;
+    step_name_title: string;
+    step_name_subtitle: string;
+    step_name_use: string;
+    step_name_next: string;
+    step_date_title: string;
+    step_date_subtitle: string;
   };
   loading: {
     messages: string[];

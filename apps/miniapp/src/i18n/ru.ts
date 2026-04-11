@@ -14,6 +14,12 @@ export const RU: Translations = {
     privacy: "Твои данные в безопасности. Мы никому их не передаём.",
     submit: "Показать мои числа →",
     submitting: "Считаем твои числа...",
+    step_name_title: "Как тебя зовут?",
+    step_name_subtitle: "Необязательно — помогает персонализировать расклад.",
+    step_name_use: "Использовать",
+    step_name_next: "Продолжить →",
+    step_date_title: "Когда ты родился(ась)?",
+    step_date_subtitle: "Дата рождения — ключ к твоим числам.",
   },
   loading: {
     messages: [

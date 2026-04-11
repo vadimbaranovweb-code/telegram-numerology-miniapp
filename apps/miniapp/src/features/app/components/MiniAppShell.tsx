@@ -3,7 +3,7 @@
 import { ReadyHomeScreen } from "@/features/app/components/ReadyHomeScreen";
 import { HeroSection } from "@/features/onboarding/components/HeroSection";
 import { NextStepsCard } from "@/features/onboarding/components/NextStepsCard";
-import { OnboardingForm } from "@/features/onboarding/components/OnboardingForm";
+import { OnboardingStepper } from "@/features/onboarding/components/OnboardingStepper";
 import { BootstrapScreen } from "@/features/profile/components/BootstrapScreen";
 import { TelegramContextCard } from "@/features/telegram/components/TelegramContextCard";
 import { useTelegramAuth } from "@/features/telegram/hooks/useTelegramAuth";
@@ -107,13 +107,14 @@ export function MiniAppShell() {
               isSubmitting ? (
                 <GenerationLoadingScreen />
               ) : (
-                <OnboardingForm
+                <OnboardingStepper
                   birthDate={birthDate}
                   fullName={fullName}
                   dailyOptIn={dailyOptIn}
                   isSubmitting={isSubmitting}
                   isFormValid={isFormValid}
                   error={error}
+                  telegramFirstName={telegramContext.user?.first_name ?? undefined}
                   onBirthDateChange={setBirthDate}
                   onFullNameChange={setFullName}
                   onDailyOptInChange={setDailyOptIn}
