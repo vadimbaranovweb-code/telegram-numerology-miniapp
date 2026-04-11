@@ -213,7 +213,7 @@ export function ReadyHomeScreen({
           sectionDescription={sectionDescriptions.reading ?? null}
           sectionAction={sectionActions.reading ?? null}
         />
-        <ReadingNumbersGrid result={result} />
+        <ReadingNumbersGrid result={result} displayName={profile.display_name ?? undefined} />
       </>
     ),
     today: (

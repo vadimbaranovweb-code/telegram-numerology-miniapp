@@ -1,7 +1,13 @@
 import { NumerologyResponse } from "@/features/onboarding/types";
 import { NumberCard } from "./NumberCard";
+import { ShareButton } from "./ShareButton";
 
-export function ReadingNumbersGrid({ result }: { result: NumerologyResponse }) {
+type Props = {
+  result: NumerologyResponse;
+  displayName?: string;
+};
+
+export function ReadingNumbersGrid({ result, displayName }: Props) {
   return (
     <article
       className="rounded-[24px] p-5"
@@ -23,6 +29,9 @@ export function ReadingNumbersGrid({ result }: { result: NumerologyResponse }) {
         <NumberCard label="Personal Month" value={result.personal_month_number} />
         <NumberCard label="Destiny"        value={result.destiny_number} />
         <NumberCard label="Soul Urge"      value={result.soul_urge_number} />
+      </div>
+      <div className="mt-4">
+        <ShareButton result={result} displayName={displayName} />
       </div>
     </article>
   );
