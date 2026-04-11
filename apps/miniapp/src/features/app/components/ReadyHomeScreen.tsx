@@ -257,7 +257,7 @@ export function ReadyHomeScreen({
         <div
           className="fixed left-0 right-0 z-40 mx-auto max-w-md px-4 transition-opacity duration-300"
           style={{
-            bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)",
+            bottom: "calc(env(safe-area-inset-bottom, 0px) + 26px)",
             opacity: readingCtaVisible ? 1 : 0,
             pointerEvents: readingCtaVisible ? "auto" : "none",
           }}

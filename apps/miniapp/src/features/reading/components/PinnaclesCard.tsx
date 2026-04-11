@@ -24,9 +24,11 @@ const INFO = {
 export function PinnaclesCard({
   pinnacles,
   aiInsights,
+  onUnlock,
 }: {
   pinnacles: PinnacleInfo[];
   aiInsights: AiInsights | null;
+  onUnlock?: () => void;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const current = pinnacles.find((p) => p.is_current);
@@ -37,42 +39,44 @@ export function PinnaclesCard({
   return (
     <>
       <div
-        className="relative rounded-[24px] overflow-hidden"
+        className="rounded-[24px]"
         style={{
           background: "var(--bg-surface)",
           border: "1px solid rgba(123,94,248,0.2)",
           boxShadow: "0 12px 40px rgba(0,0,0,0.3)",
         }}
       >
-        {/* Blur overlay */}
-        <div
-          className="absolute inset-0 z-10 flex items-center justify-center rounded-[24px]"
-          style={{
-            backdropFilter: "blur(7px)",
-            WebkitBackdropFilter: "blur(7px)",
-            background: "linear-gradient(to bottom, rgba(17,17,40,0.15), rgba(17,17,40,0.85))",
-          }}
-        >
-          <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
-            ✦ Заблокировано
-          </span>
+        {/* Visible header */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--text-muted)" }}>
+            Пики судьбы
+          </p>
+          <button
+            type="button"
+            onClick={() => setInfoOpen(true)}
+            className="flex h-6 w-6 items-center justify-center rounded-full"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid var(--border-subtle)", color: "var(--text-muted)", fontSize: 11, fontWeight: 700 }}
+            aria-label="Что это"
+          >
+            i
+          </button>
         </div>
 
-        {/* Content */}
-        <div className="p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--text-muted)" }}>
-              Пики судьбы
-            </p>
-            <button
-              type="button"
-              onClick={() => setInfoOpen(true)}
-              className="flex h-6 w-6 items-center justify-center rounded-full relative z-20"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid var(--border-subtle)", color: "var(--text-muted)", fontSize: 11, fontWeight: 700 }}
-              aria-label="Что это"
-            >
-              i
-            </button>
+        {/* Blurred content */}
+        <div className="relative px-5 pb-5 overflow-hidden rounded-b-[24px]">
+          {/* Blur overlay */}
+          <div
+            className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
+            style={{
+              backdropFilter: "blur(4px)",
+              WebkitBackdropFilter: "blur(4px)",
+              background: "linear-gradient(to bottom, rgba(17,17,40,0.15), rgba(17,17,40,0.85))",
+            }}
+            onClick={onUnlock}
+          >
+            <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
+              ✦ Нажми чтобы разблокировать
+            </span>
           </div>
 
           {/* Timeline */}

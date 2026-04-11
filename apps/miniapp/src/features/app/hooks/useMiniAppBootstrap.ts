@@ -815,13 +815,15 @@ export function useMiniAppBootstrap(
   async function completePurchase() {
     if (
       telegramAuth?.status === "authenticated" &&
-      telegramAuth.sessionToken &&
-      compatibilityPreview
+      telegramAuth.sessionToken
     ) {
+      const offerKey = compatibilityPreview?.paywall.offer_key ?? "compatibility_unlock_monthly";
+      const compatRequestId = compatibilityPreview?.compatibility_request_id ?? null;
+
       try {
         trackEvent("offer_selected", {
-          paywall_context: "compatibility",
-          offer_key: compatibilityPreview.paywall.offer_key,
+          paywall_context: compatibilityPreview ? "compatibility" : "reading",
+          offer_key: offerKey,
         });
 
         const checkoutResponse = await fetch(
@@ -833,9 +835,8 @@ export function useMiniAppBootstrap(
             },
             body: JSON.stringify({
               session_token: telegramAuth.sessionToken,
-              offer_key: compatibilityPreview.paywall.offer_key,
-              compatibility_request_id:
-                compatibilityPreview.compatibility_request_id,
+              offer_key: offerKey,
+              compatibility_request_id: compatRequestId,
             }),
           },
         );
@@ -848,8 +849,8 @@ export function useMiniAppBootstrap(
           (await checkoutResponse.json()) as PremiumCheckoutSessionResponse;
 
         trackEvent("checkout_started", {
-          paywall_context: "compatibility",
-          offer_key: compatibilityPreview.paywall.offer_key,
+          paywall_context: compatibilityPreview ? "compatibility" : "reading",
+          offer_key: offerKey,
           provider: checkoutSession.provider,
           checkout_mode: checkoutSession.mode,
           checkout_session_id: checkoutSession.checkout_session_id,
@@ -894,7 +895,7 @@ export function useMiniAppBootstrap(
           },
           body: JSON.stringify({
             session_token: telegramAuth.sessionToken,
-            offer_key: compatibilityPreview.paywall.offer_key,
+            offer_key: offerKey,
           }),
         });
 
