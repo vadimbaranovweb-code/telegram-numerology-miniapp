@@ -2,118 +2,35 @@
 
 import { useEffect, useRef, useState } from "react";
 import { t } from "@/i18n";
+import { NumerologyResponse } from "@/features/onboarding/types";
 import { BottomSheet } from "@/features/app/components/BottomSheet";
-import { ReadingCard, ReadingPreview } from "../types";
-
-const CARD_ACCENTS: Record<string, string> = {
-  "Core Energy":        "#7B5EF8",
-  "Strength":           "#F59E0B",
-  "Blind Spot":         "#C084FC",
-  "Relationship Style": "#F472B6",
-  "Current Timing":     "#60A5FA",
-  "Inner Drive":        "#C084FC",
-};
-
-const CARD_TYPE_SLUGS: Record<string, string> = {
-  "Core Energy":        "core_energy",
-  "Strength":           "strength",
-  "Blind Spot":         "blind_spot",
-  "Relationship Style": "relationship_style",
-  "Current Timing":     "current_timing",
-  "Inner Drive":        "inner_drive",
-};
-
-const CARD_INFO: Record<string, { title: string; what: string; how: string }> = {
-  "Core Energy": {
-    title: "Ключевая энергия",
-    what: "Твоё Число Жизненного Пути — главная вибрация твоей жизни. Определяет твою природу, уроки и основной путь.",
-    how: "Складываются все цифры даты рождения до однозначного числа (или мастер-числа 11, 22, 33). Например, 14.03.1990 → 1+4+0+3+1+9+9+0 = 27 → 2+7 = 9.",
-  },
-  "Strength": {
-    title: "Сила",
-    what: "Твои природные таланты и качества, которые помогают двигаться вперёд. То, что даётся тебе легко.",
-    how: "Выводится из Числа Судьбы (суммы числовых значений букв полного имени по Пифагорейской системе).",
-  },
-  "Blind Spot": {
-    title: "Слепое пятно",
-    what: "То, что ты склонен игнорировать или отрицать в себе. Осознание этого — ключ к росту.",
-    how: "Определяется из Числа Зова Души (суммы значений только гласных букв имени).",
-  },
-  "Relationship Style": {
-    title: "Стиль в отношениях",
-    what: "Как ты строишь связи с другими людьми — что ищешь, что даёшь, что тебе важно в близости.",
-    how: "На основе Числа Судьбы и Числа Жизненного Пути вместе.",
-  },
-  "Current Timing": {
-    title: "Текущий момент",
-    what: "В каком году 9-летнего цикла ты сейчас находишься и что это означает для твоих действий.",
-    how: "Личный Год = сумма числа и месяца рождения + цифры текущего года, сведённая к однозначному.",
-  },
-  "Inner Drive": {
-    title: "Внутренний мотив",
-    what: "То, что движет тобой изнутри — скрытые желания и глубинные стремления.",
-    how: "Число Зова Души — сумма числовых значений гласных букв полного имени.",
-  },
-};
+import { LifePathRingCard } from "./LifePathRingCard";
+import { PersonalityRadarCard } from "./PersonalityRadarCard";
+import { YearCycleCard } from "./YearCycleCard";
+import { PythagoreanMatrixCard } from "./PythagoreanMatrixCard";
+import { PinnaclesCard } from "./PinnaclesCard";
+import { KarmicLessonsCard } from "./KarmicLessonsCard";
 
 const READING_BENEFITS = [
-  "Все карты расклада полностью открыты",
-  "Сильные стороны, слепые пятна и текущая энергия",
+  "Все блоки расклада полностью открыты",
+  "Матрица Пифагора, пики судьбы, кармические уроки",
+  "Сила и теневая сторона с AI-описанием",
   "Полный анализ совместимости с партнёром",
   "Сохранено в профиле навсегда",
 ];
 
-function getAccent(label: string): string {
-  for (const [key, color] of Object.entries(CARD_ACCENTS)) {
-    if (label.toLowerCase().includes(key.toLowerCase())) return color;
-  }
-  return "#7B5EF8";
-}
-
-function getCardTypeSlug(label: string): string {
-  for (const [key, slug] of Object.entries(CARD_TYPE_SLUGS)) {
-    if (label.toLowerCase().includes(key.toLowerCase())) return slug;
-  }
-  return label.toLowerCase().replace(/\s+/g, "_");
-}
-
-function getIllustrationUrl(lifePathNumber: number, cardTypeSlug: string): string {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
-  return `${base}/illustrations/serve/${lifePathNumber}/${cardTypeSlug}`;
-}
-
-function getCardInfo(label: string): { title: string; what: string; how: string } | null {
-  for (const [key, info] of Object.entries(CARD_INFO)) {
-    if (label.toLowerCase().includes(key.toLowerCase())) return info;
-  }
-  return null;
-}
-
 export function ReadingStory({
-  preview,
-  lifePathNumber,
-  blurFromIndex = 2,
-  sectionBadge = null,
-  sectionState = null,
-  sectionDescription = null,
-  sectionAction = null,
+  result,
   onUnlock,
   onUnlockBlockVisible,
 }: {
-  preview: ReadingPreview;
-  lifePathNumber?: number;
-  blurFromIndex?: number;
-  sectionBadge?: string | null;
-  sectionState?: string | null;
-  sectionDescription?: string | null;
-  sectionAction?: string | null;
+  result: NumerologyResponse;
   onUnlock?: () => void;
   onUnlockBlockVisible?: (visible: boolean) => void;
 }) {
-  const [activeInfoCard, setActiveInfoCard] = useState<ReadingCard | null>(null);
   const [isUnlocking, setIsUnlocking] = useState(false);
-  const activeInfo = activeInfoCard ? getCardInfo(activeInfoCard.label) : null;
   const unlockRef = useRef<HTMLDivElement>(null);
+  const ai = result.ai_insights;
 
   useEffect(() => {
     if (!unlockRef.current || !onUnlockBlockVisible) return;
@@ -129,321 +46,228 @@ export function ReadingStory({
   async function handleUnlock() {
     if (!onUnlock) return;
     setIsUnlocking(true);
-    try {
-      await onUnlock();
-    } finally {
-      setIsUnlocking(false);
-    }
+    try { await onUnlock(); } finally { setIsUnlocking(false); }
   }
 
   return (
+    <div className="space-y-3">
+      {/* ── OPEN BLOCK 1: Life Path Ring ── */}
+      <LifePathRingCard
+        lifePathNumber={result.life_path_number}
+        aiInsights={ai}
+      />
+
+      {/* ── OPEN BLOCK 2: Personality Radar ── */}
+      <PersonalityRadarCard
+        scores={result.personality_scores}
+        aiInsights={ai}
+      />
+
+      {/* ── OPEN BLOCK 3: Year Cycle ── */}
+      <YearCycleCard
+        personalYear={result.personal_year_number}
+        personalMonth={result.personal_month_number}
+        aiInsights={ai}
+      />
+
+      {/* ── BLURRED: Strength & Shadow ── */}
+      <StrengthShadowCard
+        destinyNumber={result.destiny_number}
+        soulUrgeNumber={result.soul_urge_number}
+        aiInsights={ai}
+      />
+
+      {/* ── BLURRED: Pythagorean Matrix ── */}
+      <PythagoreanMatrixCard matrix={result.pythagorean_matrix} />
+
+      {/* ── BLURRED: Pinnacles ── */}
+      <PinnaclesCard pinnacles={result.pinnacles} aiInsights={ai} />
+
+      {/* ── BLURRED: Karmic Lessons ── */}
+      <KarmicLessonsCard karmicLessons={result.karmic_lessons} aiInsights={ai} />
+
+      {/* ── PAYWALL BLOCK ── */}
+      {onUnlock && (
+        <div
+          ref={unlockRef}
+          className="rounded-[24px] p-5"
+          style={{
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border-glow)",
+            boxShadow: "0 0 40px rgba(123,94,248,0.08)",
+          }}
+        >
+          <p
+            className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+            style={{ color: "var(--accent-soft)" }}
+          >
+            {t.paywall.label}
+          </p>
+          <h4
+            className="mt-2 text-[18px] font-bold tracking-tight"
+            style={{ color: "var(--text-primary)" }}
+          >
+            Расклад + совместимость
+          </h4>
+          <p className="mt-1 text-sm leading-5" style={{ color: "var(--text-secondary)" }}>
+            Одна покупка открывает всё сразу.
+          </p>
+          <ul className="mt-3 space-y-2">
+            {READING_BENEFITS.map((b) => (
+              <li key={b} className="flex items-start gap-2.5">
+                <span style={{ color: "var(--accent-primary)", flexShrink: 0, marginTop: 1 }}>✦</span>
+                <span className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>{b}</span>
+              </li>
+            ))}
+          </ul>
+          <div
+            className="mt-4 flex items-baseline gap-2 rounded-2xl px-4 py-3"
+            style={{ background: "var(--bg-elevated)", border: "1px solid rgba(123,94,248,0.2)" }}
+          >
+            <span className="text-[26px] font-bold" style={{ color: "var(--text-primary)" }}>
+              ⭐ 350
+            </span>
+            <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+              {t.paywall.stars} · {t.paywall.one_time}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleUnlock}
+            disabled={isUnlocking}
+            className="mt-4 w-full rounded-2xl py-4 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-60"
+            style={{ background: "var(--grad-cta)" }}
+          >
+            {isUnlocking ? "Открываем оплату..." : t.paywall.cta}
+          </button>
+          <p className="mt-3 text-center text-xs" style={{ color: "var(--text-muted)" }}>
+            {t.paywall.footer}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Strength & Shadow (blurred) ────────────────────────────────────
+
+function StrengthShadowCard({
+  destinyNumber,
+  soulUrgeNumber,
+  aiInsights,
+}: {
+  destinyNumber: number | null;
+  soulUrgeNumber: number | null;
+  aiInsights: NumerologyResponse["ai_insights"];
+}) {
+  const [infoOpen, setInfoOpen] = useState(false);
+
+  const strengthHeadline = aiInsights?.strength_headline ?? (destinyNumber ? `Сила числа ${destinyNumber}` : "Природные сильные стороны");
+  const strengthBody = aiInsights?.strength_body ?? "Твои таланты и качества, которые помогают двигаться вперёд. То, что даётся тебе легко от природы.";
+  const shadowHeadline = aiInsights?.shadow_headline ?? (soulUrgeNumber ? `Тень числа ${soulUrgeNumber}` : "Слепые пятна");
+  const shadowBody = aiInsights?.shadow_body ?? "То, что ты склонен игнорировать или отрицать в себе. Осознание этого — ключ к росту.";
+
+  return (
     <>
-      <article
-        className="rounded-[24px] p-5"
+      <div
+        className="relative rounded-[24px] overflow-hidden"
         style={{
           background: "var(--bg-surface)",
-          border: "1px solid var(--border-subtle)",
+          border: "1px solid rgba(123,94,248,0.2)",
           boxShadow: "0 12px 40px rgba(0,0,0,0.3)",
         }}
       >
-        <div className="flex items-center gap-2 flex-wrap">
-          <p
-            className="text-[11px] font-semibold uppercase tracking-[0.22em]"
-            style={{ color: "var(--text-muted)" }}
-            suppressHydrationWarning
-          >
-            {t.reading.label}
-          </p>
-          {sectionBadge && (
-            <span
-              className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
-              style={{ background: "var(--accent-primary)", color: "white" }}
-            >
-              {sectionBadge}
-            </span>
-          )}
-          {sectionState && (
-            <span
-              className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
-              style={{
-                border: "1px solid var(--border-subtle)",
-                color: "var(--text-muted)",
-              }}
-            >
-              {sectionState.replaceAll("_", " ")}
-            </span>
-          )}
+        {/* Blur overlay */}
+        <div
+          className="absolute inset-0 z-10 flex items-center justify-center rounded-[24px]"
+          style={{
+            backdropFilter: "blur(7px)",
+            WebkitBackdropFilter: "blur(7px)",
+            background: "linear-gradient(to bottom, rgba(17,17,40,0.15), rgba(17,17,40,0.85))",
+          }}
+        >
+          <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
+            ✦ Заблокировано
+          </span>
         </div>
 
-        <div className="mt-3 space-y-1">
-          <h2
-            className="text-2xl font-bold tracking-tight"
-            style={{ color: "var(--text-primary)" }}
-          >
-            {preview.title}
-          </h2>
-          <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-            {sectionDescription ?? preview.summary}
-          </p>
-        </div>
-
-        <div className="mt-5 space-y-3">
-          {preview.cards.map((card, index) => (
-            <ReadingStoryCard
-              key={card.label}
-              card={card}
-              lifePathNumber={lifePathNumber}
-              isBlurred={index >= blurFromIndex}
-              onInfo={() => setActiveInfoCard(card)}
-            />
-          ))}
-        </div>
-
-        {/* Unlock / price block */}
-        {onUnlock && (
-          <div
-            ref={unlockRef}
-            className="mt-4 rounded-[20px] p-5"
-            style={{
-              background: "var(--bg-elevated)",
-              border: "1px solid var(--border-glow)",
-              boxShadow: "0 0 40px rgba(123,94,248,0.08)",
-            }}
-          >
-            <p
-              className="text-[11px] font-semibold uppercase tracking-[0.22em]"
-              style={{ color: "var(--accent-soft)" }}
-            >
-              {t.paywall.label}
+        {/* Content */}
+        <div className="p-5">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--text-muted)" }}>
+              Сила и тень
             </p>
-            <h4
-              className="mt-2 text-[18px] font-bold tracking-tight"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Расклад + совместимость
-            </h4>
-            <p className="mt-1 text-sm leading-5" style={{ color: "var(--text-secondary)" }}>
-              Одна покупка открывает всё сразу.
-            </p>
-            <ul className="mt-3 space-y-2">
-              {READING_BENEFITS.map((b) => (
-                <li key={b} className="flex items-start gap-2.5">
-                  <span style={{ color: "var(--accent-primary)", flexShrink: 0, marginTop: 1 }}>✦</span>
-                  <span className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>{b}</span>
-                </li>
-              ))}
-            </ul>
-            <div
-              className="mt-4 flex items-baseline gap-2 rounded-2xl px-4 py-3"
-              style={{ background: "var(--bg-surface)", border: "1px solid rgba(123,94,248,0.2)" }}
-            >
-              <span className="text-[26px] font-bold" style={{ color: "var(--text-primary)" }}>
-                ⭐ 350
-              </span>
-              <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-                {t.paywall.stars} · {t.paywall.one_time}
-              </span>
-            </div>
             <button
               type="button"
-              onClick={handleUnlock}
-              disabled={isUnlocking}
-              className="mt-4 w-full rounded-2xl py-4 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-60"
-              style={{ background: "var(--grad-cta)" }}
+              onClick={() => setInfoOpen(true)}
+              className="flex h-6 w-6 items-center justify-center rounded-full relative z-20"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid var(--border-subtle)", color: "var(--text-muted)", fontSize: 11, fontWeight: 700 }}
+              aria-label="Что это"
             >
-              {isUnlocking ? "Открываем оплату..." : t.paywall.cta}
+              i
             </button>
-            <p className="mt-3 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-              {t.paywall.footer}
-            </p>
           </div>
-        )}
-      </article>
 
-      {/* Info bottom sheet */}
-      {activeInfoCard && activeInfo && (
-        <BottomSheet onClose={() => setActiveInfoCard(null)}>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            {/* Strength */}
+            <div
+              className="rounded-2xl p-3"
+              style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}
+            >
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#F59E0B" }}>
+                ✦ Сила
+              </p>
+              <p className="mt-1.5 text-[13px] font-bold leading-tight" style={{ color: "var(--text-primary)" }}>
+                {strengthHeadline}
+              </p>
+              <p className="mt-1 text-[10px] leading-4" style={{ color: "var(--text-secondary)" }}>
+                {strengthBody}
+              </p>
+            </div>
+            {/* Shadow */}
+            <div
+              className="rounded-2xl p-3"
+              style={{ background: "rgba(192,132,252,0.08)", border: "1px solid rgba(192,132,252,0.2)" }}
+            >
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#C084FC" }}>
+                ◉ Тень
+              </p>
+              <p className="mt-1.5 text-[13px] font-bold leading-tight" style={{ color: "var(--text-primary)" }}>
+                {shadowHeadline}
+              </p>
+              <p className="mt-1 text-[10px] leading-4" style={{ color: "var(--text-secondary)" }}>
+                {shadowBody}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {infoOpen && (
+        <BottomSheet onClose={() => setInfoOpen(false)}>
           <div className="space-y-4">
             <div>
-              <p
-                className="text-[11px] font-semibold uppercase tracking-[0.22em]"
-                style={{ color: getAccent(activeInfoCard.label) }}
-              >
-                {activeInfoCard.label}
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--accent-soft)" }}>
+                Сила и тень
               </p>
-              <h3
-                className="mt-2 text-[20px] font-bold tracking-tight"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {activeInfo.title}
+              <h3 className="mt-2 text-[20px] font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
+                Что это значит
               </h3>
             </div>
-
-            <div
-              className="rounded-2xl p-4 space-y-3"
-              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}
-            >
+            <div className="rounded-2xl p-4 space-y-3" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
               <div>
-                <p
-                  className="text-[10px] font-semibold uppercase tracking-[0.18em]"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  Что это
-                </p>
-                <p className="mt-1.5 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-                  {activeInfo.what}
-                </p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-muted)" }}>Сила (Число Судьбы)</p>
+                <p className="mt-1.5 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>Природные таланты и качества, которые помогают двигаться вперёд — выводится из суммы числовых значений всех букв полного имени.</p>
               </div>
-              <div
-                style={{ height: 1, background: "var(--border-subtle)" }}
-              />
+              <div style={{ height: 1, background: "var(--border-subtle)" }} />
               <div>
-                <p
-                  className="text-[10px] font-semibold uppercase tracking-[0.18em]"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  Как считается
-                </p>
-                <p className="mt-1.5 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-                  {activeInfo.how}
-                </p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-muted)" }}>Тень (Зов Души)</p>
+                <p className="mt-1.5 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>То, что ты склонен игнорировать в себе. Осознание этого — ключ к росту. Выводится из суммы значений только гласных букв имени.</p>
               </div>
             </div>
           </div>
         </BottomSheet>
       )}
     </>
-  );
-}
-
-function ReadingStoryCard({
-  card,
-  lifePathNumber,
-  isBlurred,
-  onInfo,
-}: {
-  card: ReadingCard;
-  lifePathNumber?: number;
-  isBlurred: boolean;
-  onInfo: () => void;
-}) {
-  const accent = getAccent(card.label);
-  const slug = getCardTypeSlug(card.label);
-  const showImage = lifePathNumber !== undefined && !!process.env.NEXT_PUBLIC_API_BASE_URL;
-  const imgUrl = showImage ? getIllustrationUrl(lifePathNumber!, slug) : null;
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgError, setImgError] = useState(false);
-
-  return (
-    <div
-      className="relative rounded-2xl overflow-hidden"
-      style={{
-        background: "var(--bg-elevated)",
-        border: "1px solid var(--border-subtle)",
-      }}
-    >
-      {/* Blur overlay on locked cards */}
-      {isBlurred && (
-        <div
-          className="absolute inset-0 z-10 rounded-2xl flex items-center justify-center"
-          style={{
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-            background: "linear-gradient(to bottom, rgba(17,17,40,0.25) 0%, rgba(17,17,40,0.80) 100%)",
-          }}
-        >
-          <span
-            className="text-xs font-semibold uppercase tracking-[0.18em]"
-            style={{ color: "var(--accent-soft)" }}
-          >
-            ✦ Заблокировано
-          </span>
-        </div>
-      )}
-
-      {/* Card text */}
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <p
-            className="text-[11px] font-semibold uppercase tracking-[0.2em]"
-            style={{ color: accent }}
-          >
-            {card.label}
-          </p>
-          <button
-            type="button"
-            onClick={onInfo}
-            className="flex h-6 w-6 items-center justify-center rounded-full transition active:scale-90"
-            style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid var(--border-subtle)",
-              color: "var(--text-muted)",
-              fontSize: 11,
-              fontWeight: 700,
-              flexShrink: 0,
-            }}
-            aria-label="Что это"
-          >
-            i
-          </button>
-        </div>
-        <h3
-          className="mt-2 text-[17px] font-semibold leading-tight"
-          style={{ color: "var(--text-primary)" }}
-        >
-          {card.headline}
-        </h3>
-        <p
-          className="mt-2 text-sm leading-6"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          {card.body}
-        </p>
-      </div>
-
-      {/* Illustration at bottom */}
-      {imgUrl && !imgError && (
-        <div className="relative w-full overflow-hidden illus-container" style={{ height: 120 }}>
-          {/* Skeleton loader */}
-          {!imgLoaded && (
-            <div
-              className="absolute inset-0 animate-pulse"
-              style={{ background: "var(--bg-elevated)" }}
-            />
-          )}
-          {/* Top fade */}
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 z-10"
-            style={{
-              height: 40,
-              background: `linear-gradient(to bottom, var(--bg-elevated), transparent)`,
-            }}
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={imgUrl}
-            alt=""
-            loading="lazy"
-            className="h-full w-full object-cover"
-            style={{
-              display: "block",
-              opacity: imgLoaded ? 1 : 0,
-              transition: "opacity 0.4s ease",
-            }}
-            onLoad={() => setImgLoaded(true)}
-            onError={() => {
-              setImgError(true);
-              const container = document.querySelector(".illus-container") as HTMLElement | null;
-              if (container) container.style.display = "none";
-            }}
-          />
-          {/* Accent dot */}
-          <div
-            className="absolute left-3 bottom-3 rounded-full"
-            style={{ width: 6, height: 6, background: accent }}
-          />
-        </div>
-      )}
-    </div>
   );
 }

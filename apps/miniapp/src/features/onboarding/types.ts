@@ -1,5 +1,33 @@
 import { ReadingPreview } from "@/features/reading/types";
 
+export type PersonalityScores = {
+  leadership: number;
+  intuition: number;
+  creativity: number;
+  logic: number;
+  empathy: number;
+};
+
+export type PinnacleInfo = {
+  number: number;
+  start_age: number;
+  end_age: number | null;
+  is_current: boolean;
+};
+
+export type AiInsights = {
+  life_path_headline: string;
+  life_path_body: string;
+  year_energy_body: string;
+  personality_summary: string;
+  strength_headline: string;
+  strength_body: string;
+  shadow_headline: string;
+  shadow_body: string;
+  pinnacle_body: string;
+  karmic_body: string;
+};
+
 export type NumerologyResponse = {
   birth_date: string;
   life_path_number: number;
@@ -10,4 +38,9 @@ export type NumerologyResponse = {
   calculation_system: string;
   calculation_version: string;
   reading_preview: ReadingPreview;
+  personality_scores: PersonalityScores;
+  pinnacles: PinnacleInfo[];
+  karmic_lessons: number[];
+  pythagorean_matrix: Record<string, number>;
+  ai_insights: AiInsights | null;
 };

@@ -126,11 +126,10 @@ export function MiniAppShell() {
               )
             ) : null}
 
-            {bootstrapStatus === "ready" && profile && result && readingPreview ? (
+            {bootstrapStatus === "ready" && profile && result ? (
               <ReadyHomeScreen
                 profile={profile}
                 result={result}
-                readingPreview={readingPreview}
                 homeHeadline={homeHeadline}
                 homeSupportingText={homeSupportingText}
                 homeNextStep={homeNextStep}

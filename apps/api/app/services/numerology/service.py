@@ -2,11 +2,26 @@ from datetime import date
 from typing import Optional
 
 from app.schemas.numerology import (
+    AiInsights,
     NumerologyCalculationResponse,
+    PersonalityScores,
+    PinnacleInfo,
     ReadingPreview,
     ReadingPreviewCard,
 )
 
+
+PERSONALITY_SCORES: dict[int, dict[str, int]] = {
+    1: {"leadership": 9, "intuition": 4, "creativity": 7, "logic": 8, "empathy": 3},
+    2: {"leadership": 4, "intuition": 9, "creativity": 5, "logic": 6, "empathy": 9},
+    3: {"leadership": 6, "intuition": 6, "creativity": 10, "logic": 4, "empathy": 7},
+    4: {"leadership": 7, "intuition": 3, "creativity": 4, "logic": 10, "empathy": 5},
+    5: {"leadership": 7, "intuition": 7, "creativity": 8, "logic": 5, "empathy": 5},
+    6: {"leadership": 6, "intuition": 7, "creativity": 7, "logic": 5, "empathy": 10},
+    7: {"leadership": 4, "intuition": 10, "creativity": 6, "logic": 9, "empathy": 5},
+    8: {"leadership": 10, "intuition": 5, "creativity": 5, "logic": 9, "empathy": 4},
+    9: {"leadership": 8, "intuition": 8, "creativity": 9, "logic": 5, "empathy": 9},
+}
 
 CALCULATION_SYSTEM = "pythagorean"
 CALCULATION_VERSION = "v1"
@@ -184,16 +199,62 @@ def build_reading_preview(
     )
 
 
+def calculate_pinnacles(birth_date: date, life_path: int, current_date: date) -> list[PinnacleInfo]:
+    m = _reduce_to_digit(birth_date.month)
+    d = _reduce_to_digit(birth_date.day)
+    y = _reduce_to_digit(sum(int(c) for c in str(birth_date.year)))
+
+    p1 = _reduce_to_digit(m + d)
+    p2 = _reduce_to_digit(d + y)
+    p3 = _reduce_to_digit(p1 + p2)
+    p4 = _reduce_to_digit(m + y)
+
+    first_end = 36 - life_path
+    current_age = current_date.year - birth_date.year - (
+        (current_date.month, current_date.day) < (birth_date.month, birth_date.day)
+    )
+
+    return [
+        PinnacleInfo(number=p1, start_age=0, end_age=first_end, is_current=current_age < first_end),
+        PinnacleInfo(number=p2, start_age=first_end, end_age=first_end + 9, is_current=first_end <= current_age < first_end + 9),
+        PinnacleInfo(number=p3, start_age=first_end + 9, end_age=first_end + 18, is_current=first_end + 9 <= current_age < first_end + 18),
+        PinnacleInfo(number=p4, start_age=first_end + 18, end_age=None, is_current=current_age >= first_end + 18),
+    ]
+
+
+def calculate_karmic_lessons(birth_date: date) -> list[int]:
+    digits_str = birth_date.isoformat().replace("-", "")
+    present = {int(c) for c in digits_str if c != "0"}
+    return sorted([n for n in range(1, 10) if n not in present])
+
+
+def calculate_pythagorean_matrix(birth_date: date) -> dict[int, int]:
+    digits_str = birth_date.isoformat().replace("-", "")
+    counts: dict[int, int] = {n: 0 for n in range(1, 10)}
+    for c in digits_str:
+        d = int(c)
+        if 1 <= d <= 9:
+            counts[d] += 1
+    return counts
+
+
+def get_personality_scores(life_path: int) -> PersonalityScores:
+    scores = PERSONALITY_SCORES.get(life_path, PERSONALITY_SCORES[9])
+    return PersonalityScores(**scores)
+
+
 def calculate_core_numbers(
     birth_date: date,
     full_name: Optional[str] = None,
     current_date: Optional[date] = None,
+    ai_insights: Optional[AiInsights] = None,
 ) -> NumerologyCalculationResponse:
     today = current_date or date.today()
     personal_year_number = calculate_personal_year_number(birth_date, today)
     life_path_number = calculate_life_path_number(birth_date)
     destiny_number = calculate_destiny_number(full_name) if full_name else None
     soul_urge_number = calculate_soul_urge_number(full_name) if full_name else None
+    personal_month_number = calculate_personal_month_number(personal_year_number, today)
 
     return NumerologyCalculationResponse(
         birth_date=birth_date,
@@ -201,7 +262,7 @@ def calculate_core_numbers(
         destiny_number=destiny_number,
         soul_urge_number=soul_urge_number,
         personal_year_number=personal_year_number,
-        personal_month_number=calculate_personal_month_number(personal_year_number, today),
+        personal_month_number=personal_month_number,
         calculation_system=CALCULATION_SYSTEM,
         calculation_version=CALCULATION_VERSION,
         reading_preview=build_reading_preview(
@@ -209,6 +270,11 @@ def calculate_core_numbers(
             life_path_number=life_path_number,
             soul_urge_number=soul_urge_number,
             personal_year_number=personal_year_number,
-            personal_month_number=calculate_personal_month_number(personal_year_number, today),
+            personal_month_number=personal_month_number,
         ),
+        personality_scores=get_personality_scores(life_path_number),
+        pinnacles=calculate_pinnacles(birth_date, life_path_number, today),
+        karmic_lessons=calculate_karmic_lessons(birth_date),
+        pythagorean_matrix=calculate_pythagorean_matrix(birth_date),
+        ai_insights=ai_insights,
     )

@@ -24,6 +24,34 @@ class ReadingPreview(BaseModel):
     cards: list[ReadingPreviewCard]
 
 
+class PersonalityScores(BaseModel):
+    leadership: int
+    intuition: int
+    creativity: int
+    logic: int
+    empathy: int
+
+
+class PinnacleInfo(BaseModel):
+    number: int
+    start_age: int
+    end_age: Optional[int] = None
+    is_current: bool
+
+
+class AiInsights(BaseModel):
+    life_path_headline: str
+    life_path_body: str
+    year_energy_body: str
+    personality_summary: str
+    strength_headline: str
+    strength_body: str
+    shadow_headline: str
+    shadow_body: str
+    pinnacle_body: str
+    karmic_body: str
+
+
 class NumerologyCalculationResponse(BaseModel):
     birth_date: date
     life_path_number: int
@@ -34,3 +62,8 @@ class NumerologyCalculationResponse(BaseModel):
     calculation_system: str
     calculation_version: str
     reading_preview: ReadingPreview
+    personality_scores: PersonalityScores
+    pinnacles: list[PinnacleInfo]
+    karmic_lessons: list[int]
+    pythagorean_matrix: dict[int, int]
+    ai_insights: Optional[AiInsights] = None

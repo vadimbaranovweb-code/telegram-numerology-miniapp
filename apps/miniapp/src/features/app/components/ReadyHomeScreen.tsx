@@ -20,9 +20,7 @@ import { TemporaryProfile } from "@/features/profile/types";
 import { DailyPlaceholderCard } from "@/features/daily/components/DailyPlaceholderCard";
 import { NumerologyResponse } from "@/features/onboarding/types";
 import { ProfileSummaryCard } from "@/features/profile/components/ProfileSummaryCard";
-import { ReadingNumbersGrid } from "@/features/reading/components/ReadingNumbersGrid";
 import { ReadingStory } from "@/features/reading/components/ReadingStory";
-import { ReadingPreview } from "@/features/reading/types";
 import { PurchaseSuccessCard } from "@/features/premium/components/PurchaseSuccessCard";
 import { PersonalYearCard } from "@/features/reading/components/PersonalYearCard";
 import { BottomTabBar, TabId } from "./BottomTabBar";
@@ -35,7 +33,6 @@ type HomeScreen = "hub" | "reading" | "compat" | "compat_flow";
 type ReadyHomeScreenProps = {
   profile: TemporaryProfile;
   result: NumerologyResponse;
-  readingPreview: ReadingPreview;
   homeHeadline: string | null;
   homeSupportingText: string | null;
   homeNextStep: string | null;
@@ -96,7 +93,6 @@ function resolveInitialHomeScreen(entrySection: EntrySection): HomeScreen {
 export function ReadyHomeScreen({
   profile,
   result,
-  readingPreview,
   entrySection,
   sectionBadges,
   sectionDescriptions,
@@ -231,19 +227,9 @@ export function ReadyHomeScreen({
               </button>
             </div>
             <ReadingStory
-              preview={readingPreview}
-              lifePathNumber={result.life_path_number}
-              blurFromIndex={2}
-              sectionBadge={sectionBadges.reading ?? null}
-              sectionState={sectionStates.reading ?? null}
-              sectionDescription={sectionDescriptions.reading ?? null}
-              sectionAction={sectionActions.reading ?? null}
+              result={result}
               onUnlock={onCompletePurchase}
               onUnlockBlockVisible={(visible) => setReadingCtaVisible(!visible)}
-            />
-            <ReadingNumbersGrid
-              result={result}
-              displayName={profile.display_name ?? undefined}
             />
           </>
         )}
