@@ -26,6 +26,8 @@ import { PremiumPaywallCard } from "@/features/premium/components/PremiumPaywall
 import { PurchaseSuccessCard } from "@/features/premium/components/PurchaseSuccessCard";
 import { BottomTabBar, TabId } from "./BottomTabBar";
 import { BottomSheet } from "./BottomSheet";
+import { GenerationLoadingScreen } from "./GenerationLoadingScreen";
+import { PersonalYearCard } from "@/features/reading/components/PersonalYearCard";
 import { FormEvent } from "react";
 
 type ReadyHomeScreenProps = {
@@ -194,6 +196,11 @@ export function ReadyHomeScreen({
               sectionActions={sectionActions}
               onTabChange={handleTabChange}
             />
+            <PersonalYearCard
+              personalYear={result.personal_year_number}
+              personalMonth={result.personal_month_number}
+            />
+
             {visibleSections.includes("reading") && (
               <>
                 <ReadingStory
@@ -227,7 +234,11 @@ export function ReadyHomeScreen({
           />
         )}
 
-        {activeTab === "compat" && (
+        {activeTab === "compat" && isCompatibilitySubmitting && (
+          <GenerationLoadingScreen />
+        )}
+
+        {activeTab === "compat" && !isCompatibilitySubmitting && (
           <CompatibilityTeaserCard
             isExpanded={isCompatibilityExpanded}
             isHighlighted={homeFocus === "compatibility"}
