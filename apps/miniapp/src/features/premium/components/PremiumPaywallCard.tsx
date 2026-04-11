@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { CompatibilityPreviewResponse } from "@/features/compatibility/types";
 
 type PremiumPaywallCardProps = {
@@ -7,13 +8,6 @@ type PremiumPaywallCardProps = {
   onContinue: () => void;
   onBack: () => void;
 };
-
-const BENEFITS = [
-  "Full compatibility analysis with deeper cards",
-  "Where tension will show up between you",
-  "What makes this bond last long-term",
-  "Saved to your profile for later",
-];
 
 export function PremiumPaywallCard({
   preview,
@@ -35,25 +29,32 @@ export function PremiumPaywallCard({
         <p
           className="text-[11px] font-semibold uppercase tracking-[0.22em]"
           style={{ color: "var(--accent-green)" }}
+          suppressHydrationWarning
         >
-          Premium active
+          {t.paywall.premium_label}
         </p>
         <h3
           className="mt-3 text-2xl font-bold tracking-tight"
           style={{ color: "var(--text-primary)" }}
+          suppressHydrationWarning
         >
-          Your unlock is already active.
+          {t.paywall.premium_title}
         </h3>
-        <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-          Status: {premiumStatus ?? "premium"}
+        <p
+          className="mt-2 text-sm leading-6"
+          style={{ color: "var(--text-secondary)" }}
+          suppressHydrationWarning
+        >
+          {t.paywall.premium_body} {premiumStatus ?? "premium"}
         </p>
         <button
           type="button"
           onClick={onContinue}
           className="mt-5 w-full rounded-2xl py-3.5 text-sm font-semibold transition"
           style={{ background: "var(--accent-green)", color: "#0A0A14" }}
+          suppressHydrationWarning
         >
-          Back to compatibility
+          {t.paywall.back_to_compat}
         </button>
       </article>
     );
@@ -77,23 +78,29 @@ export function PremiumPaywallCard({
       <p
         className="text-[11px] font-semibold uppercase tracking-[0.22em]"
         style={{ color: "var(--accent-soft)" }}
+        suppressHydrationWarning
       >
-        Premium unlock
+        {t.paywall.label}
       </p>
 
       <h3
         className="mt-3 text-[26px] font-bold tracking-tight"
         style={{ color: "var(--text-primary)" }}
+        suppressHydrationWarning
       >
-        Unlock the full picture.
+        {t.paywall.title}
       </h3>
 
       {/* Benefits */}
       <ul className="mt-5 space-y-3">
-        {BENEFITS.map((b) => (
+        {t.paywall.benefits.map((b) => (
           <li key={b} className="flex items-start gap-3">
             <span style={{ color: "var(--accent-primary)", marginTop: 1 }}>✦</span>
-            <span className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+            <span
+              className="text-sm leading-6"
+              style={{ color: "var(--text-secondary)" }}
+              suppressHydrationWarning
+            >
               {b}
             </span>
           </li>
@@ -112,10 +119,20 @@ export function PremiumPaywallCard({
           <span className="text-[32px] font-bold" style={{ color: "var(--text-primary)" }}>
             ⭐ {preview.paywall.price_local ?? 350}
           </span>
-          <span className="text-sm" style={{ color: "var(--text-muted)" }}>Stars</span>
+          <span
+            className="text-sm"
+            style={{ color: "var(--text-muted)" }}
+            suppressHydrationWarning
+          >
+            {t.paywall.stars}
+          </span>
         </div>
-        <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-          One-time unlock · less than a coffee
+        <p
+          className="mt-1 text-xs"
+          style={{ color: "var(--text-muted)" }}
+          suppressHydrationWarning
+        >
+          {t.paywall.one_time}
         </p>
       </div>
 
@@ -125,8 +142,9 @@ export function PremiumPaywallCard({
         onClick={onContinue}
         className="mt-4 w-full rounded-2xl py-3.5 text-sm font-semibold text-white transition active:scale-[0.98]"
         style={{ background: "var(--grad-cta)" }}
+        suppressHydrationWarning
       >
-        Unlock Full Reading
+        {t.paywall.cta}
       </button>
 
       <button
@@ -137,12 +155,17 @@ export function PremiumPaywallCard({
           border: "1px solid var(--border-subtle)",
           color: "var(--text-secondary)",
         }}
+        suppressHydrationWarning
       >
-        Back to preview
+        {t.paywall.back}
       </button>
 
-      <p className="mt-3 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-        Paid via Telegram Stars · Instant access
+      <p
+        className="mt-3 text-center text-xs"
+        style={{ color: "var(--text-muted)" }}
+        suppressHydrationWarning
+      >
+        {t.paywall.footer}
       </p>
     </article>
   );

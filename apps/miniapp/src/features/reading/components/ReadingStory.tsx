@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { ReadingCard, ReadingPreview } from "../types";
 
 const CARD_ACCENTS: Record<string, string> = {
@@ -65,8 +66,9 @@ export function ReadingStory({
         <p
           className="text-[11px] font-semibold uppercase tracking-[0.22em]"
           style={{ color: "var(--text-muted)" }}
+          suppressHydrationWarning
         >
-          First reading
+          {t.reading.label}
         </p>
         {sectionBadge && (
           <span
@@ -125,7 +127,7 @@ export function ReadingStory({
 function formatSectionActionLabel(action: string) {
   switch (action) {
     case "open_reading":
-      return "Revisit your reading";
+      return t.reading.action_open;
     default:
       return action.replaceAll("_", " ");
   }

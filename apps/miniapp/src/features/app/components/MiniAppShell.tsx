@@ -11,6 +11,7 @@ import { useTelegramBootstrap } from "@/features/telegram/hooks/useTelegramBoots
 import { useTelegramWebApp } from "@/features/telegram/hooks/useTelegramWebApp";
 
 import { useMiniAppBootstrap } from "../hooks/useMiniAppBootstrap";
+import { GenerationLoadingScreen } from "./GenerationLoadingScreen";
 import { StarField } from "./StarField";
 
 export function MiniAppShell() {
@@ -101,18 +102,22 @@ export function MiniAppShell() {
             />
 
             {bootstrapStatus === "onboarding" ? (
-              <OnboardingForm
-                birthDate={birthDate}
-                fullName={fullName}
-                dailyOptIn={dailyOptIn}
-                isSubmitting={isSubmitting}
-                isFormValid={isFormValid}
-                error={error}
-                onBirthDateChange={setBirthDate}
-                onFullNameChange={setFullName}
-                onDailyOptInChange={setDailyOptIn}
-                onSubmit={handleSubmit}
-              />
+              isSubmitting ? (
+                <GenerationLoadingScreen />
+              ) : (
+                <OnboardingForm
+                  birthDate={birthDate}
+                  fullName={fullName}
+                  dailyOptIn={dailyOptIn}
+                  isSubmitting={isSubmitting}
+                  isFormValid={isFormValid}
+                  error={error}
+                  onBirthDateChange={setBirthDate}
+                  onFullNameChange={setFullName}
+                  onDailyOptInChange={setDailyOptIn}
+                  onSubmit={handleSubmit}
+                />
+              )
             ) : null}
 
             {bootstrapStatus === "ready" && profile && result && readingPreview ? (

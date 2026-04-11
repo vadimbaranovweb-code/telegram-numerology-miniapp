@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+
 export function HeroSection() {
   return (
     <section className="relative flex flex-col items-center pt-10 pb-2 text-center">
@@ -27,20 +29,20 @@ export function HeroSection() {
 
       {/* Headline */}
       <h1
-        className="text-[30px] font-bold leading-tight tracking-tight"
+        className="text-[30px] font-bold leading-tight tracking-tight max-w-[280px]"
         style={{ color: "var(--text-primary)" }}
+        suppressHydrationWarning
       >
-        Your numbers
-        <br />
-        have been waiting.
+        {t.hero.title}
       </h1>
 
       {/* Sub */}
       <p
         className="mt-3 max-w-[260px] text-sm leading-6"
         style={{ color: "var(--text-secondary)" }}
+        suppressHydrationWarning
       >
-        Discover what your birth date reveals about you.
+        {t.hero.subtitle}
       </p>
     </section>
   );

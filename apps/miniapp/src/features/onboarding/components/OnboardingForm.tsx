@@ -1,4 +1,5 @@
 import { FormEvent } from "react";
+import { t } from "@/i18n";
 import { DrumDatePicker } from "./DrumDatePicker";
 
 type OnboardingFormProps = {
@@ -41,8 +42,9 @@ export function OnboardingForm({
           <label
             className="block text-[11px] font-semibold uppercase tracking-[0.22em]"
             style={{ color: "var(--text-muted)" }}
+            suppressHydrationWarning
           >
-            When were you born?
+            {t.onboarding.birth_label}
           </label>
           <DrumDatePicker value={birthDate} onChange={onBirthDateChange} />
         </div>
@@ -53,19 +55,20 @@ export function OnboardingForm({
             className="block text-[11px] font-semibold uppercase tracking-[0.22em]"
             htmlFor="fullName"
             style={{ color: "var(--text-muted)" }}
+            suppressHydrationWarning
           >
-            Your name
+            {t.onboarding.name_label}
             <span
               className="ml-2 normal-case tracking-normal text-xs font-normal"
               style={{ color: "var(--text-muted)" }}
             >
-              (optional)
+              {t.onboarding.name_optional}
             </span>
           </label>
           <input
             id="fullName"
             type="text"
-            placeholder="First name for deeper profile signals"
+            placeholder={t.onboarding.name_placeholder}
             value={fullName}
             onChange={(e) => onFullNameChange(e.target.value)}
             className="w-full rounded-2xl px-4 py-3 text-[15px] outline-none transition"
@@ -122,15 +125,23 @@ export function OnboardingForm({
               )}
             </div>
           </div>
-          <span className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-            Get daily insights once your reading is ready.
+          <span
+            className="text-sm leading-6"
+            style={{ color: "var(--text-secondary)" }}
+            suppressHydrationWarning
+          >
+            {t.onboarding.daily_optin}
           </span>
         </label>
 
         {/* Privacy note */}
-        <p className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
+        <p
+          className="flex items-center gap-1.5 text-xs"
+          style={{ color: "var(--text-muted)" }}
+          suppressHydrationWarning
+        >
           <span>🔒</span>
-          <span>Your data stays private. We never share it.</span>
+          <span>{t.onboarding.privacy}</span>
         </p>
 
         {/* Submit */}
@@ -148,8 +159,9 @@ export function OnboardingForm({
             cursor: !isFormValid || isSubmitting ? "not-allowed" : "pointer",
             opacity: !isFormValid || isSubmitting ? 0.6 : 1,
           }}
+          suppressHydrationWarning
         >
-          {isSubmitting ? "Calculating your numbers..." : "See my numbers →"}
+          {isSubmitting ? t.onboarding.submitting : t.onboarding.submit}
         </button>
       </form>
 

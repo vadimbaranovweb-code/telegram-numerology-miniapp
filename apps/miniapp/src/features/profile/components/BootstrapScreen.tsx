@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+
 export function BootstrapScreen() {
   return (
     <section
@@ -11,19 +13,24 @@ export function BootstrapScreen() {
       <p
         className="text-[11px] font-semibold uppercase tracking-[0.22em]"
         style={{ color: "var(--text-muted)" }}
+        suppressHydrationWarning
       >
-        Loading
+        {t.bootstrap.label}
       </p>
       <div className="mt-4 space-y-2">
         <h1
           className="text-2xl font-bold tracking-tight"
           style={{ color: "var(--text-primary)" }}
+          suppressHydrationWarning
         >
-          Restoring your profile
+          {t.bootstrap.title}
         </h1>
-        <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-          We are checking whether your reading and home progress are already
-          available on this device.
+        <p
+          className="text-sm leading-6"
+          style={{ color: "var(--text-secondary)" }}
+          suppressHydrationWarning
+        >
+          {t.bootstrap.body}
         </p>
       </div>
       {/* Animated dot indicator */}
@@ -34,8 +41,7 @@ export function BootstrapScreen() {
             className="h-1.5 w-1.5 rounded-full"
             style={{
               background: "var(--accent-primary)",
-              opacity: 0.4 + i * 0.2,
-              animation: `pulse 1.4s ease-in-out ${i * 0.2}s infinite`,
+              animation: `pulse-dot 1.4s ease-in-out ${i * 0.22}s infinite`,
             }}
           />
         ))}

@@ -65,3 +65,23 @@ a {
 /* Drum picker scrollbar hidden */
 .drum-col::-webkit-scrollbar { display: none; }
 .drum-col { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Animations */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.3; transform: scale(0.85); }
+  50%       { opacity: 1;   transform: scale(1.1); }
+}
+@keyframes confetti-fall {
+  0%   { transform: translateY(-8px) rotate(0deg);   opacity: 1; }
+  80%  { opacity: 0.8; }
+  100% { transform: translateY(340px) rotate(540deg); opacity: 0; }
+}
+@keyframes msg-fade {
+  0%   { opacity: 0; transform: translateY(6px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  85%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-6px); }
+}

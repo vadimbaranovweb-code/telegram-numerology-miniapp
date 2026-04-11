@@ -1,4 +1,6 @@
+import { t } from "@/i18n";
 import { CompatibilityPreviewResponse } from "@/features/compatibility/types";
+import { ConfettiParticles } from "@/features/app/components/ConfettiParticles";
 
 type PurchaseSuccessCardProps = {
   preview: CompatibilityPreviewResponse;
@@ -13,23 +15,22 @@ export function PurchaseSuccessCard({
   premiumStatus,
   onOpenCompatibility,
 }: PurchaseSuccessCardProps) {
-  const eyebrow = isPremium ? "Premium active" : "Unlock complete";
-  const title = isPremium
-    ? "Premium access is already active."
-    : "Premium unlock confirmed.";
-  const body = isPremium
-    ? "Your premium unlock is still saved in this session, so you can continue with compatibility without reopening checkout."
-    : "Your premium unlock is saved, and the next step is to return to compatibility.";
+  const eyebrow = isPremium ? t.success.label_active : t.success.label_new;
+  const title   = isPremium ? t.success.title_active : t.success.title_new;
+  const body    = isPremium ? t.success.body_active  : t.success.body_new;
 
   return (
     <article
-      className="rounded-[28px] p-6"
+      className="relative rounded-[28px] p-6 overflow-hidden"
       style={{
         background: "var(--bg-surface)",
         border: "1px solid rgba(52,211,153,0.35)",
         boxShadow: "0 18px 45px rgba(0,0,0,0.5), 0 0 60px rgba(52,211,153,0.06)",
       }}
     >
+      {/* Confetti */}
+      <ConfettiParticles />
+
       {/* Glow */}
       <div
         className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-8 rounded-full blur-3xl"
@@ -39,6 +40,7 @@ export function PurchaseSuccessCard({
       <p
         className="text-[11px] font-semibold uppercase tracking-[0.22em]"
         style={{ color: "var(--accent-green)" }}
+        suppressHydrationWarning
       >
         {eyebrow}
       </p>
@@ -60,10 +62,15 @@ export function PurchaseSuccessCard({
         <h3
           className="text-2xl font-bold tracking-tight"
           style={{ color: "var(--text-primary)" }}
+          suppressHydrationWarning
         >
           {title}
         </h3>
-        <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+        <p
+          className="text-sm leading-6"
+          style={{ color: "var(--text-secondary)" }}
+          suppressHydrationWarning
+        >
           {body}
         </p>
       </div>
@@ -79,8 +86,9 @@ export function PurchaseSuccessCard({
         <p
           className="text-[11px] font-semibold uppercase tracking-[0.18em]"
           style={{ color: "var(--accent-green)" }}
+          suppressHydrationWarning
         >
-          What opens next
+          {t.success.what_next}
         </p>
         <h4
           className="mt-2 text-lg font-bold tracking-tight"
@@ -88,8 +96,12 @@ export function PurchaseSuccessCard({
         >
           {preview.preview.title}
         </h4>
-        <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-          Your preview is still here, and the full compatibility reading is the next layer to open.
+        <p
+          className="mt-2 text-sm leading-6"
+          style={{ color: "var(--text-secondary)" }}
+          suppressHydrationWarning
+        >
+          {t.success.preview_body}
         </p>
         {isPremium ? (
           <p
@@ -106,8 +118,9 @@ export function PurchaseSuccessCard({
         onClick={onOpenCompatibility}
         className="mt-5 w-full rounded-2xl py-3.5 text-sm font-semibold transition active:scale-[0.98]"
         style={{ background: "var(--grad-cta)", color: "#fff" }}
+        suppressHydrationWarning
       >
-        Return to compatibility
+        {t.success.cta}
       </button>
     </article>
   );

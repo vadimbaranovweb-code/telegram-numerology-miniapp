@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { DailyInsight } from "@/features/daily/types";
 
 type DailyPlaceholderCardProps = {
@@ -26,32 +27,32 @@ export function DailyPlaceholderCard({
   const title = dailyInsight
     ? dailyInsight.headline
     : todayState === "ready"
-      ? "Today's insight is ready."
+      ? t.daily.title_ready
       : todayState === "opted_out"
-        ? "Daily insights are paused for now."
-        : "Today's guidance unlocks after your first reading.";
+        ? t.daily.title_opted_out
+        : t.daily.title_locked;
 
   const body = dailyInsight
     ? dailyInsight.body
     : sectionDescription
       ? sectionDescription
     : todayState === "ready"
-      ? "Your first reading is saved and daily guidance is turned on, so you can open one focused insight for today."
+      ? t.daily.body_ready
       : todayState === "opted_out"
-        ? "Your profile and reading are ready. Turn daily insights back on whenever you want a new prompt to return."
-        : "Once your profile and first reading are ready, this section becomes your daily check-in point.";
+        ? t.daily.body_opted_out
+        : t.daily.body_locked;
 
   const footer = isLoading
-    ? "Loading today's insight..."
+    ? t.daily.footer_loading
     : dailyInsight
       ? dailyInsight.reflection
       : sectionAction === "open_today"
-        ? "See today's insight now."
+        ? t.daily.footer_see_now
       : todayState === "ready"
-        ? "Today's insight is available now."
+        ? t.daily.footer_available
         : dailyOptIn
-          ? "Daily insights are enabled, and this section will open as soon as today's card is ready."
-          : "Daily insights are off right now, but your first reading is still here whenever you want to revisit it.";
+          ? t.daily.footer_enabled
+          : t.daily.footer_off;
 
   return (
     <article
@@ -71,8 +72,9 @@ export function DailyPlaceholderCard({
         <p
           className="text-[11px] font-semibold uppercase tracking-[0.22em]"
           style={{ color: "var(--accent-blue)" }}
+          suppressHydrationWarning
         >
-          Today
+          {t.daily.label}
         </p>
         {isHighlighted ? (
           <span
@@ -81,8 +83,9 @@ export function DailyPlaceholderCard({
               background: "rgba(96,165,250,0.12)",
               color: "var(--accent-blue)",
             }}
+            suppressHydrationWarning
           >
-            In focus
+            {t.daily.in_focus}
           </span>
         ) : null}
         {sectionBadge ? (
@@ -114,10 +117,15 @@ export function DailyPlaceholderCard({
         <h3
           className="text-xl font-bold tracking-tight"
           style={{ color: "var(--text-primary)" }}
+          suppressHydrationWarning
         >
           {title}
         </h3>
-        <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+        <p
+          className="text-sm leading-6"
+          style={{ color: "var(--text-secondary)" }}
+          suppressHydrationWarning
+        >
           {body}
         </p>
       </div>
@@ -130,6 +138,7 @@ export function DailyPlaceholderCard({
           border: "1px solid rgba(96,165,250,0.12)",
           color: "var(--text-muted)",
         }}
+        suppressHydrationWarning
       >
         {isLoading ? (
           <span style={{ color: "var(--accent-blue)" }}>{footer}</span>

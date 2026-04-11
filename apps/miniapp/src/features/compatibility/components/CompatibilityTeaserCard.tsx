@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent } from "react";
+import { t } from "@/i18n";
 
 import { DrumDatePicker } from "@/features/onboarding/components/DrumDatePicker";
 import {
@@ -36,10 +37,10 @@ type CompatibilityTeaserCardProps = {
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };
 
-const CONTEXT_OPTIONS: { value: RelationshipContext; label: string; icon: string }[] = [
-  { value: "romantic", label: "Romantic", icon: "♥" },
-  { value: "friend", label: "Friend", icon: "✦" },
-  { value: "work", label: "Work", icon: "◈" },
+const CONTEXT_OPTIONS: { value: RelationshipContext; icon: string }[] = [
+  { value: "romantic", icon: "♥" },
+  { value: "friend",   icon: "✦" },
+  { value: "work",     icon: "◈" },
 ];
 
 export function CompatibilityTeaserCard({
@@ -67,12 +68,12 @@ export function CompatibilityTeaserCard({
   const hasPreviewStage = stage !== "input";
   const expandButtonLabel =
     sectionAction === "continue_compatibility"
-      ? "Continue compatibility"
-      : "Explore compatibility";
+      ? t.compatibility.expand_continue
+      : t.compatibility.expand;
   const submitButtonLabel =
     sectionAction === "continue_compatibility"
-      ? "Continue compatibility"
-      : "Generate preview";
+      ? t.compatibility.submit_continue
+      : t.compatibility.submit;
 
   return (
     <article
@@ -92,8 +93,9 @@ export function CompatibilityTeaserCard({
         <p
           className="text-[11px] font-semibold uppercase tracking-[0.22em]"
           style={{ color: "var(--accent-soft)" }}
+          suppressHydrationWarning
         >
-          Compatibility
+          {t.compatibility.label}
         </p>
         {isHighlighted ? (
           <span
@@ -102,8 +104,9 @@ export function CompatibilityTeaserCard({
               background: "rgba(123,94,248,0.15)",
               color: "var(--accent-primary)",
             }}
+            suppressHydrationWarning
           >
-            In focus
+            {t.daily.in_focus}
           </span>
         ) : null}
         {sectionBadge ? (
@@ -152,12 +155,17 @@ export function CompatibilityTeaserCard({
             <label
               className="text-xs font-semibold uppercase tracking-[0.18em]"
               style={{ color: "var(--text-muted)" }}
+              suppressHydrationWarning
             >
-              Relationship type
+              {t.compatibility.type_label}
             </label>
             <div className="flex gap-2">
               {CONTEXT_OPTIONS.map((opt) => {
                 const isActive = relationshipContext === opt.value;
+                const label =
+                  opt.value === "romantic" ? t.compatibility.type_romantic
+                  : opt.value === "friend"  ? t.compatibility.type_friend
+                  : t.compatibility.type_work;
                 return (
                   <button
                     key={opt.value}
@@ -173,9 +181,10 @@ export function CompatibilityTeaserCard({
                         : "1px solid var(--border-subtle)",
                       color: isActive ? "var(--accent-soft)" : "var(--text-secondary)",
                     }}
+                    suppressHydrationWarning
                   >
                     <span style={{ fontSize: 18 }}>{opt.icon}</span>
-                    {opt.label}
+                    {label}
                   </button>
                 );
               })}
@@ -187,8 +196,9 @@ export function CompatibilityTeaserCard({
             <label
               className="text-xs font-semibold uppercase tracking-[0.18em]"
               style={{ color: "var(--text-muted)" }}
+              suppressHydrationWarning
             >
-              Their birth date
+              {t.compatibility.birth_date}
             </label>
             <DrumDatePicker
               value={targetBirthDate}
@@ -201,12 +211,13 @@ export function CompatibilityTeaserCard({
             <label
               className="text-xs font-semibold uppercase tracking-[0.18em]"
               style={{ color: "var(--text-muted)" }}
+              suppressHydrationWarning
             >
-              Their name
+              {t.compatibility.name}
             </label>
             <input
               type="text"
-              placeholder="Optional"
+              placeholder={t.compatibility.name_optional}
               value={targetDisplayName}
               onChange={(e) => onTargetDisplayNameChange(e.target.value)}
               className="w-full rounded-2xl px-4 py-3 text-sm outline-none transition"
@@ -223,8 +234,9 @@ export function CompatibilityTeaserCard({
             disabled={!targetBirthDate || isSubmitting}
             className="w-full rounded-2xl py-3.5 text-sm font-semibold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             style={{ background: "var(--grad-cta)", color: "#fff" }}
+            suppressHydrationWarning
           >
-            {isSubmitting ? "Generating..." : submitButtonLabel}
+            {isSubmitting ? t.compatibility.generating : submitButtonLabel}
           </button>
         </form>
       ) : null}
@@ -514,8 +526,9 @@ function CompatibilityPreviewBody({
                 <span
                   className="text-xs font-semibold uppercase tracking-[0.18em]"
                   style={{ color: "var(--accent-soft)" }}
+                  suppressHydrationWarning
                 >
-                  ✦ Unlock to reveal
+                  {t.compatibility.unlock_label}
                 </span>
               </div>
             ) : null}
@@ -663,13 +676,14 @@ function CompatibilityFooterCard({
       <p
         className="text-[11px] font-semibold uppercase tracking-[0.18em]"
         style={{ color: "var(--accent-soft)" }}
+        suppressHydrationWarning
       >
-        Full reading
+        {t.compatibility.full_reading}
       </p>
       <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
         Unlock the full compatibility reading with deeper cards for{" "}
         <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-          ⭐ {preview.paywall.price_local} Stars
+          ⭐ {preview.paywall.price_local} {t.paywall.stars}
         </span>
         .
       </p>
@@ -678,8 +692,9 @@ function CompatibilityFooterCard({
         onClick={onOpenPaywall}
         className="mt-4 w-full rounded-2xl py-3.5 text-sm font-semibold transition active:scale-[0.98]"
         style={{ background: "var(--grad-cta)", color: "#fff" }}
+        suppressHydrationWarning
       >
-        Unlock full compatibility
+        {t.compatibility.unlock_cta}
       </button>
     </div>
   );
@@ -726,26 +741,20 @@ function resolveCompatibilityStageHeader(
 ): { title: string; description: string } {
   if (stage === "preview_premium") {
     return {
-      title: "Your saved compatibility is ready to continue.",
-      description:
-        sectionDescription ??
-        "Your saved preview is ready to continue, and premium access is already active for this session.",
+      title: t.compatibility.stage_premium_title,
+      description: sectionDescription ?? t.compatibility.stage_premium_desc,
     };
   }
 
   if (stage === "preview_locked") {
     return {
-      title: "Your compatibility preview is ready.",
-      description:
-        sectionDescription ??
-        "Your saved preview shows the first compatibility signals and leads into the premium unlock.",
+      title: t.compatibility.stage_locked_title,
+      description: sectionDescription ?? t.compatibility.stage_locked_desc,
     };
   }
 
   return {
-    title: "See how your energy connects.",
-    description:
-      sectionDescription ??
-      "Enter their birth date for a quick preview of the first compatibility signals.",
+    title: t.compatibility.stage_input_title,
+    description: sectionDescription ?? t.compatibility.stage_input_desc,
   };
 }
