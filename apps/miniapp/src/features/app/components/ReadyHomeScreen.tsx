@@ -207,6 +207,7 @@ export function ReadyHomeScreen({
       <>
         <ReadingStory
           preview={readingPreview}
+          lifePathNumber={result.life_path_number}
           sectionBadge={sectionBadges.reading ?? null}
           sectionState={sectionStates.reading ?? null}
           sectionDescription={sectionDescriptions.reading ?? null}

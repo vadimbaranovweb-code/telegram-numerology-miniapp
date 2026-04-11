@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     # Set telegram_stars_export_invoice_links=true to call createInvoiceLink API.
     telegram_stars_test_invoice_slug: Optional[str] = None
     telegram_stars_export_invoice_links: bool = False
+    openai_api_key: Optional[str] = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

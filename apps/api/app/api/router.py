@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.routes.auth import router as auth_router
+from app.api.routes.illustrations import router as illustrations_router
 from app.api.routes.bootstrap import router as bootstrap_router
 from app.api.routes.compatibility import router as compatibility_router
 from app.api.routes.daily import router as daily_router
@@ -33,3 +34,4 @@ api_router.include_router(payments_router, prefix="/payments", tags=["payments"]
 api_router.include_router(premium_router, prefix="/premium", tags=["premium"])
 api_router.include_router(profile_router, prefix="/profile", tags=["profile"])
 api_router.include_router(readings_router, prefix="/readings", tags=["readings"])
+api_router.include_router(illustrations_router, prefix="/illustrations", tags=["illustrations"])
