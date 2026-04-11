@@ -13,39 +13,117 @@ logger = logging.getLogger(__name__)
 
 CACHE_DIR = Path("/tmp/numerology-illustrations")
 
-# Life path archetypal descriptions for DALL-E prompt
+# Life path archetypal visual concepts — each has distinct imagery and mood
 _LIFE_PATH_THEMES: dict[int, str] = {
-    1: "a solitary blazing star at the center, pioneer energy, bold singularity, radiant outward force",
-    2: "two luminous orbs gently orbiting each other, soft duality, yin-yang balance, intertwining light streams",
-    3: "bursting creative sparks and prismatic light rays, expressive cosmic bloom, vibrant radiance",
-    4: "crystalline geometric lattice, sacred cube structure, deep grounding energy, ordered sacred geometry",
-    5: "swirling cosmic winds and flowing stardust, dynamic motion, freedom and transformation, spiraling currents",
-    6: "blooming cosmic flower, hexagonal harmony, nurturing golden warmth at the center, gentle radiance",
-    7: "solitary distant star in vast deep space, mystical void, ancient stargate portal, hidden cosmic depths",
-    8: "powerful double helix spiral of light, abundance vortex, infinite loop of cosmic energy, golden power",
-    9: "expanding universal light sphere, all-encompassing radiance, cosmic completion, full circle of stars",
+    1: (
+        "a lone blazing comet cutting a bold streak through absolute darkness, "
+        "single concentrated point of white-hot light expanding outward, "
+        "pioneer energy — one force, one direction, no hesitation"
+    ),
+    2: (
+        "two luminous pearls suspended in perfect equilibrium above a still cosmic lake, "
+        "silver and rose light reflecting between them, "
+        "moonlit duality — soft pull of opposing forces finding harmony"
+    ),
+    3: (
+        "fractal burst of prismatic color — every hue exploding from a central creative spark, "
+        "painterly chaos resolving into a blooming spiral form, "
+        "expressive joy made visible as light and pigment"
+    ),
+    4: (
+        "ancient granite foundation stone suspended in space, "
+        "four luminous grid lines forming a perfect square of ochre-gold light, "
+        "bedrock energy — solidity, geometry, the architecture of the cosmos"
+    ),
+    5: (
+        "mercury-quick spiral trail blazing through five constellations, "
+        "motion-blur stardust in electric teal and silver, "
+        "restless kinetic energy — perpetual becoming, wind made of starlight"
+    ),
+    6: (
+        "warm amber hearthlight blooming at the center of a hexagonal rose window, "
+        "six golden petals of radiant warmth opening like a flower, "
+        "sheltering nurture — home in the center of the universe"
+    ),
+    7: (
+        "solitary amethyst crystal spire rising through a field of silent deep-space stars, "
+        "one thin beam of violet-white starlight piercing absolute stillness, "
+        "mystical solitude — the seeker alone with the infinite"
+    ),
+    8: (
+        "double copper-gold infinity spiral ascending through a column of rising light, "
+        "power vortex with deep amber core fading to brilliant white at the apex, "
+        "unstoppable upward force — ambition as cosmic law"
+    ),
+    9: (
+        "cosmic supernova dissolving outward into a thousand luminous seeds of light, "
+        "deep violet-rose bloom at the moment of ultimate completion, "
+        "universal release — everything given back to the cosmos"
+    ),
 }
 
-# Card type visual focus descriptions
-_CARD_TYPE_THEMES: dict[str, str] = {
-    "core_energy": "central energy core emanating outward, life force at the center, primary essence",
-    "current_timing": "flowing time cycles, celestial orbital rings, cosmic calendar wheel in motion",
-    "inner_drive": "deep inner flame glowing from within, hidden soul fire, mysterious inner light",
-    "strength": "rising powerful light pillar, upward ascension, bold luminous strength",
-    "blind_spot": "partially obscured light, shadow and illumination interplay, hidden revelation",
-    "relationship_style": "two connected orbits of light, relational energy field, attraction and connection",
+# Card type: distinct palette and emotional tone per card
+_CARD_TYPE_THEMES: dict[str, tuple[str, str]] = {
+    # (visual focus description, color palette hint)
+    "core_energy": (
+        "the primal life force radiating from an incandescent center, essence laid bare",
+        "warm violet-gold palette, luminous core, deep indigo outer space"
+    ),
+    "current_timing": (
+        "celestial orbital rings showing time in motion, a cosmic calendar wheel turning slowly",
+        "cool cyan-blue and silver tones, orbital light trails, flowing temporal arcs"
+    ),
+    "inner_drive": (
+        "a hidden inner flame burning deep within shadow, the soul fire visible only to those who look closely",
+        "deep crimson-rose and dark indigo, smoldering ember glow, intimate darkness"
+    ),
+    "strength": (
+        "a rising pillar of pure light breaking through darkness, ascension and power made visible",
+        "amber-white and gold tones, radiant upward burst, strength as luminous clarity"
+    ),
+    "blind_spot": (
+        "a half-revealed form emerging from shadow — light illuminates one side, deep mystery on the other",
+        "cool indigo and charcoal shadows with a single streak of revealing silver light"
+    ),
+    "relationship_style": (
+        "two orbits of warm light intertwining — distinct yet drawn together, a dance of attraction and resonance",
+        "rose-gold dual tones, twin light spirals, soft warmth of connection"
+    ),
 }
+
+# Art style variants — rotated by (life_path + card_type_index) to ensure variety
+_ART_STYLES: list[str] = [
+    "highly detailed dark digital art, cinematic depth of field, ultra-sharp particles",
+    "cosmic watercolor wash, soft ink bleeds, translucent layered washes on black",
+    "dark oil painting with impasto texture, rich deep color, painterly luminous highlights",
+    "sacred geometry line art with soft color fills, precise geometric forms, ethereal glow",
+    "soft pastel cosmic illustration, dreamy atmospheric depth, delicate color gradients",
+    "photorealistic space photography style, NASA deep-field aesthetic, sharp star detail",
+]
+
+_CARD_TYPE_ORDER = list(_CARD_TYPE_THEMES.keys())
 
 
 def _build_prompt(life_path: int, card_type: str) -> str:
-    life_theme = _LIFE_PATH_THEMES.get(life_path, "cosmic energy, sacred light")
-    card_theme = _CARD_TYPE_THEMES.get(card_type, "mystical cosmic energy")
+    life_theme = _LIFE_PATH_THEMES.get(life_path, "cosmic energy, sacred geometry, mystical light")
+    card_focus, card_palette = _CARD_TYPE_THEMES.get(
+        card_type, ("mystical cosmic energy", "deep violet and indigo")
+    )
+
+    # Rotate art style deterministically so same life_path+card_type always gets same style
+    # but different combinations get different styles
+    card_idx = _CARD_TYPE_ORDER.index(card_type) if card_type in _CARD_TYPE_ORDER else 0
+    style_idx = (life_path + card_idx * 3) % len(_ART_STYLES)
+    art_style = _ART_STYLES[style_idx]
+
     return (
-        f"Mystical dark cosmic illustration: {life_theme}. "
-        f"Visual focus: {card_theme}. "
-        "Style: deep dark space background (#0A0A14), glowing violet and indigo sacred geometry, "
-        "soft luminous particles, ethereal atmosphere, cinematic depth of field. "
-        "No text, no numbers, no letters, no faces. Square format. Highly detailed digital art."
+        f"Dark mystical illustration: {life_theme}. "
+        f"Emotional focus: {card_focus}. "
+        f"Color palette: {card_palette}. "
+        f"Background: absolute dark space, near-black (#0A0A14). "
+        f"Style: {art_style}. "
+        "No text, no numbers, no letters, no human faces or figures. "
+        "Square 1:1 format. Stunning, otherworldly, premium quality."
     )
 
 
