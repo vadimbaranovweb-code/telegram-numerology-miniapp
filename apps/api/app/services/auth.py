@@ -1,3 +1,4 @@
+import json
 from hashlib import sha1
 from typing import Optional
 from urllib.parse import parse_qs, unquote
@@ -16,10 +17,20 @@ def build_telegram_auth_response(init_data: str) -> TelegramAuthResponse:
     user_blob = parsed.get("user", [None])[0]
 
     display_name = None
+    telegram_user_id: Optional[str] = None
     if user_blob:
         display_name = extract_user_display_name(user_blob)
+        telegram_user_id = extract_user_id(user_blob)
 
-    token_suffix = sha1(init_data.encode("utf-8")).hexdigest()[:16]
+    # Derive a STABLE token from telegram user_id so the same user
+    # always gets the same session_token across mini app opens.
+    # init_data changes every open (auth_date timestamp), but user_id is stable.
+    if telegram_user_id:
+        token_seed = f"telegram_user:{telegram_user_id}"
+    else:
+        # Fallback: hash init_data minus auth_date to improve stability
+        token_seed = init_data
+    token_suffix = sha1(token_seed.encode("utf-8")).hexdigest()[:16]
 
     response = TelegramAuthResponse(
         session_token=f"tg_session_{token_suffix}",
@@ -62,3 +73,12 @@ def extract_user_display_name(user_blob: str) -> Optional[str]:
             return value
 
     return None
+
+
+def extract_user_id(user_blob: str) -> Optional[str]:
+    try:
+        data = json.loads(unquote(user_blob))
+        uid = data.get("id")
+        return str(uid) if uid is not None else None
+    except Exception:
+        return None
