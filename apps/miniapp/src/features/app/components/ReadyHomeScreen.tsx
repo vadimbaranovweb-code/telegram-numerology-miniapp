@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type {
   AppStateSource,
@@ -87,11 +87,11 @@ type ReadyHomeScreenProps = {
   onCompatibilitySubmit: (event: FormEvent<HTMLFormElement>) => void;
   onNewCalculation: (birthDate: string, name: string) => Promise<void>;
   onResetProfile: () => void | Promise<void>;
+  pendingNavigation: "reading" | null;
+  onClearPendingNavigation: () => void;
 };
 
-function resolveInitialHomeScreen(entrySection: EntrySection): HomeScreen {
-  if (entrySection === "compatibility") return "compat_flow";
-  if (entrySection === "first_reading") return "reading";
+function resolveInitialHomeScreen(): HomeScreen {
   return "hub";
 }
 
@@ -128,19 +128,29 @@ export function ReadyHomeScreen({
   onCompatibilitySubmit,
   onNewCalculation,
   onResetProfile,
+  pendingNavigation,
+  onClearPendingNavigation,
 }: ReadyHomeScreenProps) {
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [homeScreen, setHomeScreen] = useState<HomeScreen>(() =>
-    resolveInitialHomeScreen(entrySection),
+    resolveInitialHomeScreen(),
   );
   const [readingCtaVisible, setReadingCtaVisible] = useState(true);
   const [newCalcOpen, setNewCalcOpen] = useState(false);
 
+  // Navigate to reading when hook signals (after onboarding or new calculation)
+  useEffect(() => {
+    if (pendingNavigation === "reading") {
+      setActiveTab("home");
+      setHomeScreen("reading");
+      onClearPendingNavigation();
+    }
+  }, [pendingNavigation, onClearPendingNavigation]);
+
   async function handleNewCalc(newBirthDate: string, newName: string) {
     setNewCalcOpen(false);
     await onNewCalculation(newBirthDate, newName);
-    setActiveTab("home");
-    setHomeScreen("reading");
+    // Navigation handled by pendingNavigation useEffect
   }
 
   function handleTabChange(tab: TabId) {

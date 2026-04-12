@@ -112,6 +112,7 @@ export function useMiniAppBootstrap(
   const [sectionDescriptions, setSectionDescriptions] = useState<Record<string, string>>({});
   const [sectionStates, setSectionStates] = useState<Record<string, string>>({});
   const [sectionActions, setSectionActions] = useState<Record<string, string>>({});
+  const [pendingNavigation, setPendingNavigation] = useState<"reading" | null>(null);
   const [primaryAction, setPrimaryAction] = useState<PrimaryHomeAction>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -591,6 +592,7 @@ export function useMiniAppBootstrap(
           prompt_variant: "inline_onboarding_checkbox",
         },
       );
+      setPendingNavigation("reading");
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -630,6 +632,7 @@ export function useMiniAppBootstrap(
         displayName: newName || null,
         lifePathNumber: numerologyData.life_path_number,
       });
+      setPendingNavigation("reading");
 
       // Sync to backend if Telegram-backed
       if (telegramAuth?.status === "authenticated" && telegramAuth.sessionToken) {
@@ -779,11 +782,16 @@ export function useMiniAppBootstrap(
     setFullName(snapshot.profile.display_name ?? "");
     setDailyOptIn(snapshot.profile.daily_opt_in);
     setTodayState(snapshot.profile.daily_opt_in ? "ready" : "opted_out");
+    if (snapshot.isPremium != null) {
+      setIsPremium(snapshot.isPremium);
+      setPremiumStatus(snapshot.isPremium ? "premium" : "free");
+    }
     setBootstrapStatus("ready");
   }
 
   function persistSnapshot(snapshot: AppSnapshot) {
-    window.localStorage.setItem(APP_SNAPSHOT_STORAGE_KEY, JSON.stringify(snapshot));
+    const withPremium = { ...snapshot, isPremium };
+    window.localStorage.setItem(APP_SNAPSHOT_STORAGE_KEY, JSON.stringify(withPremium));
   }
 
   function clearStoredSnapshot() {
@@ -934,6 +942,16 @@ export function useMiniAppBootstrap(
                   if (refreshTelegramBootstrap) {
                     await refreshTelegramBootstrap();
                   }
+                  // Re-persist snapshot with premium flag
+                  setIsPremium(true);
+                  setPremiumStatus("premium");
+                  const currentSnapshot = window.localStorage.getItem(APP_SNAPSHOT_STORAGE_KEY);
+                  if (currentSnapshot) {
+                    try {
+                      const parsed = JSON.parse(currentSnapshot) as AppSnapshot;
+                      window.localStorage.setItem(APP_SNAPSHOT_STORAGE_KEY, JSON.stringify({ ...parsed, isPremium: true }));
+                    } catch { /* keep existing */ }
+                  }
                   setIsPaywallOpen(false);
                   setIsPurchaseSuccessOpen(true);
                   trackEvent("purchase_completed", {
@@ -964,6 +982,16 @@ export function useMiniAppBootstrap(
 
         if (refreshTelegramBootstrap) {
           await refreshTelegramBootstrap();
+        }
+        // Re-persist snapshot with premium flag (fallback path)
+        setIsPremium(true);
+        setPremiumStatus("premium");
+        const currentSnapshot = window.localStorage.getItem(APP_SNAPSHOT_STORAGE_KEY);
+        if (currentSnapshot) {
+          try {
+            const parsed = JSON.parse(currentSnapshot) as AppSnapshot;
+            window.localStorage.setItem(APP_SNAPSHOT_STORAGE_KEY, JSON.stringify({ ...parsed, isPremium: true }));
+          } catch { /* keep existing */ }
         }
       } catch {
         // Keep the temporary success flow available even if premium state refresh fails.
@@ -1039,6 +1067,8 @@ export function useMiniAppBootstrap(
     handleNewCalculation,
     handleCompatibilitySubmit,
     handleResetProfile,
+    pendingNavigation,
+    clearPendingNavigation: () => setPendingNavigation(null),
   };
 }
 

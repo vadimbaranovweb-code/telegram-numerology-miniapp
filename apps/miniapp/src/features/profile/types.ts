@@ -16,4 +16,5 @@ export type TemporaryProfile = AppProfile;
 export type AppSnapshot = {
   profile: TemporaryProfile;
   numerology: NumerologyResponse;
+  isPremium?: boolean;
 };

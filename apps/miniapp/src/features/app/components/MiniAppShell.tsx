@@ -76,6 +76,8 @@ export function MiniAppShell() {
     handleCompatibilitySubmit,
     handleNewCalculation,
     handleResetProfile,
+    pendingNavigation,
+    clearPendingNavigation,
   } = useMiniAppBootstrap(
     telegramContext,
     telegramAuth,
@@ -173,6 +175,8 @@ export function MiniAppShell() {
                 onCompatibilitySubmit={handleCompatibilitySubmit}
                 onNewCalculation={handleNewCalculation}
                 onResetProfile={handleResetProfile}
+                pendingNavigation={pendingNavigation}
+                onClearPendingNavigation={clearPendingNavigation}
               />
             ) : (
               <section className="grid gap-3">
