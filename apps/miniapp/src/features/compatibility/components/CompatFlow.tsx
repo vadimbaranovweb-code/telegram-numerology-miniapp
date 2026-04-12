@@ -14,6 +14,7 @@ type CompatFlowStep = "type" | "date" | "result";
 
 type CompatFlowProps = {
   relationshipContext: RelationshipContext;
+  sourceBirthDate: string;
   targetBirthDate: string;
   targetDisplayName: string;
   preview: CompatibilityPreviewResponse | null;
@@ -21,6 +22,7 @@ type CompatFlowProps = {
   isSubmitting: boolean;
   error: string | null;
   onRelationshipContextChange: (v: RelationshipContext) => void;
+  onSourceBirthDateChange: (v: string) => void;
   onTargetBirthDateChange: (v: string) => void;
   onTargetDisplayNameChange: (v: string) => void;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
@@ -36,6 +38,7 @@ const RELATION_OPTIONS: { value: RelationshipContext; icon: string; label: strin
 
 export function CompatFlow({
   relationshipContext,
+  sourceBirthDate,
   targetBirthDate,
   targetDisplayName,
   preview,
@@ -43,6 +46,7 @@ export function CompatFlow({
   isSubmitting,
   error,
   onRelationshipContextChange,
+  onSourceBirthDateChange,
   onTargetBirthDateChange,
   onTargetDisplayNameChange,
   onSubmit,
@@ -164,12 +168,32 @@ export function CompatFlow({
             className="mt-3 text-[22px] font-bold tracking-tight"
             style={{ color: "var(--text-primary)" }}
           >
-            Дата рождения<br />партнёра
+            Даты рождения
           </h2>
         </div>
 
-        <form className="mt-5 space-y-4" onSubmit={onSubmit}>
-          <DrumDatePicker value={targetBirthDate} onChange={onTargetBirthDateChange} />
+        <form className="mt-5 space-y-5" onSubmit={onSubmit}>
+          {/* Person 1 */}
+          <div>
+            <label
+              className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em]"
+              style={{ color: "var(--accent-soft)" }}
+            >
+              Первый человек
+            </label>
+            <DrumDatePicker value={sourceBirthDate} onChange={onSourceBirthDateChange} />
+          </div>
+
+          {/* Person 2 */}
+          <div>
+            <label
+              className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em]"
+              style={{ color: "var(--accent-soft)" }}
+            >
+              Второй человек
+            </label>
+            <DrumDatePicker value={targetBirthDate} onChange={onTargetBirthDateChange} />
+          </div>
 
           <div>
             <label
@@ -209,7 +233,7 @@ export function CompatFlow({
 
           <button
             type="submit"
-            disabled={!targetBirthDate}
+            disabled={!sourceBirthDate || !targetBirthDate}
             className="w-full rounded-2xl py-4 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50"
             style={{ background: "var(--grad-cta)" }}
           >

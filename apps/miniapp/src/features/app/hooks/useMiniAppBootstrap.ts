@@ -86,6 +86,7 @@ export function useMiniAppBootstrap(
   const [isCompatibilityExpanded, setIsCompatibilityExpanded] = useState(false);
   const [relationshipContext, setRelationshipContext] =
     useState<RelationshipContext>("romantic");
+  const [sourceBirthDateCompat, setSourceBirthDateCompat] = useState("");
   const [targetBirthDate, setTargetBirthDate] = useState("");
   const [targetDisplayName, setTargetDisplayName] = useState("");
   const [compatibilityPreview, setCompatibilityPreview] =
@@ -358,8 +359,9 @@ export function useMiniAppBootstrap(
 
     if (telegramBootstrap.appSnapshot) {
       applyTelegramBootstrapAppState(telegramBootstrap, resolvedBootstrapSource);
-      persistSnapshot(telegramBootstrap.appSnapshot);
-      hydrateFromSnapshot(telegramBootstrap.appSnapshot);
+      const snapshotWithPremium = { ...telegramBootstrap.appSnapshot, isPremium: telegramBootstrap.isPremium };
+      persistSnapshot(snapshotWithPremium);
+      hydrateFromSnapshot(snapshotWithPremium);
       return;
     }
 
@@ -550,8 +552,9 @@ export function useMiniAppBootstrap(
           setHomeFocus(refreshedBootstrap.homeFocus ?? "overview");
           setEntrySection(refreshedBootstrap.entrySection ?? "overview");
           setPrimaryAction(refreshedBootstrap.primaryAction);
-          persistSnapshot(refreshedBootstrap.appSnapshot);
-          hydrateFromSnapshot(refreshedBootstrap.appSnapshot);
+          const refreshedWithPremium = { ...refreshedBootstrap.appSnapshot, isPremium: refreshedBootstrap.isPremium };
+          persistSnapshot(refreshedWithPremium);
+          hydrateFromSnapshot(refreshedWithPremium);
         } else {
           persistSnapshot(snapshot);
           applyLocalSnapshotState(snapshot, "local_fallback");
@@ -696,7 +699,7 @@ export function useMiniAppBootstrap(
             telegramAuth?.status === "authenticated"
               ? telegramAuth.sessionToken
               : null,
-          source_birth_date: profile.birth_date,
+          source_birth_date: sourceBirthDateCompat || profile.birth_date,
           target_birth_date: targetBirthDate,
           relationship_context: relationshipContext,
           target_display_name: targetDisplayName || null,
@@ -1055,6 +1058,8 @@ export function useMiniAppBootstrap(
     setFullName,
     setDailyOptIn,
     setRelationshipContext,
+    sourceBirthDateCompat,
+    setSourceBirthDateCompat,
     setTargetBirthDate,
     setTargetDisplayName,
     setIsPurchaseSuccessOpen,

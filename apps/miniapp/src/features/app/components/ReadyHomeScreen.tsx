@@ -82,6 +82,8 @@ type ReadyHomeScreenProps = {
   onCompletePurchase: () => void;
   onOpenPurchaseSuccessPreview: () => void;
   onRelationshipContextChange: (value: RelationshipContext) => void;
+  sourceBirthDateCompat: string;
+  onSourceBirthDateChange: (value: string) => void;
   onTargetBirthDateChange: (value: string) => void;
   onTargetDisplayNameChange: (value: string) => void;
   onCompatibilitySubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -123,6 +125,8 @@ export function ReadyHomeScreen({
   onCompletePurchase,
   onOpenPurchaseSuccessPreview,
   onRelationshipContextChange,
+  sourceBirthDateCompat,
+  onSourceBirthDateChange,
   onTargetBirthDateChange,
   onTargetDisplayNameChange,
   onCompatibilitySubmit,
@@ -184,6 +188,7 @@ export function ReadyHomeScreen({
         <div className="px-4 pb-10">
           <CompatFlow
             relationshipContext={relationshipContext}
+            sourceBirthDate={sourceBirthDateCompat || profile.birth_date}
             targetBirthDate={targetBirthDate}
             targetDisplayName={targetDisplayName}
             preview={compatibilityPreview}
@@ -191,6 +196,7 @@ export function ReadyHomeScreen({
             isSubmitting={isCompatibilitySubmitting}
             error={compatibilityError}
             onRelationshipContextChange={onRelationshipContextChange}
+            onSourceBirthDateChange={onSourceBirthDateChange}
             onTargetBirthDateChange={onTargetBirthDateChange}
             onTargetDisplayNameChange={onTargetDisplayNameChange}
             onSubmit={onCompatibilitySubmit}

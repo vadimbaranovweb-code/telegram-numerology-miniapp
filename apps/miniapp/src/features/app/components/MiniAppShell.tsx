@@ -65,6 +65,8 @@ export function MiniAppShell() {
     setFullName,
     setDailyOptIn,
     setRelationshipContext,
+    sourceBirthDateCompat,
+    setSourceBirthDateCompat,
     setTargetBirthDate,
     setTargetDisplayName,
     openCompatibilityTeaser,
@@ -170,6 +172,8 @@ export function MiniAppShell() {
                 onCompletePurchase={completePurchase}
                 onOpenPurchaseSuccessPreview={openPurchaseSuccessPreview}
                 onRelationshipContextChange={setRelationshipContext}
+                sourceBirthDateCompat={sourceBirthDateCompat}
+                onSourceBirthDateChange={setSourceBirthDateCompat}
                 onTargetBirthDateChange={setTargetBirthDate}
                 onTargetDisplayNameChange={setTargetDisplayName}
                 onCompatibilitySubmit={handleCompatibilitySubmit}
