@@ -21,12 +21,16 @@ const READING_BENEFITS = [
 
 export function ReadingStory({
   result,
+  isPremium,
   onUnlock,
   onUnlockBlockVisible,
+  onGoHome,
 }: {
   result: NumerologyResponse;
+  isPremium?: boolean;
   onUnlock?: () => void;
   onUnlockBlockVisible?: (visible: boolean) => void;
+  onGoHome?: () => void;
 }) {
   const [isUnlocking, setIsUnlocking] = useState(false);
   const unlockRef = useRef<HTMLDivElement>(null);
@@ -77,26 +81,27 @@ export function ReadingStory({
         destinyNumber={result.destiny_number}
         soulUrgeNumber={result.soul_urge_number}
         aiInsights={ai}
+        isPremium={isPremium}
         onUnlock={onUnlock}
       />
 
       {/* ── BLURRED: Pythagorean Matrix ── */}
       {result.pythagorean_matrix && Object.keys(result.pythagorean_matrix).length > 0 && (
-        <PythagoreanMatrixCard matrix={result.pythagorean_matrix} onUnlock={onUnlock} />
+        <PythagoreanMatrixCard matrix={result.pythagorean_matrix} isPremium={isPremium} onUnlock={onUnlock} />
       )}
 
       {/* ── BLURRED: Pinnacles ── */}
       {result.pinnacles && result.pinnacles.length > 0 && (
-        <PinnaclesCard pinnacles={result.pinnacles} aiInsights={ai} onUnlock={onUnlock} />
+        <PinnaclesCard pinnacles={result.pinnacles} aiInsights={ai} isPremium={isPremium} onUnlock={onUnlock} />
       )}
 
       {/* ── BLURRED: Karmic Lessons ── */}
       {result.karmic_lessons && (
-        <KarmicLessonsCard karmicLessons={result.karmic_lessons} aiInsights={ai} onUnlock={onUnlock} />
+        <KarmicLessonsCard karmicLessons={result.karmic_lessons} aiInsights={ai} isPremium={isPremium} onUnlock={onUnlock} />
       )}
 
-      {/* ── PAYWALL BLOCK ── */}
-      {onUnlock && (
+      {/* ── PAYWALL BLOCK (hidden when premium) ── */}
+      {!isPremium && onUnlock && (
         <div
           ref={unlockRef}
           className="rounded-[24px] p-5"
@@ -154,6 +159,22 @@ export function ReadingStory({
           </p>
         </div>
       )}
+
+      {/* ── HOME BUTTON (after premium unlock) ── */}
+      {isPremium && onGoHome && (
+        <button
+          type="button"
+          onClick={onGoHome}
+          className="w-full rounded-2xl py-4 text-sm font-semibold transition active:scale-[0.98]"
+          style={{
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border-subtle)",
+            color: "var(--text-secondary)",
+          }}
+        >
+          ← На главную
+        </button>
+      )}
     </div>
   );
 }
@@ -164,11 +185,13 @@ function StrengthShadowCard({
   destinyNumber,
   soulUrgeNumber,
   aiInsights,
+  isPremium,
   onUnlock,
 }: {
   destinyNumber: number | null;
   soulUrgeNumber: number | null;
   aiInsights: NumerologyResponse["ai_insights"];
+  isPremium?: boolean;
   onUnlock?: () => void;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -206,19 +229,21 @@ function StrengthShadowCard({
 
         {/* Blurred content */}
         <div className="relative px-5 pb-5 overflow-hidden rounded-b-[24px]">
-          <div
-            className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
-            style={{
-              backdropFilter: "blur(4px)",
-              WebkitBackdropFilter: "blur(4px)",
-              background: "linear-gradient(to bottom, rgba(17,17,40,0.1), rgba(17,17,40,0.7))",
-            }}
-            onClick={onUnlock}
-          >
-            <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
-              ✦ Нажми чтобы разблокировать
-            </span>
-          </div>
+          {!isPremium && (
+            <div
+              className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
+              style={{
+                backdropFilter: "blur(4px)",
+                WebkitBackdropFilter: "blur(4px)",
+                background: "linear-gradient(to bottom, rgba(17,17,40,0.1), rgba(17,17,40,0.7))",
+              }}
+              onClick={onUnlock}
+            >
+              <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
+                ✦ Нажми чтобы разблокировать
+              </span>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-2xl p-3" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}>
               <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#F59E0B" }}>✦ Сила</p>

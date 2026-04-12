@@ -24,10 +24,12 @@ const INFO = {
 export function KarmicLessonsCard({
   karmicLessons,
   aiInsights,
+  isPremium,
   onUnlock,
 }: {
   karmicLessons: number[];
   aiInsights: AiInsights | null;
+  isPremium?: boolean;
   onUnlock?: () => void;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -65,20 +67,21 @@ export function KarmicLessonsCard({
 
         {/* Blurred content */}
         <div className="relative px-5 pb-5 overflow-hidden rounded-b-[24px]">
-          {/* Blur overlay */}
-          <div
-            className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
-            style={{
-              backdropFilter: "blur(4px)",
-              WebkitBackdropFilter: "blur(4px)",
-              background: "linear-gradient(to bottom, rgba(17,17,40,0.15), rgba(17,17,40,0.85))",
-            }}
-            onClick={onUnlock}
-          >
-            <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
-              ✦ Нажми чтобы разблокировать
-            </span>
-          </div>
+          {!isPremium && (
+            <div
+              className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
+              style={{
+                backdropFilter: "blur(4px)",
+                WebkitBackdropFilter: "blur(4px)",
+                background: "linear-gradient(to bottom, rgba(17,17,40,0.15), rgba(17,17,40,0.85))",
+              }}
+              onClick={onUnlock}
+            >
+              <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
+                ✦ Нажми чтобы разблокировать
+              </span>
+            </div>
+          )}
 
           {karmicLessons.length === 0 ? (
             <p className="mt-3 text-sm" style={{ color: "var(--text-secondary)" }}>

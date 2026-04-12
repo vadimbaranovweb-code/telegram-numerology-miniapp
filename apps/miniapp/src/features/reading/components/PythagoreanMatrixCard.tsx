@@ -29,9 +29,11 @@ const INFO = {
 
 export function PythagoreanMatrixCard({
   matrix,
+  isPremium,
   onUnlock,
 }: {
   matrix: Record<string, number>;
+  isPremium?: boolean;
   onUnlock?: () => void;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -67,20 +69,21 @@ export function PythagoreanMatrixCard({
 
         {/* Blurred content */}
         <div className="relative px-5 pb-5 overflow-hidden rounded-b-[24px]">
-          {/* Blur overlay */}
-          <div
-            className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
-            style={{
-              backdropFilter: "blur(4px)",
-              WebkitBackdropFilter: "blur(4px)",
-              background: "linear-gradient(to bottom, rgba(17,17,40,0.15), rgba(17,17,40,0.85))",
-            }}
-            onClick={onUnlock}
-          >
-            <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
-              ✦ Нажми чтобы разблокировать
-            </span>
-          </div>
+          {!isPremium && (
+            <div
+              className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
+              style={{
+                backdropFilter: "blur(4px)",
+                WebkitBackdropFilter: "blur(4px)",
+                background: "linear-gradient(to bottom, rgba(17,17,40,0.15), rgba(17,17,40,0.85))",
+              }}
+              onClick={onUnlock}
+            >
+              <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
+                ✦ Нажми чтобы разблокировать
+              </span>
+            </div>
+          )}
 
           <div className="mt-4 grid grid-cols-3 gap-2">
             {GRID_LAYOUT.map((row) =>

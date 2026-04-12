@@ -228,8 +228,10 @@ export function ReadyHomeScreen({
             </div>
             <ReadingStory
               result={result}
+              isPremium={isPremium}
               onUnlock={onCompletePurchase}
               onUnlockBlockVisible={(visible) => setReadingCtaVisible(!visible)}
+              onGoHome={goBackToHub}
             />
           </>
         )}
@@ -252,8 +254,8 @@ export function ReadyHomeScreen({
         )}
       </div>
 
-      {/* Fixed CTA on reading screen — hides when unlock block is in view */}
-      {activeTab === "home" && homeScreen === "reading" && (
+      {/* Fixed CTA on reading screen — hides when unlock block is in view or user is premium */}
+      {activeTab === "home" && homeScreen === "reading" && !isPremium && (
         <div
           className="fixed left-0 right-0 z-40 mx-auto max-w-md px-4 transition-opacity duration-300"
           style={{

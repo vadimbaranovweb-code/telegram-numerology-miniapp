@@ -24,10 +24,12 @@ const INFO = {
 export function PinnaclesCard({
   pinnacles,
   aiInsights,
+  isPremium,
   onUnlock,
 }: {
   pinnacles: PinnacleInfo[];
   aiInsights: AiInsights | null;
+  isPremium?: boolean;
   onUnlock?: () => void;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -64,8 +66,7 @@ export function PinnaclesCard({
 
         {/* Blurred content */}
         <div className="relative px-5 pb-5 overflow-hidden rounded-b-[24px]">
-          {/* Blur overlay */}
-          <div
+          {!isPremium && <div
             className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
             style={{
               backdropFilter: "blur(4px)",
@@ -77,7 +78,7 @@ export function PinnaclesCard({
             <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
               ✦ Нажми чтобы разблокировать
             </span>
-          </div>
+          </div>}
 
           {/* Timeline */}
           <div className="mt-4 flex items-start gap-0">
