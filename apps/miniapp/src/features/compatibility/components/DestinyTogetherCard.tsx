@@ -30,11 +30,13 @@ export function DestinyTogetherCard({
   sourceLifePath,
   targetLifePath,
   aiInsights,
+  isPremium = false,
   onUnlock,
 }: {
   sourceLifePath: number;
   targetLifePath: number;
   aiInsights: CompatibilityAiInsights | null;
+  isPremium?: boolean;
   onUnlock?: () => void;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -62,15 +64,16 @@ export function DestinyTogetherCard({
           </button>
         </div>
 
-        {/* Blurred content */}
         <div className="relative px-5 pb-5 overflow-hidden rounded-b-[24px]">
-          <div
-            className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
-            style={{ backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", background: "linear-gradient(to bottom, rgba(17,17,40,0.1), rgba(17,17,40,0.7))" }}
-            onClick={onUnlock}
-          >
-            <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>✦ Нажми чтобы разблокировать</span>
-          </div>
+          {!isPremium && (
+            <div
+              className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
+              style={{ backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", background: "linear-gradient(to bottom, rgba(17,17,40,0.1), rgba(17,17,40,0.7))" }}
+              onClick={onUnlock}
+            >
+              <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>✦ Нажми чтобы разблокировать</span>
+            </div>
+          )}
 
           <div className="flex items-center gap-4">
             <div

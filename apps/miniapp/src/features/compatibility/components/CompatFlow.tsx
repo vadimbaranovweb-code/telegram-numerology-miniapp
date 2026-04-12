@@ -263,33 +263,36 @@ export function CompatFlow({
         </div>
       )}
 
-      {/* Block 3 — Tension points (blurred) */}
+      {/* Block 3 — Tension points */}
       {preview && (
         <div className="mt-3">
           <TensionCard
             tensionBody={preview.ai_insights?.tension_body ?? null}
+            isPremium={isPremium}
             onUnlock={handleUnlock}
           />
         </div>
       )}
 
-      {/* Block 4 — Destiny Together (blurred) */}
+      {/* Block 4 — Destiny Together */}
       {preview && (
         <div className="mt-3">
           <DestinyTogetherCard
             sourceLifePath={preview.source_life_path}
             targetLifePath={preview.target_life_path}
             aiInsights={preview.ai_insights}
+            isPremium={isPremium}
             onUnlock={handleUnlock}
           />
         </div>
       )}
 
-      {/* Block 5 — Deep Connection (blurred) */}
+      {/* Block 5 — Deep Connection */}
       {preview && (
         <div className="mt-3">
           <DeepConnectionCard
             aiInsights={preview.ai_insights}
+            isPremium={isPremium}
             onUnlock={handleUnlock}
           />
         </div>
@@ -367,7 +370,7 @@ export function CompatFlow({
 }
 
 // ── Tension Card (blurred) ─────────────────────────────────────────
-function TensionCard({ tensionBody, onUnlock }: { tensionBody: string | null; onUnlock: () => void }) {
+function TensionCard({ tensionBody, isPremium, onUnlock }: { tensionBody: string | null; isPremium: boolean; onUnlock: () => void }) {
   return (
     <div
       className="rounded-[24px]"
@@ -379,13 +382,15 @@ function TensionCard({ tensionBody, onUnlock }: { tensionBody: string | null; on
         </p>
       </div>
       <div className="relative px-5 pb-5 overflow-hidden rounded-b-[24px]">
-        <div
-          className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
-          style={{ backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", background: "linear-gradient(to bottom, rgba(17,17,40,0.1), rgba(17,17,40,0.7))" }}
-          onClick={onUnlock}
-        >
-          <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>✦ Нажми чтобы разблокировать</span>
-        </div>
+        {!isPremium && (
+          <div
+            className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
+            style={{ backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", background: "linear-gradient(to bottom, rgba(17,17,40,0.1), rgba(17,17,40,0.7))" }}
+            onClick={onUnlock}
+          >
+            <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>✦ Нажми чтобы разблокировать</span>
+          </div>
+        )}
         <div className="rounded-2xl p-3" style={{ background: "rgba(244,114,182,0.08)", border: "1px solid rgba(244,114,182,0.2)" }}>
           <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#F472B6" }}>⚡ Зоны конфликтов</p>
           <p className="mt-1.5 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>

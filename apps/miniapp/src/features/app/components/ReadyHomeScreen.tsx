@@ -91,7 +91,8 @@ type ReadyHomeScreenProps = {
 
 function resolveInitialHomeScreen(entrySection: EntrySection): HomeScreen {
   if (entrySection === "compatibility") return "compat_flow";
-  return "reading";
+  if (entrySection === "first_reading") return "reading";
+  return "hub";
 }
 
 export function ReadyHomeScreen({

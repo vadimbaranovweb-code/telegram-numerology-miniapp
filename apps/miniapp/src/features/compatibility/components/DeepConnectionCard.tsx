@@ -11,9 +11,11 @@ const INFO = {
 
 export function DeepConnectionCard({
   aiInsights,
+  isPremium = false,
   onUnlock,
 }: {
   aiInsights: CompatibilityAiInsights | null;
+  isPremium?: boolean;
   onUnlock?: () => void;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -39,13 +41,15 @@ export function DeepConnectionCard({
         </div>
 
         <div className="relative px-5 pb-5 overflow-hidden rounded-b-[24px]">
-          <div
-            className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
-            style={{ backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", background: "linear-gradient(to bottom, rgba(17,17,40,0.1), rgba(17,17,40,0.7))" }}
-            onClick={onUnlock}
-          >
-            <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>✦ Нажми чтобы разблокировать</span>
-          </div>
+          {!isPremium && (
+            <div
+              className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer"
+              style={{ backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", background: "linear-gradient(to bottom, rgba(17,17,40,0.1), rgba(17,17,40,0.7))" }}
+              onClick={onUnlock}
+            >
+              <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>✦ Нажми чтобы разблокировать</span>
+            </div>
+          )}
 
           <div className="space-y-3">
             <div className="rounded-2xl p-3" style={{ background: "rgba(192,132,252,0.08)", border: "1px solid rgba(192,132,252,0.2)" }}>
