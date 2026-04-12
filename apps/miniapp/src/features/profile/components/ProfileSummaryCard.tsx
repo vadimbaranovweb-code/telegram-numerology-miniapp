@@ -1,7 +1,10 @@
+import { NumerologyResponse } from "@/features/onboarding/types";
 import { TemporaryProfile } from "@/features/profile/types";
+import { ShareButton } from "@/features/reading/components/ShareButton";
 
 type ProfileSummaryCardProps = {
   profile: TemporaryProfile;
+  result?: NumerologyResponse | null;
   sectionBadge?: string | null;
   sectionState?: string | null;
   sectionDescription?: string | null;
@@ -11,6 +14,7 @@ type ProfileSummaryCardProps = {
 
 export function ProfileSummaryCard({
   profile,
+  result = null,
   sectionBadge = null,
   sectionState = null,
   sectionDescription = null,
@@ -128,6 +132,12 @@ export function ProfileSummaryCard({
         {sectionDescription ??
           "Твои данные формируют расклад, ежедневный ритм и анализ совместимости."}
       </p>
+
+      {result && (
+        <div className="mt-5">
+          <ShareButton result={result} displayName={profile.display_name ?? undefined} />
+        </div>
+      )}
     </article>
   );
 }

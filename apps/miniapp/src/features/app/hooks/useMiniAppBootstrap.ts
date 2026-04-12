@@ -16,6 +16,7 @@ import {
   ProfilePreviewResponse,
   TemporaryProfile,
 } from "@/features/profile/types";
+import { addCalculationEntry } from "@/features/profile/calculationHistory";
 import { TelegramAuthState } from "@/features/telegram/hooks/useTelegramAuth";
 import { TelegramBootstrapState } from "@/features/telegram/hooks/useTelegramBootstrap";
 import { openTelegramInvoiceUrl } from "@/features/telegram/hooks/useTelegramWebApp";
@@ -574,6 +575,12 @@ export function useMiniAppBootstrap(
         cards_count: resolvedNumerologyData.reading_preview.cards.length,
         cache_hit: false,
       });
+      addCalculationEntry({
+        type: "numerology",
+        birthDate,
+        displayName: fullName || null,
+        lifePathNumber: resolvedNumerologyData.life_path_number,
+      });
       trackEvent("first_reading_viewed", {
         cards_count: resolvedNumerologyData.reading_preview.cards.length,
         reading_version: resolvedNumerologyData.calculation_version,
@@ -592,6 +599,62 @@ export function useMiniAppBootstrap(
       );
       setResult(null);
       setDailyInsight(null);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleNewCalculation(newBirthDate: string, newName: string) {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const numerologyData = await loadNumerologyFallback({
+        birthDate: newBirthDate,
+        fullName: newName,
+      });
+      const profileData = buildClientProfileFallback({
+        birthDate: newBirthDate,
+        fullName: newName,
+        dailyOptIn,
+      });
+      setBirthDate(newBirthDate);
+      setFullName(newName);
+
+      const snapshot = { profile: profileData, numerology: numerologyData };
+      persistSnapshot(snapshot);
+      hydrateFromSnapshot(snapshot);
+
+      addCalculationEntry({
+        type: "numerology",
+        birthDate: newBirthDate,
+        displayName: newName || null,
+        lifePathNumber: numerologyData.life_path_number,
+      });
+
+      // Sync to backend if Telegram-backed
+      if (telegramAuth?.status === "authenticated" && telegramAuth.sessionToken) {
+        fetch(`${API_BASE_URL}/onboarding/profile`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            session_token: telegramAuth.sessionToken,
+            birth_date: newBirthDate,
+            display_name: newName || null,
+            daily_opt_in: dailyOptIn,
+          }),
+        }).then(() =>
+          fetch(`${API_BASE_URL}/readings/first`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              session_token: telegramAuth.sessionToken,
+              force_regenerate: true,
+            }),
+          }),
+        ).catch(() => {});
+      }
+    } catch {
+      setError("Ошибка расчёта. Попробуйте ещё раз.");
     } finally {
       setIsSubmitting(false);
     }
@@ -973,6 +1036,7 @@ export function useMiniAppBootstrap(
     completePurchase,
     openPurchaseSuccessPreview,
     handleSubmit,
+    handleNewCalculation,
     handleCompatibilitySubmit,
     handleResetProfile,
   };

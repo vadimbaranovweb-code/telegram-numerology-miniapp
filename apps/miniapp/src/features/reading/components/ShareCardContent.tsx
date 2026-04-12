@@ -1,34 +1,40 @@
 /**
  * ShareCardContent — visual card rendered off-screen and captured by html2canvas.
  * Uses ONLY hardcoded hex colors (no CSS variables — html2canvas doesn't resolve them).
- * Fixed size: 375×600px.
+ * Fixed size: 375×667px (iPhone aspect ratio for best sharing UX).
  */
 
 import { NumerologyResponse } from "@/features/onboarding/types";
 
 const C = {
-  bg:       "#0A0A14",
-  surface:  "#111128",
-  elevated: "#1A1A35",
-  accent:   "#7B5EF8",
-  soft:     "#C084FC",
-  gold:     "#F59E0B",
-  text:     "#F1F0F7",
-  secondary:"#9B96C4",
-  muted:    "#5C587A",
-  border:   "rgba(255,255,255,0.08)",
+  bg:        "#0A0A14",
+  surface:   "#111128",
+  elevated:  "#1A1A35",
+  accent:    "#7B5EF8",
+  soft:      "#C084FC",
+  gold:      "#F59E0B",
+  pink:      "#F472B6",
+  blue:      "#60A5FA",
+  text:      "#F1F0F7",
+  secondary: "#9B96C4",
+  muted:     "#5C587A",
+  border:    "rgba(255,255,255,0.08)",
 };
 
-const ARCHETYPES: Record<number, string> = {
-  1: "The Pioneer",
-  2: "The Diplomat",
-  3: "The Creator",
-  4: "The Builder",
-  5: "The Adventurer",
-  6: "The Nurturer",
-  7: "The Mystic",
-  8: "The Achiever",
-  9: "The Humanitarian",
+const ARCHETYPES_RU: Record<number, string> = {
+  1: "Первопроходец",
+  2: "Дипломат",
+  3: "Творец",
+  4: "Строитель",
+  5: "Искатель",
+  6: "Хранитель",
+  7: "Мистик",
+  8: "Лидер",
+  9: "Гуманист",
+};
+
+const LP_EMOJI: Record<number, string> = {
+  1: "🔥", 2: "🤝", 3: "🎨", 4: "🏗", 5: "🌍", 6: "💚", 7: "🔮", 8: "⚡", 9: "✨",
 };
 
 type Props = {
@@ -37,14 +43,15 @@ type Props = {
 };
 
 export function ShareCardContent({ result, displayName }: Props) {
-  const archetype = ARCHETYPES[result.life_path_number] ?? "";
+  const archetype = ARCHETYPES_RU[result.life_path_number] ?? "";
+  const emoji = LP_EMOJI[result.life_path_number] ?? "✦";
   const name = displayName?.trim() || null;
 
   return (
     <div
       style={{
         width: 375,
-        height: 600,
+        height: 667,
         background: C.bg,
         fontFamily: "'SF Pro Display', 'Inter', 'Segoe UI', sans-serif",
         position: "relative",
@@ -53,17 +60,30 @@ export function ShareCardContent({ result, displayName }: Props) {
         flexDirection: "column",
       }}
     >
-      {/* Radial glow background */}
+      {/* Radial glow — top */}
       <div
         style={{
           position: "absolute",
-          top: -60,
+          top: -80,
           left: "50%",
           transform: "translateX(-50%)",
-          width: 320,
-          height: 320,
+          width: 400,
+          height: 400,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(123,94,248,0.22) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(123,94,248,0.20) 0%, rgba(192,132,252,0.06) 40%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
+      {/* Secondary glow — bottom */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: -60,
+          right: -40,
+          width: 240,
+          height: 240,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(244,114,182,0.12) 0%, transparent 70%)",
           pointerEvents: "none",
         }}
       />
@@ -85,20 +105,18 @@ export function ShareCardContent({ result, displayName }: Props) {
               fontSize: 10,
               fontWeight: 700,
               letterSpacing: "0.22em",
-              textTransform: "uppercase",
+              textTransform: "uppercase" as const,
             }}
           >
-            Numerology
+            Нумерология
           </span>
         </div>
-        {name ? (
-          <span style={{ color: C.muted, fontSize: 11 }}>{name}</span>
-        ) : (
-          <span style={{ color: C.muted, fontSize: 11 }}>{result.birth_date}</span>
+        {name && (
+          <span style={{ color: C.secondary, fontSize: 13, fontWeight: 600 }}>{name}</span>
         )}
       </div>
 
-      {/* Hero — big life path number */}
+      {/* Hero — big life path number with orb */}
       <div
         style={{
           flex: 1,
@@ -106,27 +124,29 @@ export function ShareCardContent({ result, displayName }: Props) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          paddingTop: 16,
+          paddingTop: 8,
+          paddingBottom: 4,
         }}
       >
-        {/* Orb */}
+        {/* Orb with glow ring */}
         <div
           style={{
-            width: 140,
-            height: 140,
+            width: 150,
+            height: 150,
             borderRadius: "50%",
-            background: "radial-gradient(circle at 40% 35%, rgba(192,132,252,0.18), rgba(123,94,248,0.06))",
-            border: `1px solid rgba(123,94,248,0.35)`,
+            background: "radial-gradient(circle at 40% 35%, rgba(192,132,252,0.20), rgba(123,94,248,0.08))",
+            border: "1.5px solid rgba(123,94,248,0.40)",
+            boxShadow: "0 0 60px rgba(123,94,248,0.15), 0 0 120px rgba(123,94,248,0.06)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            marginBottom: 20,
+            marginBottom: 18,
           }}
         >
           <span
             style={{
               color: C.text,
-              fontSize: 80,
+              fontSize: 84,
               fontWeight: 800,
               lineHeight: 1,
               letterSpacing: "-0.04em",
@@ -143,50 +163,40 @@ export function ShareCardContent({ result, displayName }: Props) {
             fontSize: 10,
             fontWeight: 700,
             letterSpacing: "0.22em",
-            textTransform: "uppercase",
+            textTransform: "uppercase" as const,
             marginBottom: 6,
           }}
         >
-          Life Path
+          Число жизненного пути
         </p>
 
         {/* Archetype */}
         <p
           style={{
             color: C.soft,
-            fontSize: 22,
+            fontSize: 24,
             fontWeight: 700,
-            letterSpacing: "0.04em",
+            letterSpacing: "0.02em",
           }}
         >
-          {archetype}
+          {emoji} {archetype}
         </p>
       </div>
-
-      {/* Divider */}
-      <div
-        style={{
-          margin: "0 28px",
-          height: 1,
-          background: C.border,
-        }}
-      />
 
       {/* Numbers grid */}
       <div
         style={{
-          padding: "20px 28px",
+          padding: "0 28px 16px",
           display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 10,
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: 8,
         }}
       >
         {[
-          { label: "Personal Year",  value: result.personal_year_number },
-          { label: "Personal Month", value: result.personal_month_number },
-          { label: "Destiny",        value: result.destiny_number },
-          { label: "Soul Urge",      value: result.soul_urge_number },
-          { label: "Born",           value: result.birth_date.slice(0, 4) },
+          { label: "Год",     value: result.personal_year_number,  color: C.accent },
+          { label: "Месяц",   value: result.personal_month_number, color: C.blue },
+          { label: "Судьба",  value: result.destiny_number,        color: C.pink },
+          { label: "Душа",    value: result.soul_urge_number,      color: C.gold },
         ].map((item) => (
           <div
             key={item.label}
@@ -194,7 +204,8 @@ export function ShareCardContent({ result, displayName }: Props) {
               background: C.elevated,
               border: `1px solid ${C.border}`,
               borderRadius: 14,
-              padding: "10px 12px",
+              padding: "10px 8px",
+              textAlign: "center" as const,
             }}
           >
             <p
@@ -202,8 +213,8 @@ export function ShareCardContent({ result, displayName }: Props) {
                 color: C.muted,
                 fontSize: 9,
                 fontWeight: 700,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase" as const,
                 marginBottom: 4,
               }}
             >
@@ -211,8 +222,8 @@ export function ShareCardContent({ result, displayName }: Props) {
             </p>
             <p
               style={{
-                color: item.value !== null ? C.text : C.muted,
-                fontSize: 22,
+                color: item.value !== null ? item.color : C.muted,
+                fontSize: 24,
                 fontWeight: 800,
                 lineHeight: 1,
               }}
@@ -223,20 +234,23 @@ export function ShareCardContent({ result, displayName }: Props) {
         ))}
       </div>
 
-      {/* Footer */}
+      {/* CTA banner */}
       <div
         style={{
-          padding: "0 28px 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 6,
+          margin: "0 28px 24px",
+          padding: "14px 20px",
+          borderRadius: 18,
+          background: "linear-gradient(135deg, rgba(123,94,248,0.18) 0%, rgba(192,132,252,0.10) 100%)",
+          border: "1px solid rgba(123,94,248,0.25)",
+          textAlign: "center" as const,
         }}
       >
-        <span style={{ color: C.accent, fontSize: 12 }}>✦</span>
-        <span style={{ color: C.muted, fontSize: 11, letterSpacing: "0.08em" }}>
-          Your numbers, your story.
-        </span>
+        <p style={{ color: C.text, fontSize: 15, fontWeight: 700, marginBottom: 4 }}>
+          Узнай свои числа ✦
+        </p>
+        <p style={{ color: C.secondary, fontSize: 11 }}>
+          Открой бота и получи персональный расклад
+        </p>
       </div>
     </div>
   );

@@ -74,6 +74,7 @@ export function MiniAppShell() {
     openPurchaseSuccessPreview,
     handleSubmit,
     handleCompatibilitySubmit,
+    handleNewCalculation,
     handleResetProfile,
   } = useMiniAppBootstrap(
     telegramContext,
@@ -168,6 +169,7 @@ export function MiniAppShell() {
                 onTargetBirthDateChange={setTargetBirthDate}
                 onTargetDisplayNameChange={setTargetDisplayName}
                 onCompatibilitySubmit={handleCompatibilitySubmit}
+                onNewCalculation={handleNewCalculation}
                 onResetProfile={handleResetProfile}
               />
             ) : (

@@ -18,7 +18,9 @@ import {
 import { DailyInsight } from "@/features/daily/types";
 import { TemporaryProfile } from "@/features/profile/types";
 import { DailyPlaceholderCard } from "@/features/daily/components/DailyPlaceholderCard";
+import { WeekCalendar } from "@/features/daily/components/WeekCalendar";
 import { NumerologyResponse } from "@/features/onboarding/types";
+import { CalculationHistory } from "@/features/profile/components/CalculationHistory";
 import { ProfileSummaryCard } from "@/features/profile/components/ProfileSummaryCard";
 import { ReadingStory } from "@/features/reading/components/ReadingStory";
 import { PurchaseSuccessCard } from "@/features/premium/components/PurchaseSuccessCard";
@@ -26,6 +28,7 @@ import { PersonalYearCard } from "@/features/reading/components/PersonalYearCard
 import { BottomTabBar, TabId } from "./BottomTabBar";
 import { BottomSheet } from "./BottomSheet";
 import { GenerationLoadingScreen } from "./GenerationLoadingScreen";
+import { NewCalculationSheet } from "./NewCalculationSheet";
 import { FormEvent } from "react";
 
 type HomeScreen = "hub" | "reading" | "compat" | "compat_flow";
@@ -82,6 +85,7 @@ type ReadyHomeScreenProps = {
   onTargetBirthDateChange: (value: string) => void;
   onTargetDisplayNameChange: (value: string) => void;
   onCompatibilitySubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onNewCalculation: (birthDate: string, name: string) => Promise<void>;
   onResetProfile: () => void | Promise<void>;
 };
 
@@ -121,6 +125,7 @@ export function ReadyHomeScreen({
   onTargetBirthDateChange,
   onTargetDisplayNameChange,
   onCompatibilitySubmit,
+  onNewCalculation,
   onResetProfile,
 }: ReadyHomeScreenProps) {
   const [activeTab, setActiveTab] = useState<TabId>("home");
@@ -128,6 +133,14 @@ export function ReadyHomeScreen({
     resolveInitialHomeScreen(entrySection),
   );
   const [readingCtaVisible, setReadingCtaVisible] = useState(true);
+  const [newCalcOpen, setNewCalcOpen] = useState(false);
+
+  async function handleNewCalc(newBirthDate: string, newName: string) {
+    setNewCalcOpen(false);
+    await onNewCalculation(newBirthDate, newName);
+    setActiveTab("home");
+    setHomeScreen("reading");
+  }
 
   function handleTabChange(tab: TabId) {
     setActiveTab(tab);
@@ -201,8 +214,12 @@ export function ReadyHomeScreen({
             result={result}
             hasCompatibilityPreview={!!compatibilityPreview}
             isPremium={isPremium}
+            todayState={todayState}
+            dailyInsight={dailyInsight}
+            isDailyLoading={isDailyLoading}
             onOpenReading={openReading}
             onOpenCompat={openCompat}
+            onNewCalc={() => setNewCalcOpen(true)}
           />
         )}
 
@@ -245,14 +262,18 @@ export function ReadyHomeScreen({
 
         {/* ── PROFILE TAB ── */}
         {activeTab === "profile" && (
-          <ProfileSummaryCard
-            profile={profile}
-            sectionBadge={sectionBadges.profile ?? null}
-            sectionState={sectionStates.profile ?? null}
-            sectionDescription={sectionDescriptions.profile ?? null}
-            sectionAction={sectionActions.profile ?? null}
-            onReset={onResetProfile}
-          />
+          <>
+            <ProfileSummaryCard
+              profile={profile}
+              result={result}
+              sectionBadge={sectionBadges.profile ?? null}
+              sectionState={sectionStates.profile ?? null}
+              sectionDescription={sectionDescriptions.profile ?? null}
+              sectionAction={sectionActions.profile ?? null}
+              onReset={onResetProfile}
+            />
+            <CalculationHistory />
+          </>
         )}
       </div>
 
@@ -296,6 +317,17 @@ export function ReadyHomeScreen({
           />
         </BottomSheet>
       ) : null}
+
+      {/* New calculation bottom sheet */}
+      {newCalcOpen && (
+        <BottomSheet onClose={() => setNewCalcOpen(false)}>
+          <NewCalculationSheet
+            onSelectNumerology={handleNewCalc}
+            onSelectCompat={() => { setNewCalcOpen(false); openCompat(); }}
+            onClose={() => setNewCalcOpen(false)}
+          />
+        </BottomSheet>
+      )}
     </>
   );
 }
@@ -337,15 +369,23 @@ function HomeHub({
   result,
   hasCompatibilityPreview,
   isPremium,
+  todayState,
+  dailyInsight,
+  isDailyLoading,
   onOpenReading,
   onOpenCompat,
+  onNewCalc,
 }: {
   profile: TemporaryProfile;
   result: NumerologyResponse;
   hasCompatibilityPreview: boolean;
   isPremium: boolean;
+  todayState: "locked" | "opted_out" | "ready";
+  dailyInsight: DailyInsight | null;
+  isDailyLoading: boolean;
   onOpenReading: () => void;
   onOpenCompat: () => void;
+  onNewCalc: () => void;
 }) {
   const name = profile.display_name ? `, ${profile.display_name.split(" ")[0]}` : "";
 
@@ -363,6 +403,28 @@ function HomeHub({
           Что хочешь исследовать сегодня?
         </p>
       </div>
+
+      {/* New calculation CTA */}
+      <button
+        type="button"
+        onClick={onNewCalc}
+        className="w-full rounded-2xl py-3.5 text-sm font-semibold text-white transition active:scale-[0.98]"
+        style={{
+          background: "var(--grad-cta)",
+          boxShadow: "0 6px 20px rgba(123,94,248,0.35)",
+        }}
+      >
+        Новый расчёт +
+      </button>
+
+      {/* Week calendar + daily insight */}
+      <WeekCalendar />
+      <DailyPlaceholderCard
+        dailyOptIn={todayState !== "opted_out"}
+        todayState={todayState}
+        dailyInsight={dailyInsight}
+        isLoading={isDailyLoading}
+      />
 
       {/* Personal year card */}
       <PersonalYearCard

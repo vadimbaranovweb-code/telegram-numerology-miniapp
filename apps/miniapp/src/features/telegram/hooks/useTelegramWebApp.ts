@@ -28,6 +28,7 @@ declare global {
           url: string,
           callback?: (status: string) => void,
         ) => void;
+        openTelegramLink?: (url: string) => void;
       };
     };
   }
