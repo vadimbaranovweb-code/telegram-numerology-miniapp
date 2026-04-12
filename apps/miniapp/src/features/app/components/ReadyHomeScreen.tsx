@@ -227,24 +227,6 @@ export function ReadyHomeScreen({
         {/* ── HOME TAB: Reading ── */}
         {activeTab === "home" && homeScreen === "reading" && (
           <>
-            {/* Close button top-right */}
-            <div className="flex justify-end py-1">
-              <button
-                type="button"
-                onClick={goBackToHub}
-                className="flex h-8 w-8 items-center justify-center rounded-full transition active:opacity-60"
-                style={{
-                  background: "var(--bg-elevated)",
-                  border: "1px solid var(--border-subtle)",
-                  color: "var(--text-muted)",
-                }}
-                aria-label="Закрыть"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
             <ReadingStory
               result={result}
               isPremium={isPremium}
@@ -300,6 +282,30 @@ export function ReadyHomeScreen({
             Получить полный расклад →
           </button>
         </div>
+      )}
+
+      {/* Fixed close button on sub-screens (reading, compat) */}
+      {activeTab === "home" && homeScreen === "reading" && (
+        <button
+          type="button"
+          onClick={goBackToHub}
+          className="fixed z-50 flex h-10 w-10 items-center justify-center rounded-full transition active:scale-90"
+          style={{
+            top: "calc(env(safe-area-inset-top, 0px) + 16px)",
+            right: 16,
+            background: "rgba(22, 22, 45, 0.8)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            color: "#fff",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+          }}
+          aria-label="Закрыть"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
       )}
 
       {/* Tab bar — only on hub and non-home tabs */}

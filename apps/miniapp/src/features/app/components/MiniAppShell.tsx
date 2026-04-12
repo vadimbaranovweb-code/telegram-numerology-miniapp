@@ -99,7 +99,9 @@ export function MiniAppShell() {
           <BootstrapScreen />
         ) : (
           <>
-            <HeroSection compact={bootstrapStatus === "onboarding" && onboardingStep === 2} />
+            {bootstrapStatus === "onboarding" && (
+              <HeroSection compact={onboardingStep === 2} />
+            )}
             <TelegramContextCard
               context={telegramContext}
               authState={telegramAuth}
