@@ -8,9 +8,9 @@ COMPATIBILITY_UNLOCK_OFFER = PremiumOffer(
     offer_key="compatibility_unlock_monthly",
     title="Compatibility Unlock",
     billing_period="monthly",
-    price_local=5.99,
+    price_local=0.13,
     currency="USD",
-    stars_amount=350,
+    stars_amount=10,
     context="compatibility",
 )
 
