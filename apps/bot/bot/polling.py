@@ -22,7 +22,7 @@ def run_polling(
     poll_timeout: int = _DEFAULT_POLL_TIMEOUT,
 ) -> None:
     """Run Telegram long-polling loop until interrupted."""
-    config = BotRuntimeConfig(api_base_url=api_base_url)
+    config = BotRuntimeConfig(api_base_url=api_base_url, bot_token=token)
     offset = 0
 
     logger.info("Bot polling started (poll_timeout=%ds).", poll_timeout)
@@ -54,9 +54,10 @@ def _get_updates(
     timeout: int,
     opener: Any = request.urlopen,
 ) -> list[dict[str, Any]]:
+    allowed = "message,pre_checkout_query"
     url = (
         f"{TELEGRAM_API_BASE}/bot{token}/getUpdates"
-        f"?offset={offset}&timeout={timeout}"
+        f"?offset={offset}&timeout={timeout}&allowed_updates={allowed}"
     )
     req = request.Request(url, method="GET")
 
