@@ -318,10 +318,16 @@ export function CompatFlow({
             Расклад + совместимость
           </h4>
           <p className="mt-1 text-sm leading-5" style={{ color: "var(--text-secondary)" }}>
-            Одна покупка открывает всё сразу.
+            Одна покупка открывает всё сразу — навсегда.
           </p>
           <ul className="mt-3 space-y-2">
-            {t.paywall.benefits.map((b) => (
+            {[
+              "Полный нумерологический расклад: матрица Пифагора, пики судьбы, кармические уроки",
+              "Сила и тень — AI-анализ твоих природных талантов и слепых пятен",
+              "Совместимость без ограничений — проверяй с кем угодно",
+              "Гороскоп — персональный астрологический расклад (скоро)",
+              "История всех расчётов сохранена в профиле",
+            ].map((b) => (
               <li key={b} className="flex items-start gap-2.5">
                 <span style={{ color: "var(--accent-primary)", flexShrink: 0, marginTop: 1 }}>✦</span>
                 <span className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>{b}</span>

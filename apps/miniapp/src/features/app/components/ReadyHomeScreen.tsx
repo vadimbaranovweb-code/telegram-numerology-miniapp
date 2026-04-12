@@ -200,6 +200,7 @@ export function ReadyHomeScreen({
             profile={profile}
             result={result}
             hasCompatibilityPreview={!!compatibilityPreview}
+            isPremium={isPremium}
             onOpenReading={openReading}
             onOpenCompat={openCompat}
           />
@@ -232,6 +233,7 @@ export function ReadyHomeScreen({
               onUnlock={onCompletePurchase}
               onUnlockBlockVisible={(visible) => setReadingCtaVisible(!visible)}
               onGoHome={goBackToHub}
+              onOpenCompat={openCompat}
             />
           </>
         )}
@@ -334,12 +336,14 @@ function HomeHub({
   profile,
   result,
   hasCompatibilityPreview,
+  isPremium,
   onOpenReading,
   onOpenCompat,
 }: {
   profile: TemporaryProfile;
   result: NumerologyResponse;
   hasCompatibilityPreview: boolean;
+  isPremium: boolean;
   onOpenReading: () => void;
   onOpenCompat: () => void;
 }) {
@@ -379,17 +383,17 @@ function HomeHub({
         icon="♥"
         accentColor="#F472B6"
         title="Совместимость"
-        subtitle={hasCompatibilityPreview ? "Превью готово" : "Проверь энергии с партнёром"}
-        badge={hasCompatibilityPreview ? "Превью" : undefined}
+        subtitle={isPremium ? "Полный расклад доступен" : hasCompatibilityPreview ? "Превью готово" : "Проверь энергии с партнёром"}
+        badge={isPremium ? "Открыто" : hasCompatibilityPreview ? "Превью" : undefined}
         onClick={onOpenCompat}
       />
       <HomeBanner
         icon="★"
         accentColor="#60A5FA"
         title="Гороскоп"
-        subtitle="Персональный астрологический расклад"
-        badge="Скоро"
-        disabled
+        subtitle={isPremium ? "Будет доступен в ближайшем обновлении" : "Персональный астрологический расклад"}
+        badge={isPremium ? "Включено" : "Скоро"}
+        disabled={!isPremium}
         onClick={() => {}}
       />
     </>

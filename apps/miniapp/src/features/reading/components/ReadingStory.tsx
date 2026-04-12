@@ -25,12 +25,14 @@ export function ReadingStory({
   onUnlock,
   onUnlockBlockVisible,
   onGoHome,
+  onOpenCompat,
 }: {
   result: NumerologyResponse;
   isPremium?: boolean;
   onUnlock?: () => void;
   onUnlockBlockVisible?: (visible: boolean) => void;
   onGoHome?: () => void;
+  onOpenCompat?: () => void;
 }) {
   const [isUnlocking, setIsUnlocking] = useState(false);
   const unlockRef = useRef<HTMLDivElement>(null);
@@ -127,7 +129,13 @@ export function ReadingStory({
             Одна покупка открывает всё сразу.
           </p>
           <ul className="mt-3 space-y-2">
-            {READING_BENEFITS.map((b) => (
+            {[
+              "Матрица Пифагора, пики судьбы, кармические уроки",
+              "Сила и тень — AI-анализ твоих природных талантов",
+              "Совместимость без ограничений — проверяй с кем угодно",
+              "Гороскоп — персональный астрологический расклад (скоро)",
+              "История расчётов сохранена в профиле навсегда",
+            ].map((b) => (
               <li key={b} className="flex items-start gap-2.5">
                 <span style={{ color: "var(--accent-primary)", flexShrink: 0, marginTop: 1 }}>✦</span>
                 <span className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>{b}</span>
@@ -160,20 +168,79 @@ export function ReadingStory({
         </div>
       )}
 
-      {/* ── HOME BUTTON (after premium unlock) ── */}
-      {isPremium && onGoHome && (
-        <button
-          type="button"
-          onClick={onGoHome}
-          className="w-full rounded-2xl py-4 text-sm font-semibold transition active:scale-[0.98]"
-          style={{
-            background: "var(--bg-surface)",
-            border: "1px solid var(--border-subtle)",
-            color: "var(--text-secondary)",
-          }}
-        >
-          ← На главную
-        </button>
+      {/* ── PREMIUM CTA BLOCKS ── */}
+      {isPremium && (
+        <>
+          {/* Compatibility CTA */}
+          {onOpenCompat && (
+            <button
+              type="button"
+              onClick={onOpenCompat}
+              className="w-full rounded-[24px] p-5 text-left transition active:scale-[0.98]"
+              style={{
+                background: "var(--bg-surface)",
+                border: "1px solid rgba(244,114,182,0.3)",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+              }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-xl"
+                  style={{ background: "rgba(244,114,182,0.12)", border: "1px solid rgba(244,114,182,0.25)" }}>
+                  ♥
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-bold" style={{ color: "var(--text-primary)" }}>Совместимость</span>
+                    <span className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em]"
+                      style={{ background: "rgba(244,114,182,0.15)", color: "#F472B6" }}>Открыто</span>
+                  </div>
+                  <p className="mt-0.5 text-sm" style={{ color: "var(--text-secondary)" }}>Проверь энергии с партнёром →</p>
+                </div>
+              </div>
+            </button>
+          )}
+
+          {/* Horoscope CTA (coming soon) */}
+          <div
+            className="w-full rounded-[24px] p-5"
+            style={{
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border-subtle)",
+              opacity: 0.7,
+            }}
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-xl"
+                style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.25)" }}>
+                ★
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-bold" style={{ color: "var(--text-primary)" }}>Гороскоп</span>
+                  <span className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em]"
+                    style={{ background: "rgba(96,165,250,0.15)", color: "#60A5FA" }}>Включено</span>
+                </div>
+                <p className="mt-0.5 text-sm" style={{ color: "var(--text-secondary)" }}>Скоро — ты получишь уведомление</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Home button */}
+          {onGoHome && (
+            <button
+              type="button"
+              onClick={onGoHome}
+              className="w-full rounded-2xl py-4 text-sm font-semibold transition active:scale-[0.98]"
+              style={{
+                background: "var(--bg-surface)",
+                border: "1px solid var(--border-subtle)",
+                color: "var(--text-secondary)",
+              }}
+            >
+              ← На главную
+            </button>
+          )}
+        </>
       )}
     </div>
   );
