@@ -192,7 +192,7 @@ export function ReadyHomeScreen({
   return (
     <>
       {/* Scrollable content */}
-      <div className={`grid gap-3 ${activeTab === "home" && homeScreen === "reading" ? "pb-36" : "pb-24"}`}>
+      <div className={`grid gap-3 ${activeTab === "home" && homeScreen === "reading" ? "pb-40" : "pb-28"}`}>
 
         {/* ── HOME TAB: Hub ── */}
         {activeTab === "home" && homeScreen === "hub" && (
