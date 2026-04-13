@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { trackEvent } from "@/features/app/lib/analytics";
 import {
@@ -117,6 +117,10 @@ export function useMiniAppBootstrap(
   const [primaryAction, setPrimaryAction] = useState<PrimaryHomeAction>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Tracks which telegramBootstrap object was last fully applied.
+  // Prevents re-running full rehydration when profile/result change after a new calculation.
+  const appliedBootstrapRef = useRef<TelegramBootstrapState | null>(null);
 
   const isFormValid = useMemo(() => Boolean(birthDate), [birthDate]);
   const readingPreview = useMemo(() => result?.reading_preview ?? null, [result]);
@@ -353,19 +357,47 @@ export function useMiniAppBootstrap(
       return;
     }
 
+    // If this exact bootstrap object was already applied, only update bootstrapStatus if needed.
+    // This prevents re-running full rehydration when profile/result change after handleNewCalculation,
+    // which would overwrite new calculation data with the stale bootstrap snapshot.
+    const isNewBootstrap = appliedBootstrapRef.current !== telegramBootstrap;
+    if (!isNewBootstrap) {
+      if (!profile && !result) {
+        setBootstrapStatus(resolveBootstrapStatusFromTelegram(telegramBootstrap));
+      }
+      return;
+    }
+    appliedBootstrapRef.current = telegramBootstrap;
+
+    // Never downgrade isPremium — backend may lag payment confirmation (race with bot)
+    // or lose state entirely (Railway SQLite on /tmp resets on restart).
+    // localStorage is the authoritative source for locally-confirmed purchases.
+    const localIsPremium = (() => {
+      try {
+        const raw = window.localStorage.getItem(APP_SNAPSHOT_STORAGE_KEY);
+        if (!raw) return false;
+        const parsed = JSON.parse(raw) as AppSnapshot;
+        return parsed.isPremium === true;
+      } catch { return false; }
+    })();
+    const resolvedIsPremium = localIsPremium || telegramBootstrap.isPremium;
+    const resolvedBootstrap = resolvedIsPremium !== telegramBootstrap.isPremium
+      ? { ...telegramBootstrap, isPremium: resolvedIsPremium, premiumStatus: "premium" as const }
+      : telegramBootstrap;
+
     const resolvedBootstrapSource = resolveBootstrapSource(
       telegramBootstrap.restorationMode,
     );
 
     if (telegramBootstrap.appSnapshot) {
-      applyTelegramBootstrapAppState(telegramBootstrap, resolvedBootstrapSource);
-      const snapshotWithPremium = { ...telegramBootstrap.appSnapshot, isPremium: telegramBootstrap.isPremium };
+      applyTelegramBootstrapAppState(resolvedBootstrap, resolvedBootstrapSource);
+      const snapshotWithPremium = { ...telegramBootstrap.appSnapshot, isPremium: resolvedIsPremium };
       persistSnapshot(snapshotWithPremium);
       hydrateFromSnapshot(snapshotWithPremium);
       return;
     }
 
-    applyTelegramBootstrapAppState(telegramBootstrap, resolvedBootstrapSource);
+    applyTelegramBootstrapAppState(resolvedBootstrap, resolvedBootstrapSource);
 
     if (telegramBootstrap.appProfile) {
       setProfile(telegramBootstrap.appProfile);
@@ -625,7 +657,8 @@ export function useMiniAppBootstrap(
       setBirthDate(newBirthDate);
       setFullName(newName);
 
-      const snapshot = { profile: profileData, numerology: numerologyData };
+      // Pass isPremium explicitly — avoid stale closure after async await
+      const snapshot: AppSnapshot = { profile: profileData, numerology: numerologyData, isPremium };
       persistSnapshot(snapshot);
       hydrateFromSnapshot(snapshot);
 
@@ -793,7 +826,9 @@ export function useMiniAppBootstrap(
   }
 
   function persistSnapshot(snapshot: AppSnapshot) {
-    const withPremium = { ...snapshot, isPremium };
+    // If snapshot explicitly carries isPremium, trust it; otherwise fall back to current state.
+    const resolvedPremium = snapshot.isPremium ?? isPremium;
+    const withPremium = { ...snapshot, isPremium: resolvedPremium };
     window.localStorage.setItem(APP_SNAPSHOT_STORAGE_KEY, JSON.stringify(withPremium));
   }
 
