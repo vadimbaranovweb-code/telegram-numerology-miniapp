@@ -285,6 +285,7 @@ export function ReadyHomeScreen({
             todayState={todayState}
             dailyInsight={dailyInsight}
             isDailyLoading={isDailyLoading}
+            horoscopeResult={horoscopeResult}
             onOpenReading={openReading}
             onOpenCompat={openCompat}
             onOpenHoroscope={openHoroscope}
@@ -448,6 +449,7 @@ function HomeHub({
   todayState,
   dailyInsight,
   isDailyLoading,
+  horoscopeResult,
   onOpenReading,
   onOpenCompat,
   onOpenHoroscope,
@@ -460,6 +462,7 @@ function HomeHub({
   todayState: "locked" | "opted_out" | "ready";
   dailyInsight: DailyInsight | null;
   isDailyLoading: boolean;
+  horoscopeResult: HoroscopeReadingResponse | null;
   onOpenReading: () => void;
   onOpenCompat: () => void;
   onOpenHoroscope: () => void;
@@ -504,8 +507,8 @@ function HomeHub({
         isLoading={isDailyLoading}
       />
 
-      {/* Daily horoscope teaser */}
-      {isPremium && (
+      {/* Daily horoscope card */}
+      {isPremium && horoscopeResult && (
         <button
           type="button"
           onClick={onOpenHoroscope}
@@ -521,18 +524,27 @@ function HomeHub({
               Гороскоп на сегодня
             </p>
             <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em]" style={{ background: "rgba(96,165,250,0.12)", color: "#60A5FA" }}>
-              Премиум
+              {horoscopeResult.zodiac.symbol} {horoscopeResult.zodiac.sign_ru}
             </span>
           </div>
-          <p className="mt-3 text-[15px] font-semibold" style={{ color: "var(--text-primary)" }}>
-            Узнай свой прогноз на день ★
+          <h3 className="mt-3 text-[15px] font-bold" style={{ color: "var(--text-primary)" }}>
+            {horoscopeResult.daily_forecast.headline}
+          </h3>
+          <p className="mt-1.5 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+            {horoscopeResult.daily_forecast.body.length > 120
+              ? horoscopeResult.daily_forecast.body.slice(0, 120) + "..."
+              : horoscopeResult.daily_forecast.body}
           </p>
-          <p className="mt-1 text-xs leading-5" style={{ color: "var(--text-secondary)" }}>
-            Персональный расклад по знаку зодиака, число дня и рекомендации.
-          </p>
-          <div className="mt-3 flex items-center gap-1.5">
-            <span className="text-xs font-medium" style={{ color: "#60A5FA" }}>Открыть</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2.2" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
+          <div className="mt-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="rounded-full px-2.5 py-1 text-xs font-medium" style={{ background: "rgba(96,165,250,0.1)", color: "#60A5FA" }}>
+                Число дня: {horoscopeResult.daily_forecast.lucky_number}
+              </span>
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {horoscopeResult.daily_forecast.focus_area}
+              </span>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2.2" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
           </div>
         </button>
       )}

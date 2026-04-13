@@ -454,7 +454,9 @@ export function useMiniAppBootstrap(
 
   useEffect(() => {
     async function loadDailyInsight() {
-      if (bootstrapStatus !== "ready" || !profile || todayState !== "ready") {
+      // Premium users always get daily insights regardless of opt-in
+      const canLoad = isPremium || todayState === "ready";
+      if (bootstrapStatus !== "ready" || !profile || !canLoad) {
         setDailyInsight(null);
         return;
       }
@@ -485,7 +487,42 @@ export function useMiniAppBootstrap(
     }
 
     void loadDailyInsight();
-  }, [bootstrapStatus, profile, todayState]);
+  }, [bootstrapStatus, profile, todayState, isPremium]);
+
+  // Premium users always get daily insights regardless of opt-in
+  useEffect(() => {
+    if (isPremium && todayState !== "ready") {
+      setTodayState("ready");
+    }
+  }, [isPremium, todayState]);
+
+  // Auto-load daily horoscope for premium users
+  useEffect(() => {
+    async function loadDailyHoroscope() {
+      if (bootstrapStatus !== "ready" || !profile || !isPremium) {
+        return;
+      }
+      // Skip if already loaded
+      if (horoscopeResult) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/horoscope/reading`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ birth_date: profile.birth_date }),
+        });
+
+        if (!response.ok) return;
+
+        const data = (await response.json()) as HoroscopeReadingResponse;
+        setHoroscopeResult(data);
+      } catch {
+        // Silent fail — horoscope card just won't show
+      }
+    }
+
+    void loadDailyHoroscope();
+  }, [bootstrapStatus, profile, isPremium, horoscopeResult]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -847,7 +884,7 @@ export function useMiniAppBootstrap(
     setBirthDate(snapshot.profile.birth_date);
     setFullName(snapshot.profile.display_name ?? "");
     setDailyOptIn(snapshot.profile.daily_opt_in);
-    setTodayState(snapshot.profile.daily_opt_in ? "ready" : "opted_out");
+    setTodayState(snapshot.profile.daily_opt_in || snapshot.isPremium ? "ready" : "opted_out");
     if (snapshot.isPremium != null) {
       setIsPremium(snapshot.isPremium);
       setPremiumStatus(snapshot.isPremium ? "premium" : "free");
