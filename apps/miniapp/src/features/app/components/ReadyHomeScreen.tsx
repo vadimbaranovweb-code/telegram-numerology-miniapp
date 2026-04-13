@@ -11,6 +11,11 @@ import type {
 import { CompatibilityTeaserCard } from "@/features/compatibility/components/CompatibilityTeaserCard";
 import type { CompatibilityUiStage } from "@/features/compatibility/components/CompatibilityTeaserCard";
 import { CompatFlow } from "@/features/compatibility/components/CompatFlow";
+import { HoroscopeFlow } from "@/features/horoscope/components/HoroscopeFlow";
+import type {
+  HoroscopeReadingResponse,
+  HoroscopeCompatibilityResponse,
+} from "@/features/horoscope/types";
 import {
   CompatibilityPreviewResponse,
   RelationshipContext,
@@ -31,7 +36,7 @@ import { GenerationLoadingScreen } from "./GenerationLoadingScreen";
 import { NewCalculationSheet } from "./NewCalculationSheet";
 import { FormEvent } from "react";
 
-type HomeScreen = "hub" | "reading" | "compat" | "compat_flow";
+type HomeScreen = "hub" | "reading" | "compat" | "compat_flow" | "horoscope_flow";
 
 type ReadyHomeScreenProps = {
   profile: TemporaryProfile;
@@ -92,6 +97,13 @@ type ReadyHomeScreenProps = {
   pendingNavigation: "reading" | null;
   onClearPendingNavigation: () => void;
   onClearCompatibility: () => void;
+  horoscopeResult: HoroscopeReadingResponse | null;
+  horoscopeCompatResult: HoroscopeCompatibilityResponse | null;
+  isHoroscopeSubmitting: boolean;
+  horoscopeError: string | null;
+  onHoroscopeReading: (birthDate: string) => void;
+  onHoroscopeCompat: (sourceBirthDate: string, targetBirthDate: string, targetName: string) => void;
+  onClearHoroscope: () => void;
 };
 
 function resolveInitialHomeScreen(): HomeScreen {
@@ -136,6 +148,13 @@ export function ReadyHomeScreen({
   pendingNavigation,
   onClearPendingNavigation,
   onClearCompatibility,
+  horoscopeResult,
+  horoscopeCompatResult,
+  isHoroscopeSubmitting,
+  horoscopeError,
+  onHoroscopeReading,
+  onHoroscopeCompat,
+  onClearHoroscope,
 }: ReadyHomeScreenProps) {
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [homeScreen, setHomeScreen] = useState<HomeScreen>(() =>
@@ -183,11 +202,35 @@ export function ReadyHomeScreen({
     setHomeScreen("compat_flow");
   }
 
+  function openHoroscope() {
+    onClearHoroscope();
+    setActiveTab("home");
+    setHomeScreen("horoscope_flow");
+  }
+
   function goBackToHub() {
     setHomeScreen("hub");
   }
 
   const compatStage = resolveCompatibilityUiStage({ preview: compatibilityPreview, isPremium });
+
+  // Full-screen horoscope flow
+  if (activeTab === "home" && homeScreen === "horoscope_flow") {
+    return (
+      <div className="px-4 pb-10">
+        <HoroscopeFlow
+          birthDate={profile.birth_date}
+          horoscopeResult={horoscopeResult}
+          horoscopeCompatResult={horoscopeCompatResult}
+          isSubmitting={isHoroscopeSubmitting}
+          error={horoscopeError}
+          onSubmitReading={onHoroscopeReading}
+          onSubmitCompat={onHoroscopeCompat}
+          onClose={goBackToHub}
+        />
+      </div>
+    );
+  }
 
   // Full-screen compat flow — no tab bar, no scroll wrapper
   if (activeTab === "home" && homeScreen === "compat_flow") {
@@ -244,6 +287,7 @@ export function ReadyHomeScreen({
             isDailyLoading={isDailyLoading}
             onOpenReading={openReading}
             onOpenCompat={openCompat}
+            onOpenHoroscope={openHoroscope}
             onNewCalc={() => setNewCalcOpen(true)}
           />
         )}
@@ -355,6 +399,7 @@ export function ReadyHomeScreen({
           <NewCalculationSheet
             onSelectNumerology={handleNewCalc}
             onSelectCompat={() => { setNewCalcOpen(false); openFreshCompat(); }}
+            onSelectHoroscope={() => { setNewCalcOpen(false); openHoroscope(); }}
             onClose={() => setNewCalcOpen(false)}
           />
         </BottomSheet>
@@ -405,6 +450,7 @@ function HomeHub({
   isDailyLoading,
   onOpenReading,
   onOpenCompat,
+  onOpenHoroscope,
   onNewCalc,
 }: {
   profile: TemporaryProfile;
@@ -416,6 +462,7 @@ function HomeHub({
   isDailyLoading: boolean;
   onOpenReading: () => void;
   onOpenCompat: () => void;
+  onOpenHoroscope: () => void;
   onNewCalc: () => void;
 }) {
   const name = profile.display_name ? `, ${profile.display_name.split(" ")[0]}` : "";
@@ -484,10 +531,9 @@ function HomeHub({
         icon="★"
         accentColor="#60A5FA"
         title="Гороскоп"
-        subtitle={isPremium ? "Будет доступен в ближайшем обновлении" : "Персональный астрологический расклад"}
-        badge={isPremium ? "Включено" : "Скоро"}
-        disabled={!isPremium}
-        onClick={() => {}}
+        subtitle={isPremium ? "Персональный астрологический расклад" : "Знак, прогноз дня, совместимость"}
+        badge={isPremium ? "Открыто" : "Премиум"}
+        onClick={onOpenHoroscope}
       />
     </>
   );

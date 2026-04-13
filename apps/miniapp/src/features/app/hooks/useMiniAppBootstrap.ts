@@ -9,6 +9,10 @@ import {
   RelationshipContext,
 } from "@/features/compatibility/types";
 import { DailyInsight } from "@/features/daily/types";
+import type {
+  HoroscopeReadingResponse,
+  HoroscopeCompatibilityResponse,
+} from "@/features/horoscope/types";
 import { NumerologyResponse } from "@/features/onboarding/types";
 import {
   AppProfile,
@@ -117,6 +121,12 @@ export function useMiniAppBootstrap(
   const [primaryAction, setPrimaryAction] = useState<PrimaryHomeAction>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Horoscope state
+  const [horoscopeResult, setHoroscopeResult] = useState<HoroscopeReadingResponse | null>(null);
+  const [horoscopeCompatResult, setHoroscopeCompatResult] = useState<HoroscopeCompatibilityResponse | null>(null);
+  const [isHoroscopeSubmitting, setIsHoroscopeSubmitting] = useState(false);
+  const [horoscopeError, setHoroscopeError] = useState<string | null>(null);
 
   // Tracks which telegramBootstrap object was last fully applied.
   // Prevents re-running full rehydration when profile/result change after a new calculation.
@@ -1069,6 +1079,77 @@ export function useMiniAppBootstrap(
     setIsCompatibilityExpanded(true);
   }
 
+  async function handleHoroscopeReading(birthDateStr: string) {
+    setIsHoroscopeSubmitting(true);
+    setHoroscopeError(null);
+    setHoroscopeResult(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/horoscope/reading`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ birth_date: birthDateStr }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Не удалось получить гороскоп.");
+      }
+
+      const data = (await response.json()) as HoroscopeReadingResponse;
+      setHoroscopeResult(data);
+
+      addCalculationEntry({
+        type: "horoscope",
+        birthDate: birthDateStr,
+        displayName: `${data.zodiac.symbol} ${data.zodiac.sign_ru}`,
+      });
+    } catch (err) {
+      setHoroscopeError(err instanceof Error ? err.message : "Ошибка при загрузке гороскопа.");
+    } finally {
+      setIsHoroscopeSubmitting(false);
+    }
+  }
+
+  async function handleHoroscopeCompat(
+    sourceBirthDate: string,
+    targetBirthDate: string,
+    targetName: string,
+  ) {
+    setIsHoroscopeSubmitting(true);
+    setHoroscopeError(null);
+    setHoroscopeCompatResult(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/horoscope/compatibility`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          source_birth_date: sourceBirthDate,
+          target_birth_date: targetBirthDate,
+          target_display_name: targetName || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Не удалось получить совместимость знаков.");
+      }
+
+      const data = (await response.json()) as HoroscopeCompatibilityResponse;
+      setHoroscopeCompatResult(data);
+
+      addCalculationEntry({
+        type: "horoscope",
+        birthDate: sourceBirthDate,
+        displayName: `${data.source_zodiac.symbol} + ${data.target_zodiac.symbol}`,
+        targetName: targetName || undefined,
+      });
+    } catch (err) {
+      setHoroscopeError(err instanceof Error ? err.message : "Ошибка при загрузке совместимости.");
+    } finally {
+      setIsHoroscopeSubmitting(false);
+    }
+  }
+
   return {
     birthDate,
     fullName,
@@ -1135,6 +1216,17 @@ export function useMiniAppBootstrap(
       setTargetDisplayName("");
       setSourceBirthDateCompat("");
       setCompatibilityError(null);
+    },
+    horoscopeResult,
+    horoscopeCompatResult,
+    isHoroscopeSubmitting,
+    horoscopeError,
+    handleHoroscopeReading,
+    handleHoroscopeCompat,
+    clearHoroscope: () => {
+      setHoroscopeResult(null);
+      setHoroscopeCompatResult(null);
+      setHoroscopeError(null);
     },
   };
 }

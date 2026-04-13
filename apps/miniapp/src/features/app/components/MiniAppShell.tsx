@@ -81,6 +81,13 @@ export function MiniAppShell() {
     pendingNavigation,
     clearPendingNavigation,
     clearCompatibility,
+    horoscopeResult,
+    horoscopeCompatResult,
+    isHoroscopeSubmitting,
+    horoscopeError,
+    handleHoroscopeReading,
+    handleHoroscopeCompat,
+    clearHoroscope,
   } = useMiniAppBootstrap(
     telegramContext,
     telegramAuth,
@@ -183,6 +190,13 @@ export function MiniAppShell() {
                 pendingNavigation={pendingNavigation}
                 onClearPendingNavigation={clearPendingNavigation}
                 onClearCompatibility={clearCompatibility}
+                horoscopeResult={horoscopeResult}
+                horoscopeCompatResult={horoscopeCompatResult}
+                isHoroscopeSubmitting={isHoroscopeSubmitting}
+                horoscopeError={horoscopeError}
+                onHoroscopeReading={handleHoroscopeReading}
+                onHoroscopeCompat={handleHoroscopeCompat}
+                onClearHoroscope={clearHoroscope}
               />
             ) : (
               <section className="grid gap-3">

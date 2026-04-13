@@ -97,6 +97,28 @@ export type Translations = {
     label: string;
     action_open: string;
   };
+  horoscope: {
+    label: string;
+    menu_title: string;
+    menu_desc: string;
+    menu_reading: string;
+    menu_reading_desc: string;
+    menu_compat: string;
+    menu_compat_desc: string;
+    birth_date: string;
+    submit_reading: string;
+    submit_compat: string;
+    first_person: string;
+    second_person: string;
+    name_optional: string;
+    name_placeholder: string;
+    strengths: string;
+    growth_areas: string;
+    lucky_number: string;
+    focus: string;
+    back: string;
+    home: string;
+  };
   nav: {
     home: string;
     explore: string;

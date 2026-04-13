@@ -6,6 +6,7 @@ import { DrumDatePicker } from "@/features/onboarding/components/DrumDatePicker"
 type NewCalculationSheetProps = {
   onSelectNumerology: (birthDate: string, name: string) => void;
   onSelectCompat: () => void;
+  onSelectHoroscope: () => void;
   onClose: () => void;
 };
 
@@ -14,6 +15,7 @@ type Step = "menu" | "numerology";
 export function NewCalculationSheet({
   onSelectNumerology,
   onSelectCompat,
+  onSelectHoroscope,
   onClose,
 }: NewCalculationSheetProps) {
   const [step, setStep] = useState<Step>("menu");
@@ -134,9 +136,8 @@ export function NewCalculationSheet({
           icon="★"
           accentColor="#60A5FA"
           title="Гороскоп"
-          subtitle="Скоро"
-          disabled
-          onClick={() => {}}
+          subtitle="Знак, прогноз, совместимость"
+          onClick={onSelectHoroscope}
         />
       </div>
     </div>
