@@ -26,6 +26,8 @@ export type DailyForecast = {
   body: string;
   lucky_number: number;
   focus_area: string;
+  forecast_date: string;
+  weekday: string;
 };
 
 export type PersonalReading = {

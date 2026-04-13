@@ -101,7 +101,7 @@ export function MiniAppShell() {
       style={{
         background: "var(--grad-hero)",
         color: "var(--text-primary)",
-        paddingTop: "calc(env(safe-area-inset-top, 0px) + 56px)",
+        paddingTop: "calc(var(--tg-content-safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)) + 16px)",
         paddingBottom: bootstrapStatus === "ready" ? "0" : "1.5rem",
       }}
     >

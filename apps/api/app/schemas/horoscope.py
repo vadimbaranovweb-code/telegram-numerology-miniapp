@@ -45,6 +45,8 @@ class DailyForecast(BaseModel):
     body: str
     lucky_number: int
     focus_area: str
+    forecast_date: date
+    weekday: str
 
 
 class PersonalReading(BaseModel):

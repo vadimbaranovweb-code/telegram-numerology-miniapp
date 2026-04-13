@@ -521,7 +521,7 @@ function HomeHub({
         >
           <div className="flex items-center gap-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: "#60A5FA" }}>
-              Гороскоп на сегодня
+              {horoscopeResult.daily_forecast.weekday}, {horoscopeResult.daily_forecast.forecast_date.split("-").reverse().join(".")}
             </p>
             <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em]" style={{ background: "rgba(96,165,250,0.12)", color: "#60A5FA" }}>
               {horoscopeResult.zodiac.symbol} {horoscopeResult.zodiac.sign_ru}
