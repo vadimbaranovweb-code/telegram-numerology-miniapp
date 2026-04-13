@@ -397,6 +397,19 @@ export function useMiniAppBootstrap(
       return;
     }
 
+    // If we already have valid local state (profile + result from localStorage)
+    // but the backend has no data (SQLite /tmp reset on Railway restart),
+    // don't wipe local state — just sync premium status.
+    const hasValidLocalState = profile !== null && result !== null;
+    const bootstrapWantsOnboarding = resolveBootstrapStatusFromTelegram(telegramBootstrap) === "onboarding";
+    if (hasValidLocalState && bootstrapWantsOnboarding) {
+      if (resolvedIsPremium) {
+        setIsPremium(true);
+        setPremiumStatus("premium");
+      }
+      return;
+    }
+
     applyTelegramBootstrapAppState(resolvedBootstrap, resolvedBootstrapSource);
 
     if (telegramBootstrap.appProfile) {
