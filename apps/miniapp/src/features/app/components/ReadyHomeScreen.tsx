@@ -504,6 +504,39 @@ function HomeHub({
         isLoading={isDailyLoading}
       />
 
+      {/* Daily horoscope teaser */}
+      {isPremium && (
+        <button
+          type="button"
+          onClick={onOpenHoroscope}
+          className="w-full rounded-[24px] p-5 text-left transition active:scale-[0.98]"
+          style={{
+            background: "var(--bg-surface)",
+            border: "1px solid rgba(96,165,250,0.15)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: "#60A5FA" }}>
+              Гороскоп на сегодня
+            </p>
+            <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em]" style={{ background: "rgba(96,165,250,0.12)", color: "#60A5FA" }}>
+              Премиум
+            </span>
+          </div>
+          <p className="mt-3 text-[15px] font-semibold" style={{ color: "var(--text-primary)" }}>
+            Узнай свой прогноз на день ★
+          </p>
+          <p className="mt-1 text-xs leading-5" style={{ color: "var(--text-secondary)" }}>
+            Персональный расклад по знаку зодиака, число дня и рекомендации.
+          </p>
+          <div className="mt-3 flex items-center gap-1.5">
+            <span className="text-xs font-medium" style={{ color: "#60A5FA" }}>Открыть</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2.2" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
+          </div>
+        </button>
+      )}
+
       {/* Personal year card */}
       <PersonalYearCard
         personalYear={result.personal_year_number}
@@ -633,73 +666,120 @@ function HomeBanner({
   );
 }
 
-/** Explore tab placeholder */
+/** Explore tab with articles */
 function ExploreScreen() {
+  const [openArticle, setOpenArticle] = useState<number | null>(null);
+
   const articles = [
-    { icon: "✦", title: "Что такое число жизненного пути?", tag: "Основы" },
-    { icon: "◈", title: "Мастер-числа 11, 22, 33 — в чём особенность?", tag: "Нумерология" },
-    { icon: "♥", title: "Совместимость по числам: мифы и реальность", tag: "Совместимость" },
+    {
+      tag: "Основы",
+      title: "Что такое число жизненного пути?",
+      image: "/articles/life-path.svg",
+      body: "Число жизненного пути — главное число в нумерологии. Оно вычисляется из полной даты рождения путём последовательного сложения цифр до однозначного числа (или мастер-числа 11, 22, 33).\n\nНапример, дата 15.03.1990: 1+5+0+3+1+9+9+0 = 28, 2+8 = 10, 1+0 = 1. Число жизненного пути — 1.\n\nКаждое число от 1 до 9 несёт свою энергию:\n• 1 — лидерство и независимость\n• 2 — партнёрство и дипломатия\n• 3 — творчество и самовыражение\n• 4 — стабильность и порядок\n• 5 — свобода и перемены\n• 6 — забота и ответственность\n• 7 — анализ и духовность\n• 8 — амбиции и материальный успех\n• 9 — мудрость и гуманизм\n\nЭто число не меняется в течение жизни и показывает твою основную жизненную задачу.",
+    },
+    {
+      tag: "Нумерология",
+      title: "Мастер-числа 11, 22, 33",
+      image: "/articles/master-numbers.svg",
+      body: "Мастер-числа — особые двузначные числа, которые не сводятся к однозначным при расчёте. Они несут усиленную вибрацию и особую миссию.\n\n11 — Интуитивный визионер. Обострённая чувствительность, способность видеть то, что скрыто от других. Часто встречается у духовных учителей и творческих людей.\n\n22 — Мастер-строитель. Способность воплощать грандиозные идеи в реальность. Это число великих проектов и системного мышления.\n\n33 — Мастер-целитель. Самое редкое мастер-число. Глубокое сострадание и способность исцелять через любовь. Встречается у людей, посвятивших жизнь служению другим.\n\nЕсли твоё число жизненного пути — мастер-число, это говорит о повышенном потенциале и ответственности. Энергия мастер-числа может проявляться не сразу, а раскрываться с опытом.",
+    },
+    {
+      tag: "Совместимость",
+      title: "Совместимость по числам: как это работает?",
+      image: "/articles/compatibility.svg",
+      body: "Нумерологическая совместимость основана на сравнении чисел жизненного пути двух людей. Некоторые числа естественно гармонируют, другие создают напряжение.\n\nОтличная совместимость:\n• 1 и 5 — оба ценят свободу\n• 2 и 6 — забота и гармония\n• 3 и 9 — творческий союз\n• 4 и 8 — деловое партнёрство\n\nСложные сочетания:\n• 1 и 1 — борьба за лидерство\n• 4 и 5 — стабильность vs перемены\n• 7 и 3 — глубина vs поверхностность\n\nВажно помнить: нумерология показывает энергетические тенденции, а не приговор. Любая пара может быть счастливой, если оба готовы работать над отношениями. Числа лишь подсвечивают зоны, где стоит быть внимательнее.",
+    },
+    {
+      tag: "Астрология",
+      title: "Четыре стихии зодиака",
+      image: "/articles/zodiac-elements.svg",
+      body: "Двенадцать знаков зодиака делятся на четыре стихии, каждая из которых определяет базовый темперамент.\n\n🔥 Огонь (Овен, Лев, Стрелец)\nЭнергия, страсть, инициативность. Огненные знаки — прирождённые лидеры. Они действуют быстро и вдохновляют других.\n\n🌍 Земля (Телец, Дева, Козерог)\nСтабильность, практичность, надёжность. Земные знаки строят прочный фундамент и ценят материальный мир.\n\n💨 Воздух (Близнецы, Весы, Водолей)\nИнтеллект, общение, идеи. Воздушные знаки живут в мире мыслей и социальных связей.\n\n💧 Вода (Рак, Скорпион, Рыбы)\nЭмоции, интуиция, глубина. Водные знаки чувствуют тоньше других и обладают развитой эмпатией.\n\nСтихии помогают понять, как знаки взаимодействуют: Огонь и Воздух усиливают друг друга, Земля и Вода — дополняют.",
+    },
+    {
+      tag: "Нумерология",
+      title: "Что такое персональный год?",
+      image: "/articles/personal-year.svg",
+      body: "Персональный год — это девятилетний цикл, в котором каждый год несёт свою энергию. Он рассчитывается из дня и месяца рождения + текущий год.\n\n• Год 1 — новые начинания, старт цикла\n• Год 2 — терпение, партнёрства\n• Год 3 — творчество, общение, радость\n• Год 4 — работа, фундамент, дисциплина\n• Год 5 — перемены, свобода, путешествия\n• Год 6 — семья, ответственность, дом\n• Год 7 — самопознание, уединение, анализ\n• Год 8 — финансы, карьера, власть\n• Год 9 — завершение, отпускание, мудрость\n\nЗная свой персональный год, можно лучше планировать важные решения. Например, год 1 идеален для старта бизнеса, а год 9 — для завершения отживших отношений и проектов.",
+    },
+    {
+      tag: "Астрология",
+      title: "Совместимость знаков зодиака",
+      image: "/articles/zodiac-compat.svg",
+      body: "Астрологическая совместимость определяется взаимодействием стихий, модальностей и аспектов между знаками.\n\nКлассические пары с высокой совместимостью:\n• Овен + Лев — огненная страсть и взаимное восхищение\n• Телец + Рак — уют, стабильность, семейные ценности\n• Близнецы + Водолей — интеллектуальная связь и свобода\n• Скорпион + Рыбы — глубокая эмоциональная связь\n\nНапряжённые, но развивающие пары:\n• Овен + Козерог — амбиции сталкиваются\n• Лев + Скорпион — борьба за контроль\n• Близнецы + Дева — разный подход к деталям\n\nКвадратуры (знаки через 90°) создают напряжение, но и мощный рост. Трины (120°) — естественная гармония. Оппозиции (180°) — притяжение противоположностей.\n\nАстрология — это карта возможностей, а не ограничений.",
+    },
   ];
 
-  return (
-    <article
-      className="rounded-[24px] p-5"
-      style={{
-        background: "var(--bg-surface)",
-        border: "1px solid var(--border-subtle)",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-      }}
-    >
-      <p
-        className="text-[11px] font-semibold uppercase tracking-[0.22em]"
-        style={{ color: "var(--text-muted)" }}
-      >
-        Статьи · скоро
-      </p>
-      <h2
-        className="mt-3 text-[20px] font-bold tracking-tight"
-        style={{ color: "var(--text-primary)" }}
-      >
-        Обзор
-      </h2>
-      <p className="mt-1 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-        Здесь появятся статьи и материалы по нумерологии.
-      </p>
+  if (openArticle !== null) {
+    const article = articles[openArticle];
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setOpenArticle(null)}
+          className="flex items-center gap-2 py-1 transition active:opacity-60"
+          style={{ color: "var(--text-muted)", background: "none", border: "none" }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          <span className="text-sm font-medium">Назад</span>
+        </button>
 
-      <ul className="mt-5 space-y-3">
-        {articles.map((a) => (
-          <li
+        <article
+          className="rounded-[24px] overflow-hidden"
+          style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", boxShadow: "0 10px 30px rgba(0,0,0,0.3)" }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={article.image} alt={article.title} className="w-full h-40 object-cover" />
+          <div className="p-5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--accent-soft)" }}>
+              {article.tag}
+            </p>
+            <h2 className="mt-2 text-[20px] font-bold tracking-tight leading-tight" style={{ color: "var(--text-primary)" }}>
+              {article.title}
+            </h2>
+            <div className="mt-4 text-sm leading-7 whitespace-pre-line" style={{ color: "var(--text-secondary)" }}>
+              {article.body}
+            </div>
+          </div>
+        </article>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="px-1">
+        <h2 className="text-[20px] font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
+          Обзор
+        </h2>
+        <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+          Статьи про нумерологию и астрологию
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        {articles.map((a, i) => (
+          <button
             key={a.title}
-            className="flex items-start gap-3 rounded-2xl px-4 py-3"
-            style={{
-              background: "var(--bg-elevated)",
-              border: "1px solid var(--border-subtle)",
-              opacity: 0.55,
-            }}
+            type="button"
+            onClick={() => setOpenArticle(i)}
+            className="w-full rounded-[20px] overflow-hidden text-left transition active:scale-[0.98]"
+            style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", boxShadow: "0 6px 20px rgba(0,0,0,0.25)" }}
           >
-            <span
-              className="mt-0.5 text-base flex-shrink-0"
-              style={{ color: "var(--accent-soft)" }}
-            >
-              {a.icon}
-            </span>
-            <div>
-              <p
-                className="text-[10px] font-semibold uppercase tracking-[0.14em]"
-                style={{ color: "var(--text-muted)" }}
-              >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={a.image} alt={a.title} className="w-full h-32 object-cover" />
+            <div className="px-4 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--accent-soft)" }}>
                 {a.tag}
               </p>
-              <p
-                className="mt-0.5 text-sm font-medium leading-5"
-                style={{ color: "var(--text-primary)" }}
-              >
+              <p className="mt-1 text-[14px] font-semibold leading-5" style={{ color: "var(--text-primary)" }}>
                 {a.title}
               </p>
             </div>
-          </li>
+          </button>
         ))}
-      </ul>
-    </article>
+      </div>
+    </>
   );
 }

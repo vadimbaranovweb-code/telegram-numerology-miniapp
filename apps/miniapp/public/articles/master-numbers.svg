@@ -1,0 +1,12 @@
+<svg width="400" height="240" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="240" rx="16" fill="url(#g2)"/>
+  <text x="200" y="95" text-anchor="middle" font-size="56" fill="rgba(255,255,255,0.12)" font-family="serif">11 · 22 · 33</text>
+  <text x="200" y="155" text-anchor="middle" font-size="26" fill="rgba(255,255,255,0.9)" font-weight="bold" font-family="system-ui">Мастер-числа</text>
+  <text x="200" y="185" text-anchor="middle" font-size="14" fill="rgba(255,255,255,0.5)" font-family="system-ui">Особая миссия и энергия</text>
+</svg>

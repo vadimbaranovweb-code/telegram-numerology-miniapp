@@ -6,7 +6,7 @@ def test_list_offers_returns_compatibility_offer() -> None:
 
     assert len(result.offers) == 1
     assert result.offers[0].offer_key == "compatibility_unlock_monthly"
-    assert result.offers[0].stars_amount == 10
+    assert result.offers[0].stars_amount == 199
 
 
 def test_list_offers_can_filter_by_context() -> None:

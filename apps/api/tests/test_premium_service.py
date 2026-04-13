@@ -41,12 +41,12 @@ def test_create_premium_checkout_session_returns_simulated_telegram_stars_sessio
     assert result.invoice_url is None
     assert result.invoice is not None
     assert result.invoice.currency == "XTR"
-    assert result.invoice.prices[0].amount == 10
+    assert result.invoice.prices[0].amount == 199
     assert (
         result.invoice.payload
         == f"premium:compatibility_unlock_monthly:{auth_response.session_token}:{preview.compatibility_request_id}"
     )
-    assert result.stars_amount == 10
+    assert result.stars_amount == 199
     assert preview.compatibility_request_id in (result.deep_link or "")
 
 

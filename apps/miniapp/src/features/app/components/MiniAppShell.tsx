@@ -101,7 +101,7 @@ export function MiniAppShell() {
       style={{
         background: "var(--grad-hero)",
         color: "var(--text-primary)",
-        paddingTop: "1.5rem",
+        paddingTop: "calc(env(safe-area-inset-top, 0px) + 56px)",
         paddingBottom: bootstrapStatus === "ready" ? "0" : "1.5rem",
       }}
     >
