@@ -753,6 +753,13 @@ export function useMiniAppBootstrap(
       applyLocalHomeLayout(localLayout);
       setIsPaywallOpen(false);
       setIsPurchaseSuccessOpen(false);
+      addCalculationEntry({
+        type: "compatibility",
+        birthDate: sourceBirthDateCompat || profile.birth_date,
+        displayName: null,
+        targetName: targetDisplayName || undefined,
+        lifePathNumber: data.source_life_path,
+      });
       trackEvent("compatibility_generation_completed", {
         relationship_context: relationshipContext,
         cards_count: data.preview.cards.length,
@@ -1109,6 +1116,13 @@ export function useMiniAppBootstrap(
     handleResetProfile,
     pendingNavigation,
     clearPendingNavigation: () => setPendingNavigation(null),
+    clearCompatibility: () => {
+      setCompatibilityPreview(null);
+      setTargetBirthDate("");
+      setTargetDisplayName("");
+      setSourceBirthDateCompat("");
+      setCompatibilityError(null);
+    },
   };
 }
 

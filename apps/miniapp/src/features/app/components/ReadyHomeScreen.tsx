@@ -91,6 +91,7 @@ type ReadyHomeScreenProps = {
   onResetProfile: () => void | Promise<void>;
   pendingNavigation: "reading" | null;
   onClearPendingNavigation: () => void;
+  onClearCompatibility: () => void;
 };
 
 function resolveInitialHomeScreen(): HomeScreen {
@@ -134,6 +135,7 @@ export function ReadyHomeScreen({
   onResetProfile,
   pendingNavigation,
   onClearPendingNavigation,
+  onClearCompatibility,
 }: ReadyHomeScreenProps) {
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [homeScreen, setHomeScreen] = useState<HomeScreen>(() =>
@@ -171,6 +173,12 @@ export function ReadyHomeScreen({
   }
 
   function openCompat() {
+    setActiveTab("home");
+    setHomeScreen("compat_flow");
+  }
+
+  function openFreshCompat() {
+    onClearCompatibility();
     setActiveTab("home");
     setHomeScreen("compat_flow");
   }
@@ -346,7 +354,7 @@ export function ReadyHomeScreen({
         <BottomSheet onClose={() => setNewCalcOpen(false)}>
           <NewCalculationSheet
             onSelectNumerology={handleNewCalc}
-            onSelectCompat={() => { setNewCalcOpen(false); openCompat(); }}
+            onSelectCompat={() => { setNewCalcOpen(false); openFreshCompat(); }}
             onClose={() => setNewCalcOpen(false)}
           />
         </BottomSheet>
