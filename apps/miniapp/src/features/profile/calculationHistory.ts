@@ -1,7 +1,33 @@
+import type { NumerologyResponse } from "@/features/onboarding/types";
+import type { CompatibilityPreviewResponse } from "@/features/compatibility/types";
+import type {
+  HoroscopeReadingResponse,
+  HoroscopeCompatibilityResponse,
+} from "@/features/horoscope/types";
+
 const HISTORY_KEY = "numerology-calc-history-v1";
 const MAX_ENTRIES = 50;
 
 export type CalculationType = "numerology" | "compatibility" | "horoscope";
+
+export type CalculationHistoryPayload =
+  | { kind: "numerology"; numerology: NumerologyResponse }
+  | {
+      kind: "compatibility";
+      compatibility: CompatibilityPreviewResponse;
+      sourceBirthDate: string;
+      targetBirthDate: string;
+      targetDisplayName?: string | null;
+      relationshipContext?: string | null;
+    }
+  | { kind: "horoscope_reading"; horoscope: HoroscopeReadingResponse }
+  | {
+      kind: "horoscope_compat";
+      horoscope: HoroscopeCompatibilityResponse;
+      sourceBirthDate: string;
+      targetBirthDate: string;
+      targetDisplayName?: string | null;
+    };
 
 export type CalculationHistoryEntry = {
   id: string;
@@ -12,6 +38,8 @@ export type CalculationHistoryEntry = {
   targetName?: string;
   lifePathNumber?: number;
   createdAt: string; // ISO timestamp
+  /** Full result payload, available for entries created after 2026-04-14. */
+  payload?: CalculationHistoryPayload;
 };
 
 export function getCalculationHistory(): CalculationHistoryEntry[] {

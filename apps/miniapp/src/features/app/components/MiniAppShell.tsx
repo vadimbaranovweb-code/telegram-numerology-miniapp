@@ -88,6 +88,7 @@ export function MiniAppShell() {
     handleHoroscopeReading,
     handleHoroscopeCompat,
     clearHoroscope,
+    handleOpenHistoryEntry,
   } = useMiniAppBootstrap(
     telegramContext,
     telegramAuth,
@@ -200,6 +201,7 @@ export function MiniAppShell() {
                 onHoroscopeReading={handleHoroscopeReading}
                 onHoroscopeCompat={handleHoroscopeCompat}
                 onClearHoroscope={clearHoroscope}
+                onOpenHistoryEntry={handleOpenHistoryEntry}
               />
             ) : null}
           </>

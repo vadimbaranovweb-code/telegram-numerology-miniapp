@@ -9,6 +9,8 @@ import {
 type CalculationHistoryProps = {
   /** Bump this number to trigger a re-read from localStorage */
   refreshKey?: number;
+  /** Called when an entry with a stored payload is clicked. */
+  onOpenEntry?: (entry: CalculationHistoryEntry) => void;
 };
 
 const TYPE_META: Record<string, { icon: string; label: string; color: string }> = {
@@ -33,7 +35,7 @@ function formatBirthDate(bd: string): string {
   return bd;
 }
 
-export function CalculationHistory({ refreshKey }: CalculationHistoryProps) {
+export function CalculationHistory({ refreshKey, onOpenEntry }: CalculationHistoryProps) {
   const [entries, setEntries] = useState<CalculationHistoryEntry[]>([]);
 
   useEffect(() => {
@@ -71,10 +73,28 @@ export function CalculationHistory({ refreshKey }: CalculationHistoryProps) {
               ? `${entry.displayName ?? "—"} + ${entry.targetName}`
               : entry.displayName || "Без имени";
 
+          const isOpenable = Boolean(entry.payload && onOpenEntry);
           return (
             <li
               key={entry.id}
-              className="flex items-center gap-3 rounded-2xl px-4 py-3"
+              onClick={isOpenable ? () => onOpenEntry!(entry) : undefined}
+              role={isOpenable ? "button" : undefined}
+              tabIndex={isOpenable ? 0 : undefined}
+              onKeyDown={
+                isOpenable
+                  ? (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onOpenEntry!(entry);
+                      }
+                    }
+                  : undefined
+              }
+              className={`flex items-center gap-3 rounded-2xl px-4 py-3 transition ${
+                isOpenable
+                  ? "cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                  : ""
+              }`}
               style={{
                 background: "var(--bg-elevated)",
                 border: "1px solid var(--border-subtle)",

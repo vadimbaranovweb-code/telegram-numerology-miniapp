@@ -26,6 +26,7 @@ import { DailyPlaceholderCard } from "@/features/daily/components/DailyPlacehold
 import { WeekCalendar } from "@/features/daily/components/WeekCalendar";
 import { NumerologyResponse } from "@/features/onboarding/types";
 import { CalculationHistory } from "@/features/profile/components/CalculationHistory";
+import type { CalculationHistoryEntry } from "@/features/profile/calculationHistory";
 import { ProfileSummaryCard } from "@/features/profile/components/ProfileSummaryCard";
 import { ReadingStory } from "@/features/reading/components/ReadingStory";
 import { PurchaseSuccessCard } from "@/features/premium/components/PurchaseSuccessCard";
@@ -94,7 +95,7 @@ type ReadyHomeScreenProps = {
   onCompatibilitySubmit: (event: FormEvent<HTMLFormElement>) => void;
   onNewCalculation: (birthDate: string, name: string) => Promise<void>;
   onResetProfile: () => void | Promise<void>;
-  pendingNavigation: "reading" | null;
+  pendingNavigation: "reading" | "compat_flow" | "horoscope_flow" | null;
   onClearPendingNavigation: () => void;
   onClearCompatibility: () => void;
   horoscopeResult: HoroscopeReadingResponse | null;
@@ -104,6 +105,7 @@ type ReadyHomeScreenProps = {
   onHoroscopeReading: (birthDate: string) => void;
   onHoroscopeCompat: (sourceBirthDate: string, targetBirthDate: string, targetName: string) => void;
   onClearHoroscope: () => void;
+  onOpenHistoryEntry: (entry: CalculationHistoryEntry) => void;
 };
 
 function resolveInitialHomeScreen(): HomeScreen {
@@ -155,6 +157,7 @@ export function ReadyHomeScreen({
   onHoroscopeReading,
   onHoroscopeCompat,
   onClearHoroscope,
+  onOpenHistoryEntry,
 }: ReadyHomeScreenProps) {
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [homeScreen, setHomeScreen] = useState<HomeScreen>(() =>
@@ -163,11 +166,20 @@ export function ReadyHomeScreen({
   const [readingCtaVisible, setReadingCtaVisible] = useState(true);
   const [newCalcOpen, setNewCalcOpen] = useState(false);
 
-  // Navigate to reading when hook signals (after onboarding or new calculation)
+  // Navigate to reading when hook signals (after onboarding, new calculation,
+  // or when a history entry is opened).
   useEffect(() => {
     if (pendingNavigation === "reading") {
       setActiveTab("home");
       setHomeScreen("reading");
+      onClearPendingNavigation();
+    } else if (pendingNavigation === "compat_flow") {
+      setActiveTab("home");
+      setHomeScreen("compat_flow");
+      onClearPendingNavigation();
+    } else if (pendingNavigation === "horoscope_flow") {
+      setActiveTab("home");
+      setHomeScreen("horoscope_flow");
       onClearPendingNavigation();
     }
   }, [pendingNavigation, onClearPendingNavigation]);
@@ -450,7 +462,7 @@ export function ReadyHomeScreen({
               sectionAction={sectionActions.profile ?? null}
               onReset={onResetProfile}
             />
-            <CalculationHistory />
+            <CalculationHistory onOpenEntry={onOpenHistoryEntry} />
           </>
         )}
       </div>

@@ -20,7 +20,10 @@ import {
   ProfilePreviewResponse,
   TemporaryProfile,
 } from "@/features/profile/types";
-import { addCalculationEntry } from "@/features/profile/calculationHistory";
+import {
+  addCalculationEntry,
+  type CalculationHistoryEntry,
+} from "@/features/profile/calculationHistory";
 import { TelegramAuthState } from "@/features/telegram/hooks/useTelegramAuth";
 import { TelegramBootstrapState } from "@/features/telegram/hooks/useTelegramBootstrap";
 import { openTelegramInvoiceUrl } from "@/features/telegram/hooks/useTelegramWebApp";
@@ -117,7 +120,9 @@ export function useMiniAppBootstrap(
   const [sectionDescriptions, setSectionDescriptions] = useState<Record<string, string>>({});
   const [sectionStates, setSectionStates] = useState<Record<string, string>>({});
   const [sectionActions, setSectionActions] = useState<Record<string, string>>({});
-  const [pendingNavigation, setPendingNavigation] = useState<"reading" | null>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<
+    "reading" | "compat_flow" | "horoscope_flow" | null
+  >(null);
   const [primaryAction, setPrimaryAction] = useState<PrimaryHomeAction>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -693,6 +698,7 @@ export function useMiniAppBootstrap(
         birthDate,
         displayName: fullName || null,
         lifePathNumber: resolvedNumerologyData.life_path_number,
+        payload: { kind: "numerology", numerology: resolvedNumerologyData },
       });
       trackEvent("first_reading_viewed", {
         cards_count: resolvedNumerologyData.reading_preview.cards.length,
@@ -744,6 +750,7 @@ export function useMiniAppBootstrap(
         birthDate: newBirthDate,
         displayName: newName || null,
         lifePathNumber: numerologyData.life_path_number,
+        payload: { kind: "numerology", numerology: numerologyData },
       });
       setPendingNavigation("reading");
 
@@ -836,6 +843,14 @@ export function useMiniAppBootstrap(
         displayName: null,
         targetName: targetDisplayName || undefined,
         lifePathNumber: data.source_life_path,
+        payload: {
+          kind: "compatibility",
+          compatibility: data,
+          sourceBirthDate: sourceBirthDateCompat || profile.birth_date,
+          targetBirthDate,
+          targetDisplayName: targetDisplayName || null,
+          relationshipContext: relationshipContext || null,
+        },
       });
       trackEvent("compatibility_generation_completed", {
         relationship_context: relationshipContext,
@@ -1164,6 +1179,7 @@ export function useMiniAppBootstrap(
         type: "horoscope",
         birthDate: birthDateStr,
         displayName: `${data.zodiac.symbol} ${data.zodiac.sign_ru}`,
+        payload: { kind: "horoscope_reading", horoscope: data },
       });
     } catch (err) {
       setHoroscopeError(err instanceof Error ? err.message : "Ошибка при загрузке гороскопа.");
@@ -1204,11 +1220,68 @@ export function useMiniAppBootstrap(
         birthDate: sourceBirthDate,
         displayName: `${data.source_zodiac.symbol} + ${data.target_zodiac.symbol}`,
         targetName: targetName || undefined,
+        payload: {
+          kind: "horoscope_compat",
+          horoscope: data,
+          sourceBirthDate,
+          targetBirthDate,
+          targetDisplayName: targetName || null,
+        },
       });
     } catch (err) {
       setHoroscopeError(err instanceof Error ? err.message : "Ошибка при загрузке совместимости.");
     } finally {
       setIsHoroscopeSubmitting(false);
+    }
+  }
+
+  function handleOpenHistoryEntry(entry: CalculationHistoryEntry) {
+    const payload = entry.payload;
+    if (!payload) return;
+
+    if (payload.kind === "numerology") {
+      const restoredProfile = buildClientProfileFallback({
+        birthDate: entry.birthDate,
+        fullName: entry.displayName ?? "",
+        dailyOptIn,
+      });
+      setBirthDate(entry.birthDate);
+      setFullName(entry.displayName ?? "");
+      const snapshot: AppSnapshot = {
+        profile: restoredProfile,
+        numerology: payload.numerology,
+        isPremium,
+      };
+      persistSnapshot(snapshot);
+      hydrateFromSnapshot(snapshot);
+      setPendingNavigation("reading");
+      return;
+    }
+
+    if (payload.kind === "compatibility") {
+      setCompatibilityPreview(payload.compatibility);
+      setSourceBirthDateCompat(payload.sourceBirthDate);
+      setTargetBirthDate(payload.targetBirthDate);
+      setTargetDisplayName(payload.targetDisplayName ?? "");
+      if (payload.relationshipContext) {
+        setRelationshipContext(payload.relationshipContext as RelationshipContext);
+      }
+      setPendingNavigation("compat_flow");
+      return;
+    }
+
+    if (payload.kind === "horoscope_reading") {
+      setHoroscopeResult(payload.horoscope);
+      setHoroscopeCompatResult(null);
+      setPendingNavigation("horoscope_flow");
+      return;
+    }
+
+    if (payload.kind === "horoscope_compat") {
+      setHoroscopeCompatResult(payload.horoscope);
+      setHoroscopeResult(null);
+      setPendingNavigation("horoscope_flow");
+      return;
     }
   }
 
@@ -1291,6 +1364,7 @@ export function useMiniAppBootstrap(
       setHoroscopeCompatResult(null);
       setHoroscopeError(null);
     },
+    handleOpenHistoryEntry,
   };
 }
 
