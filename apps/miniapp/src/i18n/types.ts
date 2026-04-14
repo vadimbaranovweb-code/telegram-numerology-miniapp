@@ -9,6 +9,7 @@ export type Translations = {
     name_optional: string;
     name_placeholder: string;
     daily_optin: string;
+    profile_reset: string;
     privacy: string;
     submit: string;
     submitting: string;

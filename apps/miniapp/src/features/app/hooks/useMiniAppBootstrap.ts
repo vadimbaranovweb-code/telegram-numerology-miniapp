@@ -121,6 +121,7 @@ export function useMiniAppBootstrap(
   const [primaryAction, setPrimaryAction] = useState<PrimaryHomeAction>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isProfileReset, setIsProfileReset] = useState(false);
 
   // Horoscope state
   const [horoscopeResult, setHoroscopeResult] = useState<HoroscopeReadingResponse | null>(null);
@@ -131,6 +132,15 @@ export function useMiniAppBootstrap(
   // Tracks which telegramBootstrap object was last fully applied.
   // Prevents re-running full rehydration when profile/result change after a new calculation.
   const appliedBootstrapRef = useRef<TelegramBootstrapState | null>(null);
+
+  // Wrapper to persist premium status in a dedicated key
+  const activatePremium = useCallback(() => {
+    setIsPremium(true);
+    setPremiumStatus("premium");
+    try {
+      window.localStorage.setItem("numerology-miniapp-premium", "true");
+    } catch { /* ignore */ }
+  }, []);
 
   const isFormValid = useMemo(() => Boolean(birthDate), [birthDate]);
   const readingPreview = useMemo(() => result?.reading_preview ?? null, [result]);
@@ -384,6 +394,8 @@ export function useMiniAppBootstrap(
     // localStorage is the authoritative source for locally-confirmed purchases.
     const localIsPremium = (() => {
       try {
+        // Check dedicated premium key first (survives profile reset)
+        if (window.localStorage.getItem("numerology-miniapp-premium") === "true") return true;
         const raw = window.localStorage.getItem(APP_SNAPSHOT_STORAGE_KEY);
         if (!raw) return false;
         const parsed = JSON.parse(raw) as AppSnapshot;
@@ -414,8 +426,7 @@ export function useMiniAppBootstrap(
     const bootstrapWantsOnboarding = resolveBootstrapStatusFromTelegram(telegramBootstrap) === "onboarding";
     if (hasValidLocalState && bootstrapWantsOnboarding) {
       if (resolvedIsPremium) {
-        setIsPremium(true);
-        setPremiumStatus("premium");
+        activatePremium();
       }
       return;
     }
@@ -454,9 +465,8 @@ export function useMiniAppBootstrap(
 
   useEffect(() => {
     async function loadDailyInsight() {
-      // Premium users always get daily insights regardless of opt-in
-      const canLoad = isPremium || todayState === "ready";
-      if (bootstrapStatus !== "ready" || !profile || !canLoad) {
+      // Always load daily insights when profile is ready
+      if (bootstrapStatus !== "ready" || !profile) {
         setDailyInsight(null);
         return;
       }
@@ -487,19 +497,19 @@ export function useMiniAppBootstrap(
     }
 
     void loadDailyInsight();
-  }, [bootstrapStatus, profile, todayState, isPremium]);
+  }, [bootstrapStatus, profile]);
 
-  // Premium users always get daily insights regardless of opt-in
+  // Always set todayState to ready once profile exists
   useEffect(() => {
-    if (isPremium && todayState !== "ready") {
+    if (bootstrapStatus === "ready" && profile && todayState !== "ready") {
       setTodayState("ready");
     }
-  }, [isPremium, todayState]);
+  }, [bootstrapStatus, profile, todayState]);
 
-  // Auto-load daily horoscope for premium users
+  // Auto-load daily horoscope when profile is ready
   useEffect(() => {
     async function loadDailyHoroscope() {
-      if (bootstrapStatus !== "ready" || !profile || !isPremium) {
+      if (bootstrapStatus !== "ready" || !profile) {
         return;
       }
       // Skip if already loaded
@@ -522,12 +532,13 @@ export function useMiniAppBootstrap(
     }
 
     void loadDailyHoroscope();
-  }, [bootstrapStatus, profile, isPremium, horoscopeResult]);
+  }, [bootstrapStatus, profile, horoscopeResult]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     setIsSubmitting(true);
+    setIsProfileReset(false);
     const isTelegramBacked =
       telegramAuth?.status === "authenticated" && Boolean(telegramAuth.sessionToken);
     trackEvent("birth_date_submitted", {
@@ -840,8 +851,16 @@ export function useMiniAppBootstrap(
   }
 
   async function handleResetProfile() {
+    // Preserve premium status before clearing snapshot
+    const preservedPremium = isPremium;
     await clearBackendSnapshot();
     clearStoredSnapshot();
+    // Re-persist premium flag so it survives the reset
+    if (preservedPremium) {
+      try {
+        window.localStorage.setItem("numerology-miniapp-premium", "true");
+      } catch { /* ignore */ }
+    }
     setProfile(null);
     setResult(null);
     setHomeHeadline(null);
@@ -860,9 +879,11 @@ export function useMiniAppBootstrap(
     setBirthDate("");
     setFullName("");
     setDailyOptIn(false);
-    setIsPremium(false);
-    setPremiumStatus(null);
+    // isPremium is NOT reset — it's tied to the Telegram account, not the profile
+    // setIsPremium(false);
+    // setPremiumStatus(null);
     setError(null);
+    setIsProfileReset(true);
     setBootstrapStatus("onboarding");
     setAppStateSource("fresh_onboarding");
     setRestorationMode("empty");
@@ -884,7 +905,7 @@ export function useMiniAppBootstrap(
     setBirthDate(snapshot.profile.birth_date);
     setFullName(snapshot.profile.display_name ?? "");
     setDailyOptIn(snapshot.profile.daily_opt_in);
-    setTodayState(snapshot.profile.daily_opt_in || snapshot.isPremium ? "ready" : "opted_out");
+    setTodayState("ready");
     if (snapshot.isPremium != null) {
       setIsPremium(snapshot.isPremium);
       setPremiumStatus(snapshot.isPremium ? "premium" : "free");
@@ -1048,8 +1069,7 @@ export function useMiniAppBootstrap(
                     await refreshTelegramBootstrap();
                   }
                   // Re-persist snapshot with premium flag
-                  setIsPremium(true);
-                  setPremiumStatus("premium");
+                  activatePremium();
                   const currentSnapshot = window.localStorage.getItem(APP_SNAPSHOT_STORAGE_KEY);
                   if (currentSnapshot) {
                     try {
@@ -1089,8 +1109,7 @@ export function useMiniAppBootstrap(
           await refreshTelegramBootstrap();
         }
         // Re-persist snapshot with premium flag (fallback path)
-        setIsPremium(true);
-        setPremiumStatus("premium");
+        activatePremium();
         const currentSnapshot = window.localStorage.getItem(APP_SNAPSHOT_STORAGE_KEY);
         if (currentSnapshot) {
           try {
@@ -1225,6 +1244,7 @@ export function useMiniAppBootstrap(
     primaryAction,
     error,
     isSubmitting,
+    isProfileReset,
     isFormValid,
     readingPreview,
     setBirthDate,

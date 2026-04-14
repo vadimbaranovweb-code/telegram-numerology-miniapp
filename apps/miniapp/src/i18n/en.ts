@@ -11,6 +11,7 @@ export const EN: Translations = {
     name_optional: "(optional)",
     name_placeholder: "First name for deeper profile signals",
     daily_optin: "Get daily insights once your reading is ready.",
+    profile_reset: "Profile reset. Enter your details for a new reading.",
     privacy: "Your data stays private. We never share it.",
     submit: "See my numbers →",
     submitting: "Calculating your numbers...",

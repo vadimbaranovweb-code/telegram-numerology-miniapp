@@ -636,7 +636,7 @@ function HomeHub({
       />
 
       {/* Daily horoscope card */}
-      {isPremium && horoscopeResult && (
+      {horoscopeResult && (
         <button
           type="button"
           onClick={onOpenDailyHoroscope}

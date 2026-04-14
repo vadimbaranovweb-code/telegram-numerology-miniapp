@@ -10,6 +10,7 @@ type OnboardingStepperProps = {
   dailyOptIn: boolean;
   isSubmitting: boolean;
   isFormValid: boolean;
+  isProfileReset?: boolean;
   error: string | null;
   telegramFirstName?: string;
   onBirthDateChange: (value: string) => void;
@@ -27,6 +28,7 @@ export function OnboardingStepper({
   dailyOptIn,
   isSubmitting,
   isFormValid,
+  isProfileReset = false,
   error,
   telegramFirstName,
   onBirthDateChange,
@@ -59,6 +61,20 @@ export function OnboardingStepper({
 
   return (
     <div>
+      {/* Reset banner */}
+      {isProfileReset && (
+        <div
+          className="mb-4 rounded-2xl px-4 py-3 text-center text-sm font-medium"
+          style={{
+            background: "rgba(123,94,248,0.1)",
+            border: "1px solid rgba(123,94,248,0.25)",
+            color: "var(--text-secondary)",
+          }}
+        >
+          {t.onboarding.profile_reset ?? "Профиль сброшен. Введите данные для нового расчёта."}
+        </div>
+      )}
+
       {/* Step progress indicator */}
       <div className="mb-5 flex items-center justify-center gap-2">
         {([1, 2] as Step[]).map((s) => (

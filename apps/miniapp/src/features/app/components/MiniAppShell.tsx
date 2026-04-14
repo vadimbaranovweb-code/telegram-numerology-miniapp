@@ -59,6 +59,7 @@ export function MiniAppShell() {
     primaryAction,
     error,
     isSubmitting,
+    isProfileReset,
     isFormValid,
     readingPreview,
     setBirthDate,
@@ -130,6 +131,7 @@ export function MiniAppShell() {
                   dailyOptIn={dailyOptIn}
                   isSubmitting={isSubmitting}
                   isFormValid={isFormValid}
+                  isProfileReset={isProfileReset}
                   error={error}
                   telegramFirstName={telegramContext.user?.first_name ?? undefined}
                   onBirthDateChange={setBirthDate}
