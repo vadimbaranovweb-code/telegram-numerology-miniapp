@@ -178,6 +178,9 @@ class FileBackedAppStateStore:
                     if existing_state.app_profile
                     and existing_state.app_profile.display_name
                     else user.display_name,
+                    # Preserve premium across re-auth from different devices
+                    "is_premium": existing_state.user.is_premium,
+                    "premium_status": existing_state.user.premium_status,
                 },
             )
             existing_state.profile = existing_state.profile.model_copy(
@@ -448,6 +451,9 @@ class SqliteBackedAppStateStore:
                     if existing_state.app_profile
                     and existing_state.app_profile.display_name
                     else user.display_name,
+                    # Preserve premium across re-auth from different devices
+                    "is_premium": existing_state.user.is_premium,
+                    "premium_status": existing_state.user.premium_status,
                 },
             )
             existing_state.profile = existing_state.profile.model_copy(

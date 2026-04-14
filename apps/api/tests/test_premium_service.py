@@ -148,6 +148,27 @@ def test_unlock_premium_offer_marks_user_as_premium() -> None:
     assert result.user.premium_status == "premium"
 
 
+def test_premium_persists_across_reauth_same_telegram_user() -> None:
+    """Premium must survive re-auth (e.g., opening app on a different device)."""
+    reset_app_state_store()
+    init_data = 'query_id=abc123&user=%7B%22id%22%3A1%2C%22first_name%22%3A%22Anna%22%7D&auth_date=123456'
+
+    # First auth: mobile device opens the app
+    first_auth = build_telegram_auth_response(init_data)
+    unlock_result = unlock_premium_offer(
+        session_token=first_auth.session_token,
+        offer_key="compatibility_unlock_monthly",
+    )
+    assert unlock_result.unlocked is True
+
+    # Second auth: desktop opens the app (same telegram user_id → same session_token)
+    second_auth = build_telegram_auth_response(init_data)
+    assert second_auth.session_token == first_auth.session_token
+    # Premium must still be active after re-auth
+    assert second_auth.user.is_premium is True
+    assert second_auth.user.premium_status == "premium"
+
+
 def test_confirm_telegram_payment_marks_user_as_premium() -> None:
     reset_app_state_store()
     auth_response = build_telegram_auth_response(

@@ -51,11 +51,20 @@ def build_telegram_auth_response(init_data: str) -> TelegramAuthResponse:
         ),
     )
 
-    upsert_session_app_auth_state(
+    stored_state = upsert_session_app_auth_state(
         session_token=response.session_token,
         user=response.user,
         profile=response.profile,
         entry_context=response.entry_context,
+    )
+
+    # Reflect preserved server-side state (e.g., premium activated on another device)
+    # so the client sees the true premium status on every open.
+    response = response.model_copy(
+        update={
+            "user": stored_state.user,
+            "profile": stored_state.profile,
+        }
     )
 
     return response
