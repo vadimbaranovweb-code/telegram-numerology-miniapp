@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { ReadyHomeScreen } from "@/features/app/components/ReadyHomeScreen";
 import { HeroSection } from "@/features/onboarding/components/HeroSection";
-import { NextStepsCard } from "@/features/onboarding/components/NextStepsCard";
 import { OnboardingStepper } from "@/features/onboarding/components/OnboardingStepper";
 import { BootstrapScreen } from "@/features/profile/components/BootstrapScreen";
 import { TelegramContextCard } from "@/features/telegram/components/TelegramContextCard";
@@ -112,7 +111,8 @@ export function MiniAppShell() {
           <BootstrapScreen />
         ) : (
           <>
-            {bootstrapStatus === "onboarding" && (
+            {(bootstrapStatus === "onboarding" ||
+              (bootstrapStatus === "ready" && (!profile || !result))) && (
               <HeroSection compact={onboardingStep === 2} />
             )}
             <TelegramContextCard
@@ -121,7 +121,8 @@ export function MiniAppShell() {
               bootstrapState={telegramBootstrap}
             />
 
-            {bootstrapStatus === "onboarding" ? (
+            {bootstrapStatus === "onboarding" ||
+            (bootstrapStatus === "ready" && (!profile || !result)) ? (
               isSubmitting ? (
                 <GenerationLoadingScreen />
               ) : (
@@ -200,11 +201,7 @@ export function MiniAppShell() {
                 onHoroscopeCompat={handleHoroscopeCompat}
                 onClearHoroscope={clearHoroscope}
               />
-            ) : (
-              <section className="grid gap-3">
-                <NextStepsCard />
-              </section>
-            )}
+            ) : null}
           </>
         )}
       </div>

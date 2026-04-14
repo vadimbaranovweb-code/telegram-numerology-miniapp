@@ -382,7 +382,12 @@ export function useMiniAppBootstrap(
     // which would overwrite new calculation data with the stale bootstrap snapshot.
     const isNewBootstrap = appliedBootstrapRef.current !== telegramBootstrap;
     if (!isNewBootstrap) {
-      if (!profile && !result) {
+      // After an explicit reset, keep the user on onboarding until they submit
+      // the form. Without this guard, the backend bootstrap (which may still
+      // report the user as past onboarding) flips bootstrapStatus back to
+      // "ready", which renders the empty hub (NextStepsCard) instead of the
+      // onboarding form.
+      if (!profile && !result && !isProfileReset) {
         setBootstrapStatus(resolveBootstrapStatusFromTelegram(telegramBootstrap));
       }
       return;
@@ -450,13 +455,14 @@ export function useMiniAppBootstrap(
     setIsPaywallOpen(false);
     setIsPurchaseSuccessOpen(false);
 
-    if (!profile && !result) {
+    if (!profile && !result && !isProfileReset) {
       setBootstrapStatus(resolveBootstrapStatusFromTelegram(telegramBootstrap));
     }
   }, [
     applyTelegramBootstrapAppState,
     applyTelegramBootstrapIdentity,
     applyTelegramBootstrapProfile,
+    isProfileReset,
     profile,
     resolveBootstrapStatusFromTelegram,
     result,
