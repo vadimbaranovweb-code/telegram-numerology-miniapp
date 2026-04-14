@@ -17,6 +17,7 @@ export type CompatibilityPaywallPreview = {
   offer_key: string;
   price_local: number;
   currency: string;
+  stars_amount: number;
 };
 
 export type CompatibilityZoneScores = {

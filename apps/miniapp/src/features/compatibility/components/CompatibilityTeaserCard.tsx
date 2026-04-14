@@ -701,7 +701,7 @@ function CompatibilityFooterCard({
         style={{ background: "var(--bg-elevated)", border: "1px solid rgba(123,94,248,0.2)" }}
       >
         <span className="text-[28px] font-bold" style={{ color: "var(--text-primary)" }}>
-          ⭐ {preview.paywall.price_local ?? 350}
+          ⭐ {preview.paywall.stars_amount ?? 199}
         </span>
         <span className="text-sm" style={{ color: "var(--text-muted)" }} suppressHydrationWarning>
           {t.paywall.stars} · {t.paywall.one_time}

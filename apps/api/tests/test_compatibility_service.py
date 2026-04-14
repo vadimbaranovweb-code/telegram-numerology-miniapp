@@ -18,6 +18,7 @@ def test_build_compatibility_preview() -> None:
     assert result.paywall.offer_key == "compatibility_unlock_monthly"
     assert result.paywall.price_local == 0.13
     assert result.paywall.currency == "USD"
+    assert result.paywall.stars_amount == 199
     assert "Max" in result.preview.summary
 
 

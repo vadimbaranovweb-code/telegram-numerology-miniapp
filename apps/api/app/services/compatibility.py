@@ -193,4 +193,5 @@ def _build_compatibility_paywall_preview() -> CompatibilityPaywallPreview:
         offer_key=offer.offer_key,
         price_local=offer.price_local,
         currency=offer.currency,
+        stars_amount=offer.stars_amount,
     )

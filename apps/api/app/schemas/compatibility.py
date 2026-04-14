@@ -32,6 +32,7 @@ class CompatibilityPaywallPreview(BaseModel):
     offer_key: str
     price_local: float
     currency: str
+    stars_amount: int
 
 
 class CompatibilityZoneScores(BaseModel):

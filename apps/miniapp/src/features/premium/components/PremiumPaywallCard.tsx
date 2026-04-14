@@ -109,31 +109,30 @@ export function PremiumPaywallCard({
 
       {/* Price block */}
       <div
-        className="mt-5 rounded-2xl px-5 py-4"
+        className="mt-5 flex items-center gap-4 rounded-2xl px-5 py-4"
         style={{
           background: "var(--bg-elevated)",
           border: "1px solid rgba(123,94,248,0.2)",
         }}
       >
-        <div className="flex items-baseline gap-2">
-          <span className="text-[32px] font-bold" style={{ color: "var(--text-primary)" }}>
-            ⭐ {preview.paywall.price_local ?? 350}
-          </span>
+        <div className="flex flex-col items-start">
+          <span className="text-[22px] leading-none">⭐</span>
           <span
-            className="text-sm"
+            className="mt-1 text-[28px] font-bold leading-none"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {preview.paywall.stars_amount ?? 199}
+          </span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p
+            className="text-sm leading-5"
             style={{ color: "var(--text-muted)" }}
             suppressHydrationWarning
           >
-            {t.paywall.stars}
-          </span>
+            {t.paywall.stars} · {t.paywall.one_time}
+          </p>
         </div>
-        <p
-          className="mt-1 text-xs"
-          style={{ color: "var(--text-muted)" }}
-          suppressHydrationWarning
-        >
-          {t.paywall.one_time}
-        </p>
       </div>
 
       {/* CTA */}
