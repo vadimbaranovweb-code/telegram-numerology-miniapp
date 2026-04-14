@@ -26,14 +26,15 @@ def build_telegram_auth_response(init_data: str) -> TelegramAuthResponse:
     # always gets the same session_token across mini app opens.
     # init_data changes every open (auth_date timestamp), but user_id is stable.
     if telegram_user_id:
-        token_seed = f"telegram_user:{telegram_user_id}"
+        session_token = build_session_token_for_user(telegram_user_id)
+        token_suffix = session_token.removeprefix("tg_session_")
     else:
         # Fallback: hash init_data minus auth_date to improve stability
-        token_seed = init_data
-    token_suffix = sha1(token_seed.encode("utf-8")).hexdigest()[:16]
+        token_suffix = sha1(init_data.encode("utf-8")).hexdigest()[:16]
+        session_token = f"tg_session_{token_suffix}"
 
     response = TelegramAuthResponse(
-        session_token=f"tg_session_{token_suffix}",
+        session_token=session_token,
         user=TelegramBootstrapUser(
             id=f"tg_user_{token_suffix[:8]}",
             display_name=display_name,
@@ -82,6 +83,17 @@ def extract_user_display_name(user_blob: str) -> Optional[str]:
             return value
 
     return None
+
+
+def build_session_token_for_user(telegram_user_id: str) -> str:
+    """Same derivation as build_telegram_auth_response.
+
+    Exposed so admin tooling can address a user's stored state by
+    Telegram user id alone (no init_data).
+    """
+    token_seed = f"telegram_user:{telegram_user_id}"
+    token_suffix = sha1(token_seed.encode("utf-8")).hexdigest()[:16]
+    return f"tg_session_{token_suffix}"
 
 
 def extract_user_id(user_blob: str) -> Optional[str]:

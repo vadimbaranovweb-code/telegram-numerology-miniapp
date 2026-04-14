@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     telegram_stars_test_invoice_slug: Optional[str] = None
     telegram_stars_export_invoice_links: bool = False
     openai_api_key: Optional[str] = None
+    # Shared secret for admin endpoints (e.g., /admin/grant-premium).
+    # Must be set in production. Leave unset to disable admin endpoints.
+    admin_token: Optional[str] = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

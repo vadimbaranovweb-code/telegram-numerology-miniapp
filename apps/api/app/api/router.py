@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.routes.admin import router as admin_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.illustrations import router as illustrations_router
 from app.api.routes.bootstrap import router as bootstrap_router
@@ -18,6 +19,7 @@ from app.api.routes.readings import router as readings_router
 
 
 api_router = APIRouter()
+api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
 api_router.include_router(bootstrap_router, prefix="/bootstrap", tags=["bootstrap"])
 api_router.include_router(
