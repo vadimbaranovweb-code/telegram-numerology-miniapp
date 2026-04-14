@@ -1,6 +1,7 @@
 import { NumerologyResponse } from "@/features/onboarding/types";
 import { TemporaryProfile } from "@/features/profile/types";
 import { ShareButton } from "@/features/reading/components/ShareButton";
+import { getLang, setLang, type Lang } from "@/i18n";
 
 type ProfileSummaryCardProps = {
   profile: TemporaryProfile;
@@ -124,6 +125,37 @@ export function ProfileSummaryCard({
             }}
           >
             {profile.daily_opt_in ? "Включены" : "Не включены"}
+          </dd>
+        </div>
+        <div
+          className="rounded-2xl px-4 py-3"
+          style={{
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--border-subtle)",
+          }}
+        >
+          <dt
+            className="text-[11px] uppercase tracking-[0.18em]"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Язык / Language
+          </dt>
+          <dd className="mt-2 flex gap-2">
+            {(["ru", "en"] as Lang[]).map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => { if (l !== getLang()) setLang(l); }}
+                className="rounded-xl px-4 py-2 text-sm font-semibold transition active:scale-95"
+                style={{
+                  background: l === getLang() ? "var(--accent-soft)" : "var(--bg-surface)",
+                  color: l === getLang() ? "#fff" : "var(--text-secondary)",
+                  border: l === getLang() ? "none" : "1px solid var(--border-subtle)",
+                }}
+              >
+                {l === "ru" ? "Русский" : "English"}
+              </button>
+            ))}
           </dd>
         </div>
       </dl>

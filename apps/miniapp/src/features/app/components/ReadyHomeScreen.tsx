@@ -36,7 +36,7 @@ import { GenerationLoadingScreen } from "./GenerationLoadingScreen";
 import { NewCalculationSheet } from "./NewCalculationSheet";
 import { FormEvent } from "react";
 
-type HomeScreen = "hub" | "reading" | "compat" | "compat_flow" | "horoscope_flow";
+type HomeScreen = "hub" | "reading" | "compat" | "compat_flow" | "horoscope_flow" | "daily_horoscope";
 
 type ReadyHomeScreenProps = {
   profile: TemporaryProfile;
@@ -208,11 +208,136 @@ export function ReadyHomeScreen({
     setHomeScreen("horoscope_flow");
   }
 
+  function openDailyHoroscope() {
+    setActiveTab("home");
+    setHomeScreen("daily_horoscope");
+  }
+
   function goBackToHub() {
     setHomeScreen("hub");
   }
 
   const compatStage = resolveCompatibilityUiStage({ preview: compatibilityPreview, isPremium });
+
+  // Full-screen daily horoscope view (read-only card)
+  if (activeTab === "home" && homeScreen === "daily_horoscope" && horoscopeResult) {
+    const { zodiac, daily_forecast, personal_reading } = horoscopeResult;
+    return (
+      <div className="px-4 pb-10">
+        {/* Back button */}
+        <div className="flex items-center gap-3 py-2">
+          <button
+            type="button"
+            onClick={goBackToHub}
+            className="flex items-center gap-2 transition active:opacity-60"
+            style={{ color: "var(--text-muted)", background: "none", border: "none" }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            <span className="text-sm font-medium">Главная</span>
+          </button>
+        </div>
+
+        {/* Header */}
+        <div className="px-1 pt-2 mb-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: "#60A5FA" }}>
+            {daily_forecast.weekday}, {daily_forecast.forecast_date.split("-").reverse().join(".")}
+          </p>
+          <h2 className="mt-2 text-[24px] font-bold tracking-tight leading-tight" style={{ color: "var(--text-primary)" }}>
+            {zodiac.symbol} {zodiac.sign_ru} — прогноз дня
+          </h2>
+          <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+            {zodiac.date_range} · {zodiac.element_ru} · {zodiac.ruling_planet}
+          </p>
+        </div>
+
+        {/* Daily forecast card */}
+        <div
+          className="rounded-[24px] p-6"
+          style={{ background: "var(--bg-surface)", border: "1px solid rgba(96,165,250,0.2)", boxShadow: "0 12px 40px rgba(0,0,0,0.3)" }}
+        >
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#60A5FA" }}>
+            Прогноз дня
+          </p>
+          <h3 className="mt-3 text-[18px] font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
+            {daily_forecast.headline}
+          </h3>
+          <p className="mt-2 text-sm leading-7" style={{ color: "var(--text-secondary)" }}>
+            {daily_forecast.body}
+          </p>
+        </div>
+
+        {/* Lucky number */}
+        <div className="mt-3 flex gap-3">
+          <div
+            className="flex-1 rounded-[20px] p-5"
+            style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}
+          >
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#60A5FA" }}>
+              Число дня
+            </p>
+            <p className="mt-2 text-[32px] font-bold" style={{ color: "var(--text-primary)" }}>
+              {daily_forecast.lucky_number}
+            </p>
+          </div>
+          <div
+            className="flex-1 rounded-[20px] p-5"
+            style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}
+          >
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#60A5FA" }}>
+              Фокус
+            </p>
+            <p className="mt-2 text-[18px] font-bold" style={{ color: "var(--text-primary)" }}>
+              {daily_forecast.focus_area}
+            </p>
+          </div>
+        </div>
+
+        {/* Strengths */}
+        <div
+          className="mt-3 rounded-[20px] p-5"
+          style={{ background: "var(--bg-surface)", border: "1px solid rgba(52,211,153,0.15)" }}
+        >
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#34D399" }}>
+            Сильные стороны {zodiac.sign_ru}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {personal_reading.strengths.map((s) => (
+              <span key={s} className="rounded-full px-3 py-1.5 text-xs font-medium" style={{ background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.2)", color: "#34D399" }}>
+                ✦ {s}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Element */}
+        <div
+          className="mt-3 rounded-[20px] p-5"
+          style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}
+        >
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "var(--accent-soft)" }}>
+            Стихия {zodiac.element_ru}
+          </p>
+          <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+            {personal_reading.element_summary}
+          </p>
+        </div>
+
+        {/* CTA to full horoscope */}
+        <button
+          type="button"
+          onClick={openHoroscope}
+          className="mt-4 w-full rounded-2xl py-3.5 text-sm font-semibold text-white transition active:scale-[0.98]"
+          style={{ background: "var(--grad-cta)", boxShadow: "0 6px 20px rgba(123,94,248,0.35)" }}
+        >
+          Полный гороскоп →
+        </button>
+
+        <div className="h-8" />
+      </div>
+    );
+  }
 
   // Full-screen horoscope flow
   if (activeTab === "home" && homeScreen === "horoscope_flow") {
@@ -289,6 +414,7 @@ export function ReadyHomeScreen({
             onOpenReading={openReading}
             onOpenCompat={openCompat}
             onOpenHoroscope={openHoroscope}
+            onOpenDailyHoroscope={openDailyHoroscope}
             onNewCalc={() => setNewCalcOpen(true)}
           />
         )}
@@ -453,6 +579,7 @@ function HomeHub({
   onOpenReading,
   onOpenCompat,
   onOpenHoroscope,
+  onOpenDailyHoroscope,
   onNewCalc,
 }: {
   profile: TemporaryProfile;
@@ -466,6 +593,7 @@ function HomeHub({
   onOpenReading: () => void;
   onOpenCompat: () => void;
   onOpenHoroscope: () => void;
+  onOpenDailyHoroscope: () => void;
   onNewCalc: () => void;
 }) {
   const name = profile.display_name ? `, ${profile.display_name.split(" ")[0]}` : "";
@@ -511,7 +639,7 @@ function HomeHub({
       {isPremium && horoscopeResult && (
         <button
           type="button"
-          onClick={onOpenHoroscope}
+          onClick={onOpenDailyHoroscope}
           className="w-full rounded-[24px] p-5 text-left transition active:scale-[0.98]"
           style={{
             background: "var(--bg-surface)",

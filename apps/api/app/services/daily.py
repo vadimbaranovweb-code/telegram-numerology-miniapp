@@ -10,27 +10,27 @@ from app.services.numerology.service import (
 
 
 LIFE_PATH_FOCUS = {
-    1: "act before overthinking",
-    2: "listen before reacting",
-    3: "say the important thing clearly",
-    4: "protect structure over mood",
-    5: "leave room for movement",
-    6: "care without taking over everything",
-    7: "step back and notice the deeper pattern",
-    8: "choose the move with real leverage",
-    9: "release what is already complete",
+    1: "действовать, а не обдумывать",
+    2: "сначала выслушать, потом реагировать",
+    3: "сказать важное чётко и прямо",
+    4: "держать структуру, а не идти на поводу у настроения",
+    5: "оставить пространство для манёвра",
+    6: "заботиться, не забирая всё на себя",
+    7: "отступить и заметить глубинный паттерн",
+    8: "выбрать ход с реальным рычагом влияния",
+    9: "отпустить то, что уже завершено",
 }
 
 PERSONAL_MONTH_HEADLINES = {
-    1: "Today asks for a cleaner start than yesterday did.",
-    2: "Today works best through patience, not force.",
-    3: "Today rewards expression and visible energy.",
-    4: "Today becomes stronger when you stay consistent.",
-    5: "Today can shift fast, so stay flexible.",
-    6: "Today puts attention on care and relationships.",
-    7: "Today favors quiet clarity over noise.",
-    8: "Today is strongest when you act with precision.",
-    9: "Today carries closure energy more than expansion.",
+    1: "Сегодня просит более чистого старта, чем вчера.",
+    2: "Сегодня лучше работает терпение, а не давление.",
+    3: "Сегодня вознаграждает самовыражение и видимую энергию.",
+    4: "Сегодня становится сильнее, когда ты последователен.",
+    5: "Сегодня всё может быстро измениться — будь гибким.",
+    6: "Сегодня фокус на заботе и отношениях.",
+    7: "Сегодня тишина и ясность важнее шума.",
+    8: "Сегодня сила в точных, выверенных действиях.",
+    9: "Сегодня энергия завершения сильнее расширения.",
 }
 
 
@@ -50,14 +50,14 @@ def build_daily_insight(
         insight_date=today,
         headline=headline,
         body=(
-            f"Your Life Path {life_path_number} and Personal Month "
-            f"{personal_month_number} suggest the best move today is to {focus}. "
-            "Keep the signal simple and do the next grounded thing."
+            f"Твоё число жизненного пути {life_path_number} и персональный месяц "
+            f"{personal_month_number} подсказывают: лучший ход сегодня — {focus}. "
+            "Держи фокус простым и делай следующий заземлённый шаг."
         ),
         reflection=(
-            "What one choice would feel lighter by tonight if you stopped "
-            "forcing the wrong pace?"
+            "Какое одно решение к вечеру принесёт облегчение, "
+            "если перестать форсировать неправильный темп?"
         ),
         generated=True,
-        source="deterministic_daily_v1",
+        source="deterministic_daily_v2",
     )
